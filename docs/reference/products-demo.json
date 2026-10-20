@@ -1,0 +1,1246 @@
+{
+  "spec_version": "demo-2026-10-19-v1",
+  "status": "SYNTHETIC_PRODUCT_POLICY_NOT_LAW",
+  "not_real_bank_offer": true,
+  "common_policy": {
+    "category": "P",
+    "borrower_registration_country": "RU",
+    "excluded_sectors": [
+      "FINANCIAL_ORGANIZATION",
+      "GAMBLING"
+    ],
+    "decision_mode": "HUMAN_REVIEW",
+    "mandatory_legal_gates_cannot_be_overridden": true,
+    "notes": "Отраслевые исключения и возраст 18+ — границы DEMO-продукта, не универсальный запрет закона"
+  },
+  "products": [
+    {
+      "id": "P01",
+      "version": "demo-2026-10-19-v1",
+      "name": "Экспресс для бизнеса",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL",
+        "DEVELOPMENT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 300000,
+        "max": 3000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 24
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 28,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 6,
+        "min_average_monthly_revenue_rub": 500000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": []
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P02",
+      "version": "demo-2026-10-19-v1",
+      "name": "Оборотный кредит",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 10000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 36
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 24,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 1000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": []
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P03",
+      "version": "demo-2026-10-19-v1",
+      "name": "Возобновляемая линия",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "facility_kind": "REVOLVING_LINE",
+      "amount_rub": {
+        "min": 1000000,
+        "max": 15000000,
+        "meaning": "LIMIT"
+      },
+      "facility_term_months": {
+        "min": 12,
+        "max": 36
+      },
+      "max_tranche_days": 90,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 25,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "FACILITY_SPECIFIC_SCHEDULE",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 18,
+        "min_average_monthly_revenue_rub": 2000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": []
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P04",
+      "version": "demo-2026-10-19-v1",
+      "name": "Линия под закупки",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "facility_kind": "NON_REVOLVING_LINE",
+      "amount_rub": {
+        "min": 1000000,
+        "max": 12000000,
+        "meaning": "LIMIT"
+      },
+      "facility_term_months": {
+        "min": 12,
+        "max": 36
+      },
+      "max_tranche_days": 180,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 24,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "FACILITY_SPECIFIC_SCHEDULE",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 1500000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "SUPPLIER_DOCUMENTS"
+        ]
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "SUPPLIER_DOCUMENTS"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P05",
+      "version": "demo-2026-10-19-v1",
+      "name": "Овердрафт",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "CASH_GAP"
+      ],
+      "facility_kind": "OVERDRAFT",
+      "amount_rub": {
+        "min": 200000,
+        "max": 5000000,
+        "meaning": "LIMIT"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 12
+      },
+      "max_tranche_days": 30,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 26,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "FACILITY_SPECIFIC_SCHEDULE",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 1000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "DEMO_BANK_ACCOUNT_6_MONTHS"
+        ]
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "DEMO_BANK_ACCOUNT_6_MONTHS"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P06",
+      "version": "demo-2026-10-19-v1",
+      "name": "Сезонный оборот",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL",
+        "CASH_GAP"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 8000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 18
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 25,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "SEASONAL_APPROVED_SCHEDULE",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 18,
+        "min_average_monthly_revenue_rub": 1000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "SEASONAL_CASHFLOW"
+        ]
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "SEASONAL_CASHFLOW"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P07",
+      "version": "demo-2026-10-19-v1",
+      "name": "Оборудование",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "EQUIPMENT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 15000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 12,
+        "max": 60
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 22,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 1000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "PURCHASE_DOCUMENTS"
+        ]
+      },
+      "collateral": {
+        "kind": "PURCHASED_EQUIPMENT",
+        "required": true,
+        "min_own_contribution_pct": 20,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "PURCHASE_DOCUMENTS",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P08",
+      "version": "demo-2026-10-19-v1",
+      "name": "Коммерческий транспорт",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "TRANSPORT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 10000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 12,
+        "max": 60
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 23,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 800000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "PURCHASE_DOCUMENTS"
+        ]
+      },
+      "collateral": {
+        "kind": "PURCHASED_VEHICLE",
+        "required": true,
+        "min_own_contribution_pct": 20,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "PURCHASE_DOCUMENTS",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P09",
+      "version": "demo-2026-10-19-v1",
+      "name": "Коммерческое помещение",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "COMMERCIAL_PROPERTY"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 3000000,
+        "max": 30000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 24,
+        "max": 84
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 21,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 24,
+        "min_average_monthly_revenue_rub": 2000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "PURCHASE_DOCUMENTS",
+          "PROPERTY_LEGAL_REVIEW"
+        ]
+      },
+      "collateral": {
+        "kind": "PURCHASED_PROPERTY",
+        "required": true,
+        "min_own_contribution_pct": 30,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "PURCHASE_DOCUMENTS",
+        "PROPERTY_LEGAL_REVIEW",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P10",
+      "version": "demo-2026-10-19-v1",
+      "name": "Инвестиции под недвижимость",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "INVESTMENT",
+        "DEVELOPMENT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 2000000,
+        "max": 25000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 24,
+        "max": 72
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 23,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 24,
+        "min_average_monthly_revenue_rub": 2500000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "BUSINESS_PLAN",
+          "PROPERTY_LEGAL_REVIEW"
+        ]
+      },
+      "collateral": {
+        "kind": "EXISTING_PROPERTY",
+        "required": true,
+        "min_own_contribution_pct": 0,
+        "max_ltv": 0.65,
+        "ltv_basis": "BANK_ACCEPTED_VALUE_NET_OF_PRIOR_CLAIMS",
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "BUSINESS_PLAN",
+        "PROPERTY_LEGAL_REVIEW",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P11",
+      "version": "demo-2026-10-19-v1",
+      "name": "Исполнение контракта",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "CONTRACT_EXECUTION"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 10000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 3,
+        "max": 24
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 24,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 1000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "CONFIRMED_CONTRACT"
+        ]
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "CONFIRMED_CONTRACT"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P12",
+      "version": "demo-2026-10-19-v1",
+      "name": "Рефинансирование с залогом",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "REFINANCING"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 500000,
+        "max": 15000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 12,
+        "max": 48
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 23,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 18,
+        "min_average_monthly_revenue_rub": 1500000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "EXISTING_LOAN",
+          "PROPERTY_LEGAL_REVIEW"
+        ]
+      },
+      "collateral": {
+        "kind": "EXISTING_PROPERTY",
+        "required": true,
+        "min_own_contribution_pct": 0,
+        "max_ltv": 0.7,
+        "ltv_basis": "BANK_ACCEPTED_VALUE_NET_OF_PRIOR_CLAIMS",
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "EXISTING_LOAN",
+        "PROPERTY_LEGAL_REVIEW",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P13",
+      "version": "demo-2026-10-19-v1",
+      "name": "Небольшой кредит ИП",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL",
+        "DEVELOPMENT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 100000,
+        "max": 500000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 18
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 30,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 6,
+        "min_average_monthly_revenue_rub": 80000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "NPD",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": []
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "NOT_APPLICABLE",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P14",
+      "version": "demo-2026-10-19-v1",
+      "name": "Финансирование продавца",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "IP",
+        "LLC"
+      ],
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 300000,
+        "max": 5000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 6,
+        "max": 24
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 27,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "NONE_IN_DEMO",
+        "external_cost_examples": []
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 12,
+        "min_average_monthly_revenue_rub": 500000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "MARKETPLACE_6_MONTHS"
+        ]
+      },
+      "collateral": {
+        "kind": "NONE",
+        "required": false,
+        "min_own_contribution_pct": 0,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_REQUIRED_IN_DEMO"
+      },
+      "additional_document_triggers": [
+        "MARKETPLACE_6_MONTHS"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    },
+    {
+      "id": "P15",
+      "version": "demo-2026-10-19-v1",
+      "name": "Расширение производства",
+      "provider_id": "DEMO_BANK",
+      "is_synthetic": true,
+      "legal_kind": "BUSINESS_BANK_CREDIT",
+      "currency": "RUB",
+      "borrower_forms": [
+        "LLC"
+      ],
+      "purposes": [
+        "INVESTMENT",
+        "EQUIPMENT"
+      ],
+      "facility_kind": "TERM",
+      "amount_rub": {
+        "min": 2000000,
+        "max": 20000000,
+        "meaning": "PRINCIPAL"
+      },
+      "facility_term_months": {
+        "min": 24,
+        "max": 60
+      },
+      "max_tranche_days": null,
+      "pricing": {
+        "rate_type": "FIXED",
+        "annual_rate_pct": 22,
+        "issue_fee_rub": 0,
+        "maintenance_fee_rub": 0,
+        "interest_basis": "ACTUAL_OUTSTANDING",
+        "unused_limit_fee_pct": 0,
+        "external_costs": "INDIVIDUAL_DISCLOSURE_REQUIRED",
+        "external_cost_examples": [
+          "Оценка",
+          "Регистрация",
+          "Страхование, если предусмотрено условиями"
+        ]
+      },
+      "repayment": "ANNUITY",
+      "eligibility": {
+        "category": "P",
+        "min_business_age_months": 24,
+        "min_average_monthly_revenue_rub": 2000000,
+        "revenue_window_months": 12,
+        "short_history": "ACTUAL_COMPLETE_MONTHS_WITH_CONDITIONAL_ELIGIBILITY",
+        "country": "RU",
+        "regions": "ALL_RU_FOR_DEMO",
+        "min_ip_age_years": 18,
+        "tax_regimes": [
+          "OSNO",
+          "USN",
+          "PSN",
+          "AUSN",
+          "COMBINED",
+          "OTHER"
+        ],
+        "tax_form_compatibility_must_be_validated": true,
+        "extra_conditions": [
+          "BUSINESS_PLAN",
+          "MANUFACTURING",
+          "MSP_REGISTRY"
+        ]
+      },
+      "collateral": {
+        "kind": "EQUIPMENT",
+        "required": true,
+        "min_own_contribution_pct": 20,
+        "max_ltv": null,
+        "ltv_basis": null,
+        "notes": "Собственный взнос не заменяет проверку приемлемости и оформления залога"
+      },
+      "guarantor": {
+        "LLC": "CONTROLLING_OWNER_PERSONAL_GUARANTEE_REQUIRED",
+        "IP": "NOT_APPLICABLE"
+      },
+      "additional_document_triggers": [
+        "BUSINESS_PLAN",
+        "MANUFACTURING",
+        "MSP_REGISTRY",
+        "COLLATERAL_PACKAGE"
+      ],
+      "disclosures": [
+        "Вымышленный продукт для хакатона",
+        "Не является предложением Альфа-Банка",
+        "Предварительный подбор не означает одобрение"
+      ]
+    }
+  ]
+}

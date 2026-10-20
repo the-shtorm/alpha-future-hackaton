@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: credit-cabinet
+  main:
+    web-application-type: none
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/credit_cabinet}
+    username: ${DB_USER:credit_app}
+    password: ${DB_APP_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000
+  flyway:
+    enabled: true
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/credit_cabinet}
+    user: ${DB_MIGRATOR_USER:credit_migrator}
+    password: ${DB_MIGRATOR_PASSWORD}
+    default-schema: credit
+    schemas: credit
+    locations: classpath:db/migration
+    clean-disabled: true
+    validate-migration-naming: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: credit
+        jdbc:
+          time_zone: UTC
+  sql:
+    init:
+      mode: never
+

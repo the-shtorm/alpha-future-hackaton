@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+**/target/
+**/node_modules/
+**/dist/
+.idea/
+*.iml
+work/
+.pnpm-store/
+*.log
+__pycache__/
+*.pyc
+
