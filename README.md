@@ -15,9 +15,41 @@
 - Отдельные роли PostgreSQL для миграций и приложения.
 - Минимальный Spring Boot bootstrap для миграций. Это пока **не REST-сервер**: контроллеры, авторизация, JPA-сущности, React и Nginx еще не реализованы.
 
-## Локальный запуск PostgreSQL
+## Запуск в Docker
 
-Требуются Docker Compose, JDK 21 и Maven 3.6.3+ для Java-проверок.
+Нужен Docker с Compose и BuildKit. Java 21 и Maven устанавливаются внутри сборочного образа; устанавливать их на компьютер для этого запуска не требуется.
+
+Из корня репозитория, если `.env` еще не создан:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Задайте в `.env` свои пароли и запустите:
+
+```powershell
+docker compose up --build -d
+docker compose logs -f backend
+docker compose ps -a
+```
+
+Compose поднимает PostgreSQL, дожидается успешного healthcheck и запускает Java-приложение с адресом БД `postgres:5432`. В текущей версии приложение выполняет миграции и завершает работу: **`backend Exited (0)` после успешного запуска — ожидаемый результат**. PostgreSQL продолжает работать. HTTP API, React и Nginx пока не реализованы, поэтому у backend не опубликован HTTP-порт и не настроен постоянный перезапуск.
+
+Файл `.env.example` включает профиль `demo` с 15 синтетическими продуктами. Для отдельной БД без демонстрационного каталога задайте `SPRING_PROFILES_ACTIVE=`. Пароли поступают при запуске и не включаются в образ.
+
+`Dockerfile` использует два этапа: Maven/JDK 21 для сборки и JRE 21 для запуска от непривилегированного пользователя. Сборочный контекст ограничен `backend/pom.xml` и `backend/src`: `.env`, Git, документы, кеши и локальные сборки туда не попадают. Maven-зависимости кешируются BuildKit. Интеграционные Testcontainers-тесты не запускаются внутри сборки образа; их команда приведена ниже.
+
+Отдельно собрать образ:
+
+```powershell
+docker build -t alpha-future-backend:local .
+```
+
+После изменения исходников повторите `docker compose up --build -d backend`. Для проверки миграций передавайте runtime- и migrator-пароли, соответствующие уже созданному тому PostgreSQL; изменение `.env` само по себе пароли ролей в нем не меняет.
+
+## Запуск Java-приложения без Docker
+
+Для запуска Java на компьютере требуются JDK 21 и Maven 3.6.3+. Сам PostgreSQL можно оставить в контейнере.
 
 ```powershell
 Copy-Item .env.example .env
@@ -87,6 +119,9 @@ docs/
 infra/postgres/init/001_roles.sh
 tools/build_demo_catalog.py
 tools/sql-validation/
+Dockerfile
+.dockerignore
+.gitattributes
 compose.yaml
 .env.example
 ```

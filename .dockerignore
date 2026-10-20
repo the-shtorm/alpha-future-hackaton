@@ -1,0 +1,7 @@
+# Only the Maven project sources are required to build the backend.
+**
+!Dockerfile
+!backend/
+!backend/pom.xml
+!backend/src/
+!backend/src/**

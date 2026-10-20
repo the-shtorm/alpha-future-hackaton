@@ -1,4 +1,30 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alpha-future-backend:local
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-credit_cabinet}
+      DB_USER: credit_app
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:?Set DB_APP_PASSWORD}
+      DB_MIGRATOR_USER: credit_migrator
+      DB_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:?Set DB_MIGRATOR_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # The current non-web bootstrap applies migrations and exits successfully.
+    restart: "no"
+
   postgres:
     image: postgres:17-bookworm
     environment:
