@@ -47,6 +47,45 @@ docker build -t alpha-future-backend:local .
 
 После изменения исходников повторите `docker compose up --build -d backend`. Для проверки миграций передавайте runtime- и migrator-пароли, соответствующие уже созданному тому PostgreSQL; изменение `.env` само по себе пароли ролей в нем не меняет.
 
+## Просмотр БД в pgAdmin
+
+pgAdmin входит в Compose и доступен по адресу [http://localhost:5050](http://localhost:5050).
+Он настроен по [официальной инструкции для контейнера](https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html).
+Если `.env` уже существовал, добавьте в него настройки из `.env.example`:
+
+```dotenv
+PGADMIN_PORT=5050
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=local-pgadmin-change-me
+```
+
+Запустить только PostgreSQL и pgAdmin без пересборки backend:
+
+```powershell
+docker compose up -d pgadmin
+```
+
+1. Откройте [http://localhost:5050](http://localhost:5050) и войдите с `PGADMIN_DEFAULT_EMAIL` и `PGADMIN_DEFAULT_PASSWORD` из `.env`.
+2. Нажмите правой кнопкой на **Servers → Register → Server**. На вкладке **General** задайте имя `Credit Cabinet`.
+3. На вкладке **Connection** укажите:
+
+   | Поле | Значение |
+   | --- | --- |
+   | Host name/address | `postgres` |
+   | Port | `5432` |
+   | Maintenance database | `POSTGRES_DB` из `.env` (по умолчанию `credit_cabinet`) |
+   | Username | `credit_app` |
+   | Password | `DB_APP_PASSWORD` из `.env` |
+
+4. Нажмите **Save**. Раскройте **Servers → Credit Cabinet → Databases → credit_cabinet → Schemas → credit → Tables** (если меняли `POSTGRES_DB`, выберите свое имя БД).
+5. Для просмотра строк нажмите правой кнопкой на таблице: **View/Edit Data → All Rows**. Через **Tools → Query Tool** можно выполнить, например, `SELECT * FROM credit.credit_product LIMIT 100;`.
+
+Пароль входа в pgAdmin и пароль подключения к PostgreSQL — отдельные настройки.
+Для административного доступа к БД можно зарегистрировать отдельное подключение с пользователем `postgres` и паролем `POSTGRES_ADMIN_PASSWORD` из `.env`.
+Внутри сети Compose используется адрес `postgres:5432`, независимо от `POSTGRES_PORT` на компьютере.
+Порт pgAdmin опубликован только на `127.0.0.1`; изменить его можно через `PGADMIN_PORT`.
+Настройки и учетная запись pgAdmin сохраняются в томе `pgadmin_data`. `PGADMIN_DEFAULT_EMAIL` и `PGADMIN_DEFAULT_PASSWORD` создают учетную запись при первом запуске; для существующей учетной записи меняйте пароль в интерфейсе pgAdmin.
+
 ## Запуск Java-приложения без Docker
 
 Для запуска Java на компьютере требуются JDK 21 и Maven 3.6.3+. Сам PostgreSQL можно оставить в контейнере.
