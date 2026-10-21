@@ -14,6 +14,7 @@
 - Основной маршрут до кредитного решения и демонстрационные договор/первая выдача/закрытие.
 - Отдельные роли PostgreSQL для миграций и приложения.
 - Минимальный Spring Boot bootstrap для миграций. Это пока **не REST-сервер**: контроллеры, авторизация, JPA-сущности, React и Nginx еще не реализованы.
+- Отдельный контейнер FastAPI: проверка `/health`, OpenAPI и Swagger UI. Бизнес-методы и подключение Python-сервиса к БД пока не реализованы.
 
 ## Запуск в Docker
 
@@ -33,7 +34,7 @@ docker compose logs -f backend
 docker compose ps -a
 ```
 
-Compose поднимает PostgreSQL, дожидается успешного healthcheck и запускает Java-приложение с адресом БД `postgres:5432`. В текущей версии приложение выполняет миграции и завершает работу: **`backend Exited (0)` после успешного запуска — ожидаемый результат**. PostgreSQL продолжает работать. HTTP API, React и Nginx пока не реализованы, поэтому у backend не опубликован HTTP-порт и не настроен постоянный перезапуск.
+Compose поднимает PostgreSQL, дожидается успешного healthcheck и запускает Java-приложение с адресом БД `postgres:5432`. В текущей версии приложение выполняет миграции и завершает работу: **`backend Exited (0)` после успешного запуска — ожидаемый результат**. `docker ps` показывает только работающие контейнеры; завершившийся backend виден через `docker compose ps -a` или `docker ps -a`. Причина завершения — `spring.main.web-application-type: none` в `backend/src/main/resources/application.yml`. PostgreSQL, pgAdmin и FastAPI продолжают работать. REST API на Java, React и Nginx пока не реализованы, поэтому у Java-backend не опубликован HTTP-порт и не настроен постоянный перезапуск.
 
 Файл `.env.example` включает профиль `demo` с 15 синтетическими продуктами. Для отдельной БД без демонстрационного каталога задайте `SPRING_PROFILES_ACTIVE=`. Пароли поступают при запуске и не включаются в образ.
 
@@ -46,6 +47,24 @@ docker build -t alpha-future-backend:local .
 ```
 
 После изменения исходников повторите `docker compose up --build -d backend`. Для проверки миграций передавайте runtime- и migrator-пароли, соответствующие уже созданному тому PostgreSQL; изменение `.env` само по себе пароли ролей в нем не меняет.
+
+## FastAPI
+
+Сервис `fastapi` собирается из каталога `fastapi/` на Python 3.13 и запускается через Uvicorn. Образ следует [официальной инструкции FastAPI для Docker](https://fastapi.tiangolo.com/deployment/docker/). Он работает от непривилегированного пользователя, с файловой системой только для чтения, healthcheck и `restart: unless-stopped`.
+
+Чтобы собрать и запустить только FastAPI:
+
+```powershell
+docker compose up --build -d --wait fastapi
+docker compose ps
+Invoke-RestMethod http://localhost:8000/health
+```
+
+- Проверка процесса: [http://localhost:8000/health](http://localhost:8000/health), ответ `{"status":"ok"}`.
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs).
+- OpenAPI: [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json).
+
+Порт доступен только на `127.0.0.1`; для изменения добавьте `FASTAPI_PORT=8001` в `.env` и пересоздайте сервис. В сети Compose адрес сервиса — `http://fastapi:8000`. FastAPI пока не обращается к PostgreSQL или Java-backend, поэтому запускается независимо от них. `/health` проверяет доступность HTTP-процесса, без проверки БД.
 
 ## Просмотр БД в pgAdmin
 
@@ -155,6 +174,12 @@ docs/
   form-storage-contract.md
   validation.md
   reference/                       # Согласованные ранее формы и кредитный путь
+fastapi/
+  Dockerfile
+  .dockerignore
+  requirements.txt
+  app/__init__.py
+  app/main.py
 infra/postgres/init/001_roles.sh
 tools/build_demo_catalog.py
 tools/sql-validation/
