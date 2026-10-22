@@ -36,6 +36,8 @@ docker compose ps -a
 
 Compose поднимает PostgreSQL, дожидается успешного healthcheck и запускает Java-приложение с адресом БД `postgres:5432`. В текущей версии приложение выполняет миграции и завершает работу: **`backend Exited (0)` после успешного запуска — ожидаемый результат**. `docker ps` показывает только работающие контейнеры; завершившийся backend виден через `docker compose ps -a` или `docker ps -a`. Причина завершения — `spring.main.web-application-type: none` в `backend/src/main/resources/application.yml`. PostgreSQL, pgAdmin и FastAPI продолжают работать. REST API на Java, React и Nginx пока не реализованы, поэтому у Java-backend не опубликован HTTP-порт и не настроен постоянный перезапуск.
 
+На Linux с SELinux каталог `infra/postgres/init` монтируется с `:ro,Z`: Docker назначает ему метку доступа текущего контейнера. Без подходящей метки PostgreSQL может завершаться с `ls: cannot open directory '/docker-entrypoint-initdb.d/': Permission denied`, из-за чего backend ожидает здоровую БД. После обновления конфигурации выполните `docker compose up -d postgres`, затем `docker compose up -d`. Удалять том `postgres_data` для этого не нужно.
+
 Файл `.env.example` включает профиль `demo` с 15 синтетическими продуктами. Для отдельной БД без демонстрационного каталога задайте `SPRING_PROFILES_ACTIVE=`. Пароли поступают при запуске и не включаются в образ.
 
 `Dockerfile` использует два этапа: Maven/JDK 21 для сборки и JRE 21 для запуска от непривилегированного пользователя. Сборочный контекст ограничен `backend/pom.xml` и `backend/src`: `.env`, Git, документы, кеши и локальные сборки туда не попадают. Maven-зависимости кешируются BuildKit. Интеграционные Testcontainers-тесты не запускаются внутри сборки образа; их команда приведена ниже.
