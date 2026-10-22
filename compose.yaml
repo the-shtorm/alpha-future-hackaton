@@ -11,6 +11,12 @@ services:
       DB_MIGRATOR_USER: credit_migrator
       DB_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:?Set DB_MIGRATOR_PASSWORD}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
+      DOCUMENTS_PATH: /app/documents
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - documents_data:/app/documents
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,9 +28,7 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    # The current non-web bootstrap applies migrations and exits successfully.
-    # Use `docker compose ps -a` to see it after completion.
-    restart: "no"
+    restart: unless-stopped
 
   fastapi:
     build:
@@ -88,4 +92,5 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+  documents_data:
 

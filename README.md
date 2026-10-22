@@ -1,195 +1,154 @@
-# Умный кредитный кабинет — основа базы данных
+# Умный кредитный кабинет
 
-Первая версия PostgreSQL для предпринимательских кредитов ИП/ООО. Стек: Java 21, Spring Boot 3.5.16, PostgreSQL 17; React и Nginx подключаются к будущему REST API.
-
-В репозитории созданы **35 предметных таблиц**, четыре основные миграции Flyway, отдельная демонстрационная миграция с 15 вымышленными продуктами, описание связей и проверки целостности.
-
-Начать изучение: [проектирование БД](docs/database-design.md), [схема связей](docs/database-erd.mmd), [контракт данных форм](docs/form-storage-contract.md).
+Бэкенд хакатона: Java 21, Spring Boot 3.5.16, PostgreSQL 17. REST API покрывает каталог,
+предварительную форму, проверку доступности продуктов и демонстрационную подачу заявки.
+Каталог содержит 15 вымышленных продуктов. React и Nginx пока не подключены.
 
 ## Что реализовано
 
-- SQL-схема, ключи, ограничения, индексы, неизменяемые версии и история статусов.
-- Разделение пользователя, компании, участников сделки и заявок.
-- Версии форм, продуктов, документов, согласий, проверок и моделей.
-- Основной маршрут до кредитного решения и демонстрационные договор/первая выдача/закрытие.
-- Отдельные роли PostgreSQL для миграций и приложения.
-- Минимальный Spring Boot bootstrap для миграций. Это пока **не REST-сервер**: контроллеры, авторизация, JPA-сущности, React и Nginx еще не реализованы.
-- Отдельный контейнер FastAPI: проверка `/health`, OpenAPI и Swagger UI. Бизнес-методы и подключение Python-сервиса к БД пока не реализованы.
+- Каталог с пагинацией в SQL, фильтрами, сортировкой и полной карточкой условий.
+- Предварительная форма: промежуточное сохранение, анонимный доступ по секрету,
+  источники значений, проверка контрольных разрядов ИНН, денежных сумм и дат.
+- Проверка применимости версий продуктов: выполненные условия, нарушения и недостающие
+  сведения. Неизвестное значение не приравнивается к нулю. Скоринга и ранжирующей модели нет.
+- Вход по паролю и Bearer-токену; проверка доступа по `party_membership`.
+- Перенос выбранного продукта и ответов в черновик, динамические требования к документам.
+- Закрытая загрузка/скачивание PDF, PNG, JPEG, неизменяемые версии и контрольные суммы.
+- Транзакционная демонстрационная отправка с неизменяемым снимком и идемпотентностью.
+- Проверки полей и комплектности, протоколы и история статусов. Техническая ошибка не
+  превращается в кредитный отказ.
+- OpenAPI/Swagger, Flyway V1–V5, отдельные роли мигратора и приложения.
+- Отдельный FastAPI-контейнер с `/health` и Swagger; бизнес-логика находится в Java.
+
+**Границы MVP:** отправка — подтверждение владельца демонстрационной организации, без
+юридической подписи. Антивирус не подключен: файлы получают `RECEIVED`, проверка безопасности —
+`UNKNOWN`, последующая техническая валидация — `NEEDS_INFO`. Полная процедура идентификации,
+полномочия подписанта, согласия отдельных субъектов, закрытые источники, автоматическая
+фоновая обработка и рабочее место сотрудника требуют следующего этапа реализации.
 
 ## Запуск в Docker
 
-Нужен Docker с Compose и BuildKit. Java 21 и Maven устанавливаются внутри сборочного образа; устанавливать их на компьютер для этого запуска не требуется.
+Нужны Docker, Compose и BuildKit. Java и Maven устанавливаются внутри сборочного образа.
+Если `.env` еще нет, скопируйте пример (существующий файл не перезаписывайте):
 
-Из корня репозитория, если `.env` еще не создан:
-
-```powershell
-Copy-Item .env.example .env
+```bash
+cp .env.example .env
 ```
 
-Задайте в `.env` свои пароли и запустите:
+В PowerShell: `Copy-Item .env.example .env`. Задайте свои пароли в `.env`, затем:
 
-```powershell
+```bash
 docker compose up --build -d
 docker compose logs -f backend
 docker compose ps -a
 ```
 
-Compose поднимает PostgreSQL, дожидается успешного healthcheck и запускает Java-приложение с адресом БД `postgres:5432`. В текущей версии приложение выполняет миграции и завершает работу: **`backend Exited (0)` после успешного запуска — ожидаемый результат**. `docker ps` показывает только работающие контейнеры; завершившийся backend виден через `docker compose ps -a` или `docker ps -a`. Причина завершения — `spring.main.web-application-type: none` в `backend/src/main/resources/application.yml`. PostgreSQL, pgAdmin и FastAPI продолжают работать. REST API на Java, React и Nginx пока не реализованы, поэтому у Java-backend не опубликован HTTP-порт и не настроен постоянный перезапуск.
+Backend теперь **постоянно работает как HTTP-сервер**, после применения миграций не завершает
+работу. PostgreSQL должен пройти healthcheck перед запуском Java. При изменении исходников:
 
-На Linux с SELinux каталог `infra/postgres/init` монтируется с `:ro,Z`: Docker назначает ему метку доступа текущего контейнера. Без подходящей метки PostgreSQL может завершаться с `ls: cannot open directory '/docker-entrypoint-initdb.d/': Permission denied`, из-за чего backend ожидает здоровую БД. После обновления конфигурации выполните `docker compose up -d postgres`, затем `docker compose up -d`. Удалять том `postgres_data` для этого не нужно.
-
-Файл `.env.example` включает профиль `demo` с 15 синтетическими продуктами. Для отдельной БД без демонстрационного каталога задайте `SPRING_PROFILES_ACTIVE=`. Пароли поступают при запуске и не включаются в образ.
-
-`Dockerfile` использует два этапа: Maven/JDK 21 для сборки и JRE 21 для запуска от непривилегированного пользователя. Сборочный контекст ограничен `backend/pom.xml` и `backend/src`: `.env`, Git, документы, кеши и локальные сборки туда не попадают. Maven-зависимости кешируются BuildKit. Интеграционные Testcontainers-тесты не запускаются внутри сборки образа; их команда приведена ниже.
-
-Отдельно собрать образ:
-
-```powershell
-docker build -t alpha-future-backend:local .
+```bash
+docker compose up --build -d backend
 ```
 
-После изменения исходников повторите `docker compose up --build -d backend`. Для проверки миграций передавайте runtime- и migrator-пароли, соответствующие уже созданному тому PostgreSQL; изменение `.env` само по себе пароли ролей в нем не меняет.
+| Сервис | Адрес |
+|---|---|
+| Java health (включая запрос к БД) | [localhost:8080/health](http://localhost:8080/health) |
+| Каталог | [localhost:8080/products](http://localhost:8080/products?page=0&size=12) |
+| Java Swagger UI | [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) |
+| Java OpenAPI | [localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs) |
+| FastAPI Swagger UI | [localhost:8000/docs](http://localhost:8000/docs) |
+| pgAdmin | [localhost:5050](http://localhost:5050) |
 
-## FastAPI
+Порты опубликованы на `127.0.0.1`. Переопределения в `.env`: `BACKEND_PORT`, `FASTAPI_PORT`,
+`POSTGRES_PORT`, `PGADMIN_PORT`. Документы сохраняются в закрытом томе `documents_data`.
+Runtime работает под UID 10001 с read-only корневой файловой системой; доступны только `/tmp`
+и том документов. Для существующих томов миграции добавляются поверх данных без удаления.
 
-Сервис `fastapi` собирается из каталога `fastapi/` на Python 3.13 и запускается через Uvicorn. Образ следует [официальной инструкции FastAPI для Docker](https://fastapi.tiangolo.com/deployment/docker/). Он работает от непривилегированного пользователя, с файловой системой только для чтения, healthcheck и `restart: unless-stopped`.
+На SELinux каталог `infra/postgres/init` монтируется с `:ro,Z`. Если после изменения метки
+PostgreSQL не запускается, пересоздайте контейнер: `docker compose up -d postgres`. Удалять том
+`postgres_data` для этого не нужно.
 
-Чтобы собрать и запустить только FastAPI:
+`.env.example` включает профиль `demo` с синтетическим каталогом. Без демонстрационного
+каталога используйте отдельную БД и `SPRING_PROFILES_ACTIVE=`. Не меняйте набор Flyway locations
+на уже используемой БД без проверки истории миграций. Пароли поступают при запуске и не
+включаются в образ. Изменение `.env` не меняет пароль уже созданной роли PostgreSQL.
 
-```powershell
-docker compose up --build -d --wait fastapi
-docker compose ps
-Invoke-RestMethod http://localhost:8000/health
+## Демонстрационный кабинет
+
+Чтобы создать локального пользователя `demo-owner` и демонстрационную организацию, задайте
+`DEMO_PASSWORD` в `.env`: минимум 12 символов, максимум 72 байта UTF-8. Пересоздайте backend.
+Без этого параметра учетная запись не создается. Пароль хранится как `{bcrypt}...`; повторный
+запуск не меняет существующий пароль пользователя.
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"login":"demo-owner","password":"YOUR_DEMO_PASSWORD"}'
 ```
 
-- Проверка процесса: [http://localhost:8000/health](http://localhost:8000/health), ответ `{"status":"ok"}`.
-- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs).
-- OpenAPI: [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json).
+Используйте `accessToken` из ответа в `Authorization: Bearer <token>`. `GET /me` возвращает
+организации и роли: OWNER может отправить заявку, EDITOR — готовить, VIEWER — читать.
+Токен действует 12 часов; `POST /auth/logout` отзывает его. Swagger поддерживает кнопку
+Authorize. Cookie-сессии, публичная регистрация и автоматическая выдача членства не включены.
 
-Порт доступен только на `127.0.0.1`; для изменения добавьте `FASTAPI_PORT=8001` в `.env` и пересоздайте сервис. В сети Compose адрес сервиса — `http://fastapi:8000`. FastAPI пока не обращается к PostgreSQL или Java-backend, поэтому запускается независимо от них. `/health` проверяет доступность HTTP-процесса, без проверки БД.
+Контракт, структура формы, ошибки и пример полного запроса: [backend-api.md](docs/backend-api.md).
 
-## Просмотр БД в pgAdmin
+## pgAdmin
 
-pgAdmin входит в Compose и доступен по адресу [http://localhost:5050](http://localhost:5050).
-Он настроен по [официальной инструкции для контейнера](https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html).
-Если `.env` уже существовал, добавьте в него настройки из `.env.example`:
+Значения `PGADMIN_DEFAULT_EMAIL` и `PGADMIN_DEFAULT_PASSWORD` задают учетную запись при первом
+создании `pgadmin_data`. В существующей учетной записи пароль меняется через интерфейс.
+Они отличаются от учетных данных PostgreSQL.
 
-```dotenv
-PGADMIN_PORT=5050
-PGADMIN_DEFAULT_EMAIL=admin@example.com
-PGADMIN_DEFAULT_PASSWORD=local-pgadmin-change-me
-```
+Зарегистрируйте сервер: Servers → Register → Server. В Connection укажите:
 
-Запустить только PostgreSQL и pgAdmin без пересборки backend:
+| Поле | Значение |
+|---|---|
+| Host name/address | `postgres` |
+| Port | `5432` |
+| Maintenance database | `POSTGRES_DB` из `.env`, по умолчанию `credit_cabinet` |
+| Username | `credit_app` |
+| Password | `DB_APP_PASSWORD` из `.env` |
 
-```powershell
-docker compose up -d pgadmin
-```
+Таблицы: Databases → credit_cabinet → Schemas → credit → Tables. Для просмотра — View/Edit Data
+или Query Tool: `SELECT * FROM credit.credit_product LIMIT 100;`. Runtime-роль не имеет доступа
+к изменению схемы, каталога или подделке истории. Администратор БД — `postgres` с паролем
+`POSTGRES_ADMIN_PASSWORD`; миграции выполняет `credit_migrator`.
 
-1. Откройте [http://localhost:5050](http://localhost:5050) и войдите с `PGADMIN_DEFAULT_EMAIL` и `PGADMIN_DEFAULT_PASSWORD` из `.env`.
-2. Нажмите правой кнопкой на **Servers → Register → Server**. На вкладке **General** задайте имя `Credit Cabinet`.
-3. На вкладке **Connection** укажите:
+## Локальный запуск Java и проверки
 
-   | Поле | Значение |
-   | --- | --- |
-   | Host name/address | `postgres` |
-   | Port | `5432` |
-   | Maintenance database | `POSTGRES_DB` из `.env` (по умолчанию `credit_cabinet`) |
-   | Username | `credit_app` |
-   | Password | `DB_APP_PASSWORD` из `.env` |
+Нужны JDK 21+, Maven 3.6.3+ и доступ к Docker Engine для Testcontainers.
 
-4. Нажмите **Save**. Раскройте **Servers → Credit Cabinet → Databases → credit_cabinet → Schemas → credit → Tables** (если меняли `POSTGRES_DB`, выберите свое имя БД).
-5. Для просмотра строк нажмите правой кнопкой на таблице: **View/Edit Data → All Rows**. Через **Tools → Query Tool** можно выполнить, например, `SELECT * FROM credit.credit_product LIMIT 100;`.
-
-Пароль входа в pgAdmin и пароль подключения к PostgreSQL — отдельные настройки.
-Для административного доступа к БД можно зарегистрировать отдельное подключение с пользователем `postgres` и паролем `POSTGRES_ADMIN_PASSWORD` из `.env`.
-Внутри сети Compose используется адрес `postgres:5432`, независимо от `POSTGRES_PORT` на компьютере.
-Порт pgAdmin опубликован только на `127.0.0.1`; изменить его можно через `PGADMIN_PORT`.
-Настройки и учетная запись pgAdmin сохраняются в томе `pgadmin_data`. `PGADMIN_DEFAULT_EMAIL` и `PGADMIN_DEFAULT_PASSWORD` создают учетную запись при первом запуске; для существующей учетной записи меняйте пароль в интерфейсе pgAdmin.
-
-## Запуск Java-приложения без Docker
-
-Для запуска Java на компьютере требуются JDK 21 и Maven 3.6.3+. Сам PostgreSQL можно оставить в контейнере.
-
-```powershell
-Copy-Item .env.example .env
+```bash
 docker compose up -d postgres
-docker compose ps
-```
-
-Значения в `.env.example` предназначены для локальной разработки. В `.env` задайте свои пароли. `.env` исключен из Git. Порт БД опубликован только на `127.0.0.1`.
-
-Первое создание тома запускает `infra/postgres/init/001_roles.sh`: создаются `credit_migrator`, `credit_app` и схема `credit`. Изменение `.env` не меняет автоматически пароли уже созданных ролей в существующем томе. Не удаляйте том ради изменения настроек.
-
-Для запуска bootstrap перенесите настройки из `.env` в окружение текущего PowerShell:
-
-```powershell
-Get-Content .env | Where-Object { $_ -match '^(POSTGRES_DB|POSTGRES_PORT|DB_APP_PASSWORD|DB_MIGRATOR_PASSWORD)=' } | ForEach-Object {
-    $setting = $_ -split '=', 2
-    [Environment]::SetEnvironmentVariable($setting[0], $setting[1], 'Process')
-}
-$env:DB_URL = "jdbc:postgresql://localhost:$($env:POSTGRES_PORT)/$($env:POSTGRES_DB)"
-$env:SPRING_PROFILES_ACTIVE = 'demo'
+# Передайте DB_URL, DB_APP_PASSWORD, DB_MIGRATOR_PASSWORD и при необходимости
+# SPRING_PROFILES_ACTIVE=demo в окружение процесса из ваших локальных настроек.
 mvn -f backend/pom.xml spring-boot:run
-```
-
-Профиль `demo` добавляет 15 синтетических продуктов повторяемой миграцией `R__synthetic_product_catalog.sql`. Она использует стабильные UUID и `ON CONFLICT DO NOTHING`: повторный запуск не переписывает существующие версии. Измененные условия требуют нового кода версии в исходном каталоге. Без профиля создается только схема и справочник типов документов. Используйте отдельную демонстрационную БД; включение/отключение набора миграций на одной БД требует проверки истории Flyway.
-
-Bootstrap использует runtime-пользователя для обычного подключения и отдельного мигратора для Flyway. Hibernate настроен на `validate`, автоматическое изменение структуры отключено. Приложение работает в режиме `web-application-type: none` и пока только инициализирует инфраструктуру; HTTP endpoint нет.
-
-## Проверки
-
-Полный интеграционный тест с контейнером PostgreSQL 17:
-
-```powershell
 mvn -f backend/pom.xml test
 ```
 
-Тесты применяют Flyway, загружают демо-каталог, проверяют 32 недопустимых действия, положительный маршрут и права runtime-роли. Контейнер одноразовый, тестовые заявки откатываются транзакцией. Нужен доступ процесса Java к Docker Engine.
+Тесты используют одноразовые PostgreSQL-контейнеры и не изменяют рабочую БД. Проверяются
+миграции и 32 SQL-инварианта, права runtime-роли, каталог, анонимный профиль, конкурентные
+изменения, проверки условий, доступ к заявкам, файлы, отправка и повторные запросы.
 
-Альтернативная локальная проверка того же SQL на PostgreSQL 17.5 в WebAssembly, без Docker:
+Альтернативная проверка SQL без Docker:
 
-```powershell
+```bash
 cd tools/sql-validation
 pnpm install --frozen-lockfile --ignore-scripts
 pnpm test
 ```
 
-Эта проверка исполняет SQL и триггеры, но не заменяет JDBC, Flyway и проверку контейнерного окружения. Проверенные результаты и ограничения среды: [validation.md](docs/validation.md).
+Она не заменяет JDBC, Flyway и HTTP-проверки. Результаты: [validation.md](docs/validation.md).
 
-## Структура
+## Данные и устройство
 
-```text
-backend/
-  pom.xml
-  src/main/java/ru/alphafuture/credit/CreditCabinetApplication.java
-  src/main/resources/
-    application.yml
-    application-demo.yml
-    db/migration/V1...V4__*.sql
-    db/demo/R__synthetic_product_catalog.sql
-  src/test/java/ru/alphafuture/credit/DatabaseIntegrityTest.java
-  src/test/resources/db/database_invariants.sql
-docs/
-  database-design.md
-  database-erd.mmd
-  form-storage-contract.md
-  validation.md
-  reference/                       # Согласованные ранее формы и кредитный путь
-fastapi/
-  Dockerfile
-  .dockerignore
-  requirements.txt
-  app/__init__.py
-  app/main.py
-infra/postgres/init/001_roles.sh
-tools/build_demo_catalog.py
-tools/sql-validation/
-Dockerfile
-.dockerignore
-.gitattributes
-compose.yaml
-.env.example
-```
+[Проектирование БД](docs/database-design.md), [схема связей](docs/database-erd.mmd),
+[контракт хранения форм](docs/form-storage-contract.md), [REST API](docs/backend-api.md).
 
-Продукты, подписи, внешние проверки и выдачи в демо не являются реальными банковскими операциями. Формула нечеткой логики здесь не определяется.
+API использует `JdbcClient` и сервисные транзакции поверх существующей схемы; миграции
+остаются единственным способом изменения структуры. JPA не генерирует DDL. Прикладные запросы
+проверяют пользователя и членство: RLS в PostgreSQL не включен.
+
+Демонстрационные источники работают локально и явно возвращают `isSimulated=true`.
+Скопированные вручную значения не становятся подтвержденными сведениями реестра.
+Продукты, подписи и проверки в демо не являются реальными банковскими операциями.
