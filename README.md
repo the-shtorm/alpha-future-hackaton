@@ -18,7 +18,6 @@
 - Проверки полей и комплектности, протоколы и история статусов. Техническая ошибка не
   превращается в кредитный отказ.
 - OpenAPI/Swagger, Flyway V1–V5, отдельные роли мигратора и приложения.
-- Отдельный FastAPI-контейнер с `/health` и Swagger; бизнес-логика находится в Java.
 
 **Границы MVP:** отправка — подтверждение владельца демонстрационной организации, без
 юридической подписи. Антивирус не подключен: файлы получают `RECEIVED`, проверка безопасности —
@@ -56,10 +55,9 @@ docker compose up --build -d backend
 | Каталог | [localhost:8080/products](http://localhost:8080/products?page=0&size=12) |
 | Java Swagger UI | [localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) |
 | Java OpenAPI | [localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs) |
-| FastAPI Swagger UI | [localhost:8000/docs](http://localhost:8000/docs) |
 | pgAdmin | [localhost:5050](http://localhost:5050) |
 
-Порты опубликованы на `127.0.0.1`. Переопределения в `.env`: `BACKEND_PORT`, `FASTAPI_PORT`,
+Порты опубликованы на `127.0.0.1`. Переопределения в `.env`: `BACKEND_PORT`,
 `POSTGRES_PORT`, `PGADMIN_PORT`. Документы сохраняются в закрытом томе `documents_data`.
 Runtime работает под UID 10001 с read-only корневой файловой системой; доступны только `/tmp`
 и том документов. Для существующих томов миграции добавляются поверх данных без удаления.
