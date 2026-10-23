@@ -1,81 +1,170 @@
-# REST API — контракт MVP
+# REST API: Data Policy 2.1 и Preliminary Form 1.0
 
-Java API по умолчанию: `http://localhost:8080` (текущий локальный `.env`: порт 8081); Swagger: `/swagger-ui/index.html`, OpenAPI: `/v3/api-docs`.
-Все маршруты, кроме `/health`, документации, входа, каталога, поиска бизнеса и анонимных профилей,
-требуют `Authorization: Bearer <token>`. Токен возвращает `POST /auth/login` и действует 12 часов.
-Пароли проверяются через Spring PasswordEncoder; cookie-сессии не используются.
-`POST /auth/logout` отзывает текущий токен. `GET /me` возвращает пользователя и его организации.
+Base URL: `http://localhost:8080`, учитывайте BACKEND_PORT из .env.
+Swagger: `/swagger-ui/index.html`; OpenAPI: `/v3/api-docs`.
+JSON-команды: Content-Type application/json; Bearer accessToken из /auth/login.
+Сессия действует 12 часов, в БД хранится SHA-256; logout отзывает токен.
+Все успешные операции ниже возвращают 200. No Auth требуется только health/login/catalog/Swagger.
 
-| Метод | Маршрут | Назначение |
-|---|---|---|
-| GET | /products | Каталог: page=0, size=12 (1…50), sort=name,asc; purpose, amount, termMonths, borrowerKind, collateralRequired |
-| GET | /products/{id} | Полные действующие условия продукта |
-| POST | /business/lookup | Проверенный по контрольным разрядам taxId, ответ локального синтетического источника |
-| POST | /selection-profiles | Создать профиль: `{"answers":{...}}` |
-| GET | /selection-profiles/{id} | Прочитать свой профиль |
-| PATCH | /selection-profiles/{id} | `{"expectedVersion":0,"answers":{...}}`: рекурсивное слияние, null удаляет поле |
-| POST | /selection-profiles/{id}/eligibility | Проверка всех действующих продуктов, неизменяемый снимок правил и профиля |
-| PUT | /selection-profiles/{id}/selected-product | `{"expectedVersion":0,"productVersionId":"uuid"}` |
-| POST | /applications | Черновик из профиля: profileId, partyId; проверка членства и выбора продукта |
-| GET | /applications | Заявки доступных организаций, пагинация |
-| GET/PATCH | /applications/{id} | Чтение/обновление черновика; PATCH: expectedVersion, answers |
-| GET | /applications/{id}/requirements | Требования к документам, этап и основание DEMO |
-| POST | /applications/{id}/documents | multipart: requirementId, file; PDF/PNG/JPEG до 10 MB |
-| GET | /applications/{id}/documents/{versionId} | Закрытое скачивание с проверкой членства |
-| POST | /applications/{id}/validate | Проверка данных и комплектности, без кредитного решения |
-| GET | /applications/{id}/validation-results | Сохраненные протоколы активной поданной версии |
-| POST | /applications/{id}/submit | expectedVersion, confirmed=true; обязательный Idempotency-Key |
-| GET | /applications/{id}/status | Статус и история |
+[Типы и расчеты](data-dictionary.md), [источники требований](data-policy.md),
+[предварительная форма](preliminary_form.md), [Postman](postman-testing.md).
 
-Профиль без входа получает секрет `accessToken` **только при создании**. Для каждого дальнейшего
-обращения к нему нужен `X-Profile-Token`; в БД хранится только SHA-256. Срок жизни — 7 дней.
-Профили вошедших пользователей доступны только создателю. При переносе анонимного профиля в
-заявку нужны одновременно Bearer пользователя и X-Profile-Token. UUID не дает доступа.
+| Метод | Endpoint | Вход | Результат | Доступ |
+|---|---|---|---|---|
+| GET | `/health` | Нет | 200 status=ok после запроса к БД | No Auth |
+| POST | `/auth/login` | login, password | 200 accessToken, tokenType, expiresAt | No Auth |
+| POST | `/auth/logout` | Нет | 200; токен отозван | Любой пользователь |
+| GET | `/me` | Нет | Пользователь, parties, bankApprover | Любой пользователь |
+| GET | `/companies/{id}/profile` | Нет | Сведения доступной компании | Участник компании |
+| GET | `/products` | page=0, size=12 (1..50) | Каталог действующих версий, totalElements | No Auth |
+| GET | `/products/{id}` | UUID продукта или версии | Полные условия выбранной версии | No Auth |
+| GET | `/forms/application` | Нет | 15 полей окончательной заявки и 11 transferredFields | Любой пользователь |
+| POST | `/selection-profiles` | partyId, answers | 19 полей, частичная форма; rowVersion, fieldSources, value_status | OWNER/EDITOR |
+| GET | `/selection-profiles/{id}` | Нет | Форма подбора; изменение сбрасывает выбор продукта | Участник компании |
+| PATCH | `/selection-profiles/{id}` | expectedVersion, answers | Форма подбора; изменение сбрасывает выбор продукта | OWNER/EDITOR |
+| POST | `/applications` | profileId, expectedProfileVersion, answers (дополнения по схеме 15 полей) | DRAFT из выбранного профиля, отдельно preliminaryContext | OWNER/EDITOR |
+| GET | `/applications` | page, size | Заявки доступных компаний | Участник компании |
+| GET | `/applications/{id}` | Нет | Текущий черновик/статус/версия | Участник или банк |
+| PATCH | `/applications/{id}` | expectedVersion, answers | Слияние ответов, версия +1 | OWNER/EDITOR; DRAFT/NEEDS_INFO |
+| POST | `/applications/{id}/validate` | Нет | value_status, review: kind/reason/conditions | Участник или банк |
+| POST | `/applications/{id}/submit` | expectedVersion, confirmed=true; Idempotency-Key | revisionId, sha256, replayed | OWNER |
+| GET | `/applications/{id}/journey` | Нет | application, history, checks с причинами, decision, offer/counteroffer, договор/выдача | Участник или банк |
+| GET | `/applications/{id}/status` | Нет | application, history, checks с причинами, decision, offer/counteroffer, договор/выдача | Участник или банк |
+| GET | `/applications/{id}/revisions/{revision}` | Нет | snapshot, snapshot_sha256, revision_no | Участник или банк |
+| GET | `/applications/{id}/requirements` | Нет | Требования продукта, включая поручительство и обеспечение | Участник или банк |
+| POST | `/applications/{id}/documents` | multipart: typeCode, file | versionId, sha256, value_status=UNKNOWN | OWNER/EDITOR; DRAFT/NEEDS_INFO |
+| GET | `/applications/{id}/documents/{version}` | Нет | Закрытое скачивание PDF/PNG/JPEG/договора | Участник или банк |
+| GET | `/bank/applications` | page, size | Банковская очередь | BANK_APPROVER |
+| POST | `/bank/applications/{id}/assign` | Нет | assignedTo=текущий сотрудник | BANK_APPROVER |
+| POST | `/bank/applications/{id}/process` | Нет | APPROVED/COUNTEROFFERED/DECLINED/REQUEST_INFO либо UNDER_REVIEW; положительные автоматические исходы только DEMO | Назначенный BANK_APPROVER |
+| POST | `/bank/applications/{id}/decisions` | kind, reason, missingFields | Ручное решение; не обходит документы, бюджет, оценку или жесткий отказ | Назначенный BANK_APPROVER |
+| POST | `/bank/applications/{id}/documents/{version}/review` | result=PASS/FAIL/UNKNOWN, reason | Ручная CONTENT-проверка | BANK_APPROVER; DRAFT/SUBMITTED/NEEDS_INFO |
+| POST | `/applications/{id}/offers/accept` | offerId, confirmed=true | OFFER_ACCEPTED | OWNER |
+| POST | `/applications/{id}/contract/sign` | confirmed=true | SIGNED, условный договор | OWNER |
+| POST | `/bank/applications/{id}/disburse` | confirmed=true | DISBURSED, одна синтетическая запись | Назначенный BANK_APPROVER |
+| GET | `/forms/preliminary` | Нет | 19 полей; 7 conditionalFields | Любой пользователь |
+| POST | `/selection-profiles/{id}/eligibility` | Нет | runId, profileVersion, причины; порядок по применимости/коду, personalRatingAvailable=false | OWNER/EDITOR |
+| GET | `/selection-profiles/{id}/recommendations/{runId}` | Нет | Сохраненный результат; current=false после изменения формы | Участник компании |
+| PUT | `/selection-profiles/{id}/selected-product` | expectedVersion, runId, productVersionId | Выбран продукт; rowVersion+1; старый run →409, INELIGIBLE →422 | OWNER/EDITOR |
+| POST | `/applications/{id}/refresh-preliminary` | expectedVersion, expectedProfileVersion | Обновляет отдельный контекст того же профиля/продукта; answers не меняются | OWNER/EDITOR; DRAFT/NEEDS_INFO |
+| POST | `/applications/{id}/counteroffers/accept` | proposalId, termsSha256, confirmed=true | Создает и принимает Offer по сохраненной альтернативе; повтор идемпотентен | OWNER |
+| POST | `/bank/macroeconomic-contexts` | keyRatePct (строка), validFrom, expiresAt, sourceCode | Неизменяемая версия серверной ставки 0..100 | BANK_APPROVER |
+| GET | `/bank/macroeconomic-contexts/current` | Нет | Действующий контекст; при отсутствии →422 | BANK_APPROVER |
+| POST | `/applications/{id}/financial-evidence` | periodFrom, periodTo, operations[] | id, вычисленная revenue, UNKNOWN; версия заявки+1 | OWNER/EDITOR; DRAFT/NEEDS_INFO |
+| GET | `/applications/{id}/financial-evidence` | Нет | Операции, периоды, расчетная выручка и результаты проверки | Участник или банк |
+| POST | `/bank/applications/{id}/financial-evidence/{evidence}/review` | result=PASS/FAIL/UNKNOWN, reason | Новая неизменяемая банковская проверка | Назначенный BANK_APPROVER |
+| GET | `/demo/scenarios` | Нет | 8 синтетических сценариев; только профиль demo и доступные компании | Участник или банк |
 
-Поля `answers` (все необязательны для промежуточного сохранения):
+## Переход от формы к заявке
+
+1. POST /selection-profiles с partyId и 19-польной формой.
+2. POST /selection-profiles/{id}/eligibility: сохранить runId.
+3. PUT /selection-profiles/{id}/selected-product с текущей expectedVersion и выбранной версией.
+4. POST /applications:
 
 ```json
 {
-  "request":{"purpose":"WORKING_CAPITAL","amount":"1000000.00","termMonths":12},
-  "registration":{"taxId":"7707083893","name":"Демонстрационный бизнес","borrowerKind":"LLC","registeredOn":"2020-01-01","country":"RU"},
-  "business":{"actualStartedOn":"2020-01-01","region":"77","sector":"TRADE","taxRegime":"USN","ipAgeYears":30,"mspRegistry":true,"marketplaceMonths":12,"bankAccountMonths":12},
-  "financial":{"revenue":"24000000.00","periodFrom":"2025-10-01","periodTo":"2026-09-30","debtBalance":"0.00","monthlyDebtPayment":"0.00","overdue":false},
-  "security":{"collateralReady":false,"guarantorReady":true,"collateralValue":"0.00"},
-  "project":{"ownContributionPct":"20.00","purchasePrice":"1250000.00","repaymentSource":"Выручка от основной деятельности"}
+  "profileId":"UUID профиля",
+  "expectedProfileVersion":1,
+  "answers":{
+    "financial":{"monthlyDebtPayment":"0.00","overdue":0},
+    "security":{"collateralValue":"0.00"},
+    "project":{"ownContributionPct":"0.00"}
+  }
 }
 ```
 
-Деньги — десятичные строки, 2 знака после точки, до 17 цифр целой части. Неизвестное поле
-отсутствует либо равно null; оно не приравнивается к нулю. Будущие даты и несовместимые
-налоговые режимы отклоняются. `fieldSources`, владельцы и банковские статусы устанавливает
-сервер. Ручные ответы имеют APPLICANT/MANUAL/DECLARED. Поиск бизнеса не меняет профиль
-автоматически. Его синтетические данные при ручном переносе остаются DECLARED.
+Сервер переносит ровно 11 общих полей. Дополнения/редактирование принимаются только по
+15-польной схеме заявки. partyId/productVersionId/status/fieldSources не подменяются клиентом.
+Отдельный preliminaryContext хранит источник выбора. После PATCH формы выбор сбрасывается;
+старый результат сохраняется и не может использоваться для нового выбора.
 
-Доступность: ELIGIBLE / CONDITIONAL / INELIGIBLE; объяснения содержат field, code и message.
-Это правила применимости каталога, без ранжирующей модели/скоринга и без одобрения кредита.
-При каждом изменении профиля выбор сбрасывается. Пагинация выполняется в SQL; сортировка
-разрешена по name, minAmount, annualRatePct в asc/desc с устойчивым дополнительным ключом.
-Для списка выдаются карточки без полного policy; детальный endpoint возвращает policy.
+PATCH заявки: expectedVersion и answers; null удаляет поле, массивы не являются полями анкеты.
+В DRAFT/NEEDS_INFO можно явно обновить контекст того же профиля через refresh-preliminary;
+текущие 15 ответов при этом не перезаписываются.
 
-Ошибки: application/problem+json: status, title, detail, code, errors. Ошибки полей — 400,
-без аутентификации — 401, чужой объект — 404, нет полномочий на запись — 403, устаревшая
-версия/состояние/ключ повторного запроса — 409, неполный приемный комплект — 422, большой файл — 413.
-Тело SQL-ошибок, пароли, токены и пути хранилища в ответы не попадают.
+## Подача и банковская обработка
 
-Отправка в MVP — **демонстрационное подтверждение владельца организации**, а не юридическая
-подпись. Согласия субъектов, проверка подписанта и внешние закрытые источники еще требуют
-отдельной реализации. OWNER может отправить, EDITOR — готовить, VIEWER — читать.
-Снимок создается сервером в одной транзакции, файлы и версия условий фиксируются.
-Повтор submit с тем же ключом и параметрами возвращает прежнюю ревизию даже после смены статуса.
-Другой запрос с уже использованным ключом — 409. Ключ имеет область пользователя.
-Канонизация снимка: рекурсивная сортировка ключей объектов, сохранение порядка массивов,
-UTF-8 без пробелов, суммы как строки; SHA-256 не является электронной подписью.
+OWNER: submit с expectedVersion, confirmed=true и Idempotency-Key длиной 1..160.
+Перед отправкой перечитайте rowVersion после загрузки документа или финансового доказательства.
+Повтор идентичного ключа/версии возвращает прежний revisionId, replayed=true.
+Новый submit после NEEDS_INFO создает новую ревизию, не изменяет предыдущую.
 
-Файл получает RECEIVED, но не VERIFIED. Формат проверяется по сигнатуре, размер и хеш —
-сервером. Антивирус пока не подключен: результат UNKNOWN, дальнейшая проверка потребует
-сотрудника/сканера; это не кредитный отказ. Для поданной версии протоколы привязаны к ее
-снимку, при повторной подаче создается новая версия. Успешная техническая проверка переводит
-SUBMITTED → VALIDATING → ENRICHING; недостающие сведения — NEEDS_INFO. До подключения
-антивируса загруженные документы блокируют успешную проверку содержимого.
+validate возвращает предварительный расчет/качество данных, не сохраненное банковское решение.
+process выполняется для SUBMITTED (или продолжает UNDER_REVIEW) назначенным BANK_APPROVER.
+Просрочка>0.2 запрещает встречное предложение. Пропуски/UNKNOWN-документы дают REQUEST_INFO
+и NEEDS_INFO. Проверенное расхождение операций и выручки или короткая история могут
+дать UNDER_REVIEW без окончательного Decision; причины находятся в journey.checks[].evidence.
 
-Совместимость springdoc 2.8.x со Spring Boot 3.5.x проверена по [матрице проекта](https://springdoc.org/v2/).
+При отключенном DEMO или реальном продукте оценка отсутствует: REQUEST_INFO/scoring.
+При включенном DEMO с полными проверками возможны четыре исхода, все с явными
+mode=DEMO/isSimulated и версией фиксированной оценки. Отсутствие макроконтекста —
+REQUEST_INFO/macroeconomic.key_rate_pct. Коэффициенты не обучены и не рандомизированы.
+
+Ручное решение:
+
+```json
+{"kind":"REQUEST_INFO","reason":"Уточните расхождение выручки","missingFields":["financial.revenue"]}
+```
+
+APPROVED/COUNTEROFFERED ручной командой разрешены только если текущая проверка дает
+соответствующий положительный результат; обязательные проверки нельзя обходить ролью банка.
+REQUEST_INFO требует missingFields. DECLINED требует причину. Источник сохраняется BANK_APPROVER.
+
+## Встречное предложение
+
+Decision.kind=COUNTEROFFERED; alternative_terms содержит amount/termMonths/annualRatePct.
+В journey.counteroffer: id, termsSha256, expiresAt и те же alternative_terms.
+Offer до акцепта не создается. OWNER подтверждает:
+
+```json
+{"proposalId":"UUID альтернативы","termsSha256":"64 символа из ответа","confirmed":true}
+```
+
+Условия не пересчитываются при акцепте. Другой hash —409; чужой объект —404;
+просроченная/устаревшая альтернатива —409. Создание Offer и acceptance атомарно,
+повтор возвращает тот же Offer. Далее contract/sign и банковская disburse используют
+новую сумму/ставку, а не исходные answers. Смена ключевой ставки старую альтернативу не меняет.
+Для обычного APPROVED Offer создается сразу и принимается через offers/accept.
+Срок предложения 7 дней; договор и выдача синтетические, повторная выдача —409.
+
+## Макроконтекст
+
+Создается банком, не в answers клиента. Пример **искусственных** данных:
+
+```json
+{"keyRatePct":"10.00000","validFrom":"2026-10-01T00:00:00Z","expiresAt":"2026-11-01T00:00:00Z","sourceCode":"DEMO_FIXTURE_NOT_CBR"}
+```
+
+При проверке используйте действующие даты. Это не реальная ставка ЦБ. Нет автоматического
+получения ставки; sourceCode и период задаются явно. Записи защищены от UPDATE/DELETE.
+
+## Документы и операции
+
+Документы: multipart typeCode+file, PDF/PNG/JPEG по сигнатуре, максимум 10 MB.
+CREDIT_CONTRACT зарезервирован сервером. При загрузке UNKNOWN, банковский CONTENT PASS
+фиксируется отдельной записью; роль клиента не позволяет подтвердить документ.
+Требования зависят от продукта: например P01 для LLC требует GUARANTEE_CONTRACT.
+Файлы можно скачивать только с доступом к заявке. Неизвестный/чужой versionId —404.
+
+Финансовое доказательство отдельно от answers:
+
+```json
+{
+  "periodFrom":"2025-10-01","periodTo":"2026-09-30",
+  "operations":[{"externalId":"op-1","date":"2026-01-01","amount":"24000000.00","direction":"CREDIT","category":"REVENUE"}]
+}
+```
+
+Допустимые направления CREDIT/DEBIT; категории REVENUE/REVENUE_REFUND/INTERNAL_TRANSFER/
+LOAN/EXPENSE/UNKNOWN. До 10000 операций, идентификаторы без повторов, даты внутри периода.
+Неизвестные категории или отсутствие PASS дают дозапрос. Проверенное расхождение с
+заявленной выручкой отправляет на ручное рассмотрение. GET позволяет банку видеть операции.
+
+## Ошибки
+
+application/problem+json содержит code/detail/fields без SQL, токенов или путей хранилища.
+400 — формат/тип/подтверждение; 401 — сессия; 403 — роль; 404 — чужой/нет объекта;
+409 — версия, статус, чужое назначение, hash или идемпотентность;
+413 — размер файла; 422 — запрет выбора/одобрения или отсутствие макроконтекста;
+503 — недоступный файл. Машинные причины бизнес-проверок — conditions.reasonCode и eligibility.reasons.

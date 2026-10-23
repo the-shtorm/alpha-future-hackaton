@@ -4,6 +4,7 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+      use-big-decimal-for-floats: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -12,11 +13,7 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/credit_cabinet}
     username: ${DB_USER:credit_app}
     password: ${DB_APP_PASSWORD}
-    hikari:
-      maximum-pool-size: 10
-      connection-timeout: 10000
   flyway:
-    enabled: true
     url: ${DB_URL:jdbc:postgresql://localhost:5432/credit_cabinet}
     user: ${DB_MIGRATOR_USER:credit_migrator}
     password: ${DB_MIGRATOR_PASSWORD}
@@ -25,26 +22,13 @@ spring:
     locations: classpath:db/migration
     clean-disabled: true
     validate-migration-naming: true
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        default_schema: credit
-        jdbc:
-          time_zone: UTC
-  sql:
-    init:
-      mode: never
-
 server:
-  port: 8080
   error:
     include-message: never
     include-stacktrace: never
-
 cabinet:
   documents-path: ${DOCUMENTS_PATH:./work/documents}
   demo-password: ${DEMO_PASSWORD:}
+  demo-bank-password: ${DEMO_BANK_PASSWORD:}
 
+  demo-assessment-enabled: ${DEMO_ASSESSMENT_ENABLED:false}

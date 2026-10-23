@@ -1,0 +1,8 @@
+**/target/
+**/node_modules/
+**/dist/
+**/*.sql
+docs/
+.env
+.env.*
+tools/sql-validation/pnpm-lock.yaml

@@ -1,0 +1,1 @@
+"""Credit cabinet FastAPI service."""
