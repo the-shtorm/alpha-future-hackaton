@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: credit-cabinet
+resources:
+  - job.yaml
+images:
+  - name: alpha-future-backend
+    newName: registry.example.com/credit-cabinet/backend
+    newTag: replace-with-release-tag

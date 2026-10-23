@@ -1,6 +1,10 @@
 **
 !Dockerfile
 !requirements.txt
+!requirements-test.txt
+!pyproject.toml
+!tests/
+!tests/**
 !app/
 !app/**
 **/__pycache__/

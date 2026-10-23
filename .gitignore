@@ -11,4 +11,10 @@ work/
 *.log
 __pycache__/
 *.pyc
+.venv/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+infra/kubernetes/secret.env
 

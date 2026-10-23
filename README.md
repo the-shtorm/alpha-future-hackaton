@@ -15,6 +15,8 @@
 - Отдельные роли PostgreSQL для миграций и приложения.
 - Минимальный Spring Boot bootstrap для миграций. Это пока **не REST-сервер**: контроллеры, авторизация, JPA-сущности, React и Nginx еще не реализованы.
 - Отдельный контейнер FastAPI: проверка `/health`, OpenAPI и Swagger UI. Бизнес-методы и подключение Python-сервиса к БД пока не реализованы.
+- Облачное развёртывание через Kubernetes, внешний PostgreSQL с TLS, отдельная Job миграций: [инструкция](docs/cloud-deployment.md).
+- Автоматические тесты FastAPI с измерением покрытия, Spring Boot/Testcontainers и CI в GitHub Actions.
 
 ## Запуск в Docker
 
@@ -139,13 +141,31 @@ Bootstrap использует runtime-пользователя для обыч�
 
 ## Проверки
 
+FastAPI и облачная настройка `PORT`, включая ошибочные значения и недоступный healthcheck:
+
+```powershell
+docker compose -f compose.test.yaml run --build --rm fastapi-tests
+```
+
+Команда запускает изолированный тестовый контейнер. XML/HTML-отчёты и JUnit сохраняются в `work/test-reports/fastapi/`. Порог покрытия Python-кода с учётом ветвлений — **95%**. Рабочий образ не содержит pytest и тестовых зависимостей.
+
+Без Docker, с Python 3.13, из каталога `fastapi`:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements-test.txt
+.\.venv\Scripts\python -m pytest
+```
+
 Полный интеграционный тест с контейнером PostgreSQL 17:
 
 ```powershell
-mvn -f backend/pom.xml test
+mvn -f backend/pom.xml verify
 ```
 
-Тесты применяют Flyway, загружают демо-каталог, проверяют 32 недопустимых действия, положительный маршрут и права runtime-роли. Контейнер одноразовый, тестовые заявки откатываются транзакцией. Нужен доступ процесса Java к Docker Engine.
+Тесты применяют Flyway, загружают демо-каталог, проверяют 32 недопустимых действия, положительный маршрут и права runtime-роли. `CloudBootstrapTest` запускает настоящий Spring Boot main с внешним PostgreSQL и раздельными учётными записями runtime/migrator, проверяет отсутствие демо-продуктов при облачном запуске. Контейнеры одноразовые, тестовые заявки откатываются транзакцией. Нужен доступ процесса Java к Docker Engine. Отчёт JaCoCo: `backend/target/site/jacoco/index.html`; он измеряет Java-код, а SQL-инварианты проверяются интеграционными сценариями отдельно.
+
+Workflow `.github/workflows/tests.yaml` запускает Python- и Java-тесты, сохраняет отчёты и проверяет Compose/Kubernetes-манифесты при push и pull request.
 
 Альтернативная локальная проверка того же SQL на PostgreSQL 17.5 в WebAssembly, без Docker:
 
@@ -171,6 +191,7 @@ backend/
   src/test/java/ru/alphafuture/credit/DatabaseIntegrityTest.java
   src/test/resources/db/database_invariants.sql
 docs/
+  cloud-deployment.md
   database-design.md
   database-erd.mmd
   form-storage-contract.md
@@ -180,8 +201,18 @@ fastapi/
   Dockerfile
   .dockerignore
   requirements.txt
+  requirements-test.txt
+  pyproject.toml
+  tests/
   app/__init__.py
   app/main.py
+  app/settings.py
+  app/server.py
+  app/healthcheck.py
+infra/kubernetes/
+  fastapi/
+  migrations/
+  secret.env.example
 infra/postgres/init/001_roles.sh
 tools/build_demo_catalog.py
 tools/sql-validation/
@@ -189,6 +220,8 @@ Dockerfile
 .dockerignore
 .gitattributes
 compose.yaml
+compose.test.yaml
+.github/workflows/tests.yaml
 .env.example
 ```
 
