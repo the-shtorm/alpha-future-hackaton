@@ -22,7 +22,8 @@ jobs:
         run: |
           docker build --target runtime -t fastapi-smoke ./fastapi
           docker run -d --name fastapi-smoke --read-only --tmpfs /tmp:size=64m --cap-drop ALL --security-opt no-new-privileges:true -e PORT=8080 -p 127.0.0.1:18080:8080 fastapi-smoke
-          curl --fail --retry 20 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:18080/health
+          # A published Docker port can reset connections while Uvicorn starts.
+          curl --fail --retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 45 --max-time 2 http://127.0.0.1:18080/health
           docker exec fastapi-smoke python -m app.healthcheck
       - name: Remove smoke container
         if: always()
