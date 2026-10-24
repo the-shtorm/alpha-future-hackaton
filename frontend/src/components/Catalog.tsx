@@ -90,10 +90,10 @@ export function ProductCard({
           size={48}
           block
           disabled={disabled}
+          rightAddons={<Icon name="arrow" size={18} />}
           onClick={() => onStart(product)}
         >
           {actionLabel}
-          <Icon name="arrow" size={18} />
         </Button>
         <button className="text-action" onClick={() => onDetails(product)}>
           Подробнее
@@ -213,9 +213,14 @@ export function ProductDetails({
         Проверка соответствия условиям не означает одобрение. Окончательные условия зависят от
         полной заявки. В текущем каталоге приведены демонстрационные условия.
       </p>
-      <Button view="accent" size={56} block onClick={() => onStart(product)}>
+      <Button
+        view="accent"
+        size={56}
+        block
+        rightAddons={<Icon name="arrow" size={19} />}
+        onClick={() => onStart(product)}
+      >
         Подобрать под мою задачу
-        <Icon name="arrow" size={19} />
       </Button>
     </Modal>
   );
@@ -280,9 +285,13 @@ export function CatalogPage({
             Сравните продукты или подберите их под свою задачу.
           </p>
           <div className="hero-actions">
-            <Button view="accent" size={56} onClick={() => onStart()}>
+            <Button
+              view="accent"
+              size={56}
+              rightAddons={<Icon name="arrow" size={20} />}
+              onClick={() => onStart()}
+            >
               Подобрать финансирование
-              <Icon name="arrow" size={20} />
             </Button>
             <a href="#catalog">Смотреть каталог ↓</a>
           </div>
@@ -440,9 +449,13 @@ export function CatalogPage({
           </h2>
           <p>Расскажите о бизнесе — проверим условия и покажем подходящие варианты.</p>
         </div>
-        <Button view="accent" size={56} onClick={() => onStart()}>
+        <Button
+          view="accent"
+          size={56}
+          rightAddons={<Icon name="arrow" size={20} />}
+          onClick={() => onStart()}
+        >
           Помогите с выбором
-          <Icon name="arrow" size={20} />
         </Button>
       </section>
     </>
