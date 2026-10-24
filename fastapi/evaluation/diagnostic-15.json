@@ -1,0 +1,423 @@
+{
+  "datasetVersion": "post-finetune-diagnostic-15-v1",
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "notice": "Labels fixed before their first inference. Previously inspected after fine-tuning; diagnostic replay only. Not used to fit weights or select calibration thresholds. Shared known product catalog.",
+  "scenarios": [
+    {
+      "id": "quick-new-ordinary",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "ООО обслуживает кофемашины в офисах. Требуется один платёж за склад уплотнителей и фильтров. Продажи только напрямую, регулярной сезонной волны нет."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-ordinary",
+      "intent": "ordinary"
+    },
+    {
+      "id": "quick-new-seasonal",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "База водных развлечений должна оплатить текущие запасы к открытию навигации. Зимой выручки почти нет, основная продажа приходится на летние месяцы."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-seasonal",
+      "intent": "seasonal"
+    },
+    {
+      "id": "quick-new-marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Продаём комплектующие для настольных игр на Ozon. Хотим одной партией пополнить склад для магазина на этой площадке, расширять производство не планируем."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-marketplace",
+      "intent": "marketplace"
+    },
+    {
+      "id": "quick-new-revolving",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Закупаем картон каждую неделю. Хотим брать деньги небольшими траншами, возвращать их после отгрузки коробок и снова выбирать погашенную часть того же лимита."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-revolving",
+      "intent": "revolving"
+    },
+    {
+      "id": "quick-new-nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Нужно оплатить четыре этапа одной закупочной программы. После возврата денег лимит не должен восстанавливаться: программа заканчивается после последней поставки."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-nonrevolving",
+      "intent": "nonrevolving"
+    },
+    {
+      "id": "quick-new-overdraft",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "В некоторые дни перед поступлением оплаты от заказчиков на расчётном счёте не хватает средств. Нужен подключённый к счёту резерв для автоматического покрытия таких коротких разрывов."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P05",
+        "P06"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-overdraft",
+      "intent": "overdraft"
+    },
+    {
+      "id": "quick-new-equipment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Меняем сломанный лазерный гравёр на такой же по мощности. Покупается одна машина взамен старой, новый цех не открываем и выпуск не увеличиваем."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-equipment",
+      "intent": "equipment"
+    },
+    {
+      "id": "quick-new-transport",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем изотермический фургон для развозки молочной продукции. Нужны средства на приобретение автомобиля, имущество для обеспечения готовы обсудить."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-transport",
+      "intent": "transport"
+    },
+    {
+      "id": "quick-new-property",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Выкупаем помещение ветеринарной клиники у арендодателя. Предмет покупки — само нежилое помещение; ремонт и текущие расходы сейчас не финансируем."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-property",
+      "intent": "property"
+    },
+    {
+      "id": "quick-new-investment",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Открываем второй филиал сервисной компании. Финансируем инвестиционный проект развития под залог принадлежащего нам склада; помещение покупать не требуется."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-investment",
+      "intent": "investment"
+    },
+    {
+      "id": "quick-new-contract",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Получили контракт на монтаж освещения в спортивном зале. До оплаты заказчиком нужно профинансировать закупки и работы именно по этому договору."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-contract",
+      "intent": "contract"
+    },
+    {
+      "id": "quick-new-refinance",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Хотим закрыть действующий бизнес-кредит в другом банке новым финансированием. В обеспечение предлагаем коммерческую недвижимость, новых товаров не закупаем."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-refinance",
+      "intent": "refinance"
+    },
+    {
+      "id": "quick-new-ip",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Я индивидуальный предприниматель, ремонтирую музыкальные инструменты. Нужна небольшая разовая сумма на обычные расходники для мастерской. На маркетплейсах не торгую, сезонной закупки нет."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-ip",
+      "intent": "ip"
+    },
+    {
+      "id": "quick-new-personal",
+      "profile": {
+        "business": {
+          "sector": "UNKNOWN"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Фирма не участвует в покупке. Хочу как частное лицо оплатить отпуск семьи, деньги не пойдут ни на развитие компании, ни на её хозяйственные расходы."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P13",
+        "P15"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-personal",
+      "intent": "personal"
+    },
+    {
+      "id": "quick-new-restricted",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Обслуживаем вентиляцию только у местных предприятий. Нужны обычные разовые расходники, сезонности нет и через торговые площадки ничего не продаём. В доступном списке только сезонный продукт и продукт для продавцов площадок."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "familyId": "quick-new-restricted",
+      "intent": "restricted"
+    }
+  ]
+}

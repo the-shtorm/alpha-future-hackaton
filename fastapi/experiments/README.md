@@ -2,13 +2,19 @@
 
 `e5-credit-finetune-v1.json` фиксирует идентичность локальной дообученной модели,
 контрольные суммы её файлов и архива, параметры обучения, отдельный порог и результаты
-на calibration/development/final test. Веса и окружения в Git не включены.
+на calibration/development/final test. Готовые веса теперь отслеживаются через
+Git LFS; tokenizer, конфиги и manifest входят в Git. Окружения не включены.
+
+**Передача и запуск модели: [MODEL_HANDOFF.md](../MODEL_HANDOFF.md).**
+После получения ветки выполните `git lfs install` и `git lfs pull`, затем из fastapi/
+`uv run --frozen python -m scripts.verify_model --smoke`.
 
 Сохранённая модель: `fastapi/models/e5-credit-finetune-v1/final/`.
 Переносимый архив: `fastapi/models/exports/e5-credit-finetune-v1-116acca8c002.zip`.
 Рядом лежит файл `.zip.sha256`; внутри архива — `final/` с manifest,
 `training-summary.json` и `selection-policy.json`. Это локальные файлы на машине,
-они не появятся после одного только `git clone`.
+ZIP остаётся локальной резервной копией. Рабочий каталог final/ передаётся через
+Git/Git LFS и появляется после clone/checkout с настроенным Git LFS.
 
 Проверка архива из PowerShell в `fastapi/`:
 
@@ -26,7 +32,8 @@ uv sync --project training --python 3.11
 ```
 
 Нужны заранее подготовленные базовые веса с revision из `config/model.lock.json`.
-Каждому повторному обучению нужен новый output. Оценка сохранённого кандидата:
+Каждому повторному обучению нужен новый output. Историческая оценка с повторной
+калибровкой F0.5:
 
 ```powershell
 $env:ENVIRONMENT='test'
@@ -73,10 +80,14 @@ identity/revision/manifest прекращает startup, автоматичес�
 ./.venv/Scripts/python.exe -m scripts.java_acceptance --model-variant finetuned
 ```
 
-Для этого образ должен быть собран из текущего кода. CI использует `base`, потому
-что локальные дообученные веса не опубликованы и не хранятся в Git. Для полного
-локального pytest с обоими checkpoint задаются `RUN_REAL_MODEL_TESTS=1` и
-`RUN_FINETUNED_MODEL_TESTS=1`.
+Для этого образ должен быть собран из текущего кода. CI скачивает сохранённую
+модель через LFS: `model-package` проверяет её SHA и CPU smoke, а ручной `real-java`
+проверяет обе модели и Java-цепочку. Для полного локального pytest с обоими
+checkpoint задаются `RUN_REAL_MODEL_TESTS=1` и `RUN_FINETUNED_MODEL_TESTS=1`.
+
+Текущий F1-порог проверяется без перенастройки через
+`uv run --frozen python -m scripts.evaluate_active_model`; дополнительные 15
+диагностических примеров — через `--dataset evaluation/diagnostic-15.json`.
 
 Новые подборы используют текущую модель. Ранее сохранённые результаты Java
 неизменяемы и сохраняют собственную metadata; для пересчёта нужен новый подбор.
