@@ -12,3 +12,5 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-24 — Catalog and demo login](2026-10-24-catalog-and-demo-login.md) — completed; demo login and public catalog verified in Docker/browser, 7 frontend tests passed.
 - [2026-10-24 — Form controls, alignment and validation](2026-10-24-form-controls-and-validation.md) — completed; 48 backend and 11 frontend tests passed, Docker rebuilt, form/application controls and low-revenue empty result verified in browser.
 - [2026-10-24 — Interface animations](2026-10-24-interface-animations.md) — completed; frontend build and 11 tests passed, Docker rebuilt, dialogs/dropdowns/step transitions verified in browser.
+- [2026-10-24 — Scoring readiness check](2026-10-24-scoring-readiness-check.md) — completed; source inspection confirms real scoring integration is still pending.
+- [2026-10-24 — Bank journey diagnostics](2026-10-24-bank-journey-diagnostics.md) — completed; 24 backend integration tests passed; bank UI absent and refresh loses frontend token; live login blocked by stopped local containers.
