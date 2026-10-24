@@ -8,9 +8,9 @@
     "labelsVersion": "ru-v2",
     "contractVersion": "rank-v2"
   },
-  "maxCosineDistance": 0.4941788911819458,
+  "maxCosineDistance": 0.5237781852483749,
   "labelStatus": "SYNTHETIC_PROPOSED",
-  "objective": "Maximum calibration micro F0.5; ties higher precision then smaller distance",
+  "objective": "Maximum calibration micro F1; ties higher precision then smaller distance",
   "calibrationSha256": "287315a605cef0a25618c7c0e04faf413798f2778ee59f509ce14f4b4fe991e7",
   "productsSha256": "b88ebd0ee5b0fe4b1270ead4e01d9298d7c57894930702d19fd30cfaae7c3c5b"
 }

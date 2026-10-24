@@ -19,7 +19,7 @@ def test_default_runtime_selects_saved_checkpoint_and_matching_threshold():
     assert settings.model_id == lock["modelId"] == "local/e5-credit-finetune-v1"
     assert settings.model_revision == lock["revision"]
     assert settings.model_local_path == config.ROOT / "models/e5-credit-finetune-v1/final"
-    assert settings.recommendation_max_cosine_distance == 0.4941788911819458
+    assert settings.recommendation_max_cosine_distance == 0.5237781852483749
     assert (
         Settings(
             environment="test", ml_internal_api_key="test", recommendation_max_cosine_distance=None
