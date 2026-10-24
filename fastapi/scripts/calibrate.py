@@ -142,7 +142,7 @@ def main():
     parser.add_argument("--policy-output", type=Path, default=ROOT / "config/selection-policy.json")
     args = parser.parse_args()
     catalog, calibration, holdout = load_data()
-    settings = Settings(recommendation_max_cosine_distance=None)
+    settings = Settings(model_variant="base", recommendation_max_cosine_distance=None)
     encoder = SentenceEncoder(settings)
     cal_rows = score_split(encoder, catalog, calibration["scenarios"])
     threshold, search = choose_threshold(cal_rows)

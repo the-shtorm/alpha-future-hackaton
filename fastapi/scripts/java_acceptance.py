@@ -11,6 +11,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from app.core.config import locked_model
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -29,9 +31,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "work/ml-acceptance/java-e2e.json")
     parser.add_argument("--max-cosine-distance", type=float, default=None)
+    parser.add_argument("--model-variant", choices=("base", "finetuned"), default="base")
     args = parser.parse_args()
     project = "recsys-java-" + secrets.token_hex(5)
     env = dict(os.environ)
+    env["ML_TEST_MODEL_VARIANT"] = args.model_variant
+    directory = (
+        "e5-credit-finetune-v1/final" if args.model_variant == "finetuned" else "multilingual-e5-small"
+    )
+    env["ML_TEST_MODEL_PATH"] = str(ROOT / "fastapi/models" / directory)
+    expected_model = locked_model(args.model_variant)
     env["ML_TEST_MAX_COSINE_DISTANCE"] = (
         str(args.max_cosine_distance) if args.max_cosine_distance is not None else ""
     )
@@ -134,7 +143,8 @@ def main():
                     "queryTemplateVersion",
                     "passageTemplateVersion",
                 }
-                assert imported["metadata"]["modelVersion"] == "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+                assert imported["metadata"]["model"] == expected_model["modelId"]
+                assert imported["metadata"]["modelVersion"] == expected_model["revision"]
                 for item in imported["results"]:
                     original = originals[item["productId"]]
                     assert item["pendingConditions"] == original["pendingConditions"]
@@ -193,6 +203,7 @@ def main():
         )
         report = {
             "passed": True,
+            "model": expected_model,
             "maxCosineDistance": threshold,
             "transport": "real Java HTTP gateway -> CPU E5 -> Java immutable import",
             "cases": results,

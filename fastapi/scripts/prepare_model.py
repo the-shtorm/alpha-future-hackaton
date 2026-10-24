@@ -15,6 +15,7 @@ from app.services.encoder import SentenceEncoder, verify_manifest
 def smoke(directory, revision):
     encoder = SentenceEncoder(
         Settings(
+            model_variant="base",
             environment="test",
             ml_internal_api_key="preparation",
             model_local_path=directory,

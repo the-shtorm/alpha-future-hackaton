@@ -4,10 +4,11 @@ services:
     image: ${ML_TEST_IMAGE:-alpha-future-recsys:java-contract}
     environment:
       ML_INTERNAL_API_KEY: ${ML_TEST_API_KEY:?Set test key}
-      MODEL_LOCAL_PATH: /models/multilingual-e5-small
+      MODEL_VARIANT: ${ML_TEST_MODEL_VARIANT:-base}
+      MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
     volumes:
-      - ./fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro
+      - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro
     ports: ["127.0.0.1::8000"]
     mem_limit: 2g
     read_only: true

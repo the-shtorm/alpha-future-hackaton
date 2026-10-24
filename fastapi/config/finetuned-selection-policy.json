@@ -1,0 +1,16 @@
+{
+  "policyVersion": "top_k_cosine_distance_v1",
+  "modelId": "local/e5-credit-finetune-v1",
+  "modelRevision": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+  "templates": {
+    "queryTemplateVersion": "query-v2",
+    "passageTemplateVersion": "passage-v2",
+    "labelsVersion": "ru-v2",
+    "contractVersion": "rank-v2"
+  },
+  "maxCosineDistance": 0.4941788911819458,
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "objective": "Maximum calibration micro F0.5; ties higher precision then smaller distance",
+  "calibrationSha256": "287315a605cef0a25618c7c0e04faf413798f2778ee59f509ce14f4b4fe991e7",
+  "productsSha256": "b88ebd0ee5b0fe4b1270ead4e01d9298d7c57894930702d19fd30cfaae7c3c5b"
+}

@@ -19,12 +19,30 @@ pytestmark = [
 ]
 
 
-def test_real_offline_encoder_and_http(payload, monkeypatch):
+@pytest.mark.parametrize(
+    "variant",
+    [
+        "base",
+        pytest.param(
+            "finetuned",
+            marks=pytest.mark.skipif(
+                not os.getenv("RUN_FINETUNED_MODEL_TESTS"),
+                reason="Set RUN_FINETUNED_MODEL_TESTS=1 with saved checkpoint",
+            ),
+        ),
+    ],
+)
+def test_real_offline_encoder_and_http(payload, monkeypatch, variant):
     monkeypatch.setenv("HF_HUB_OFFLINE", "1")
     settings = Settings(
+        model_variant=variant,
         environment="test",
         ml_internal_api_key="integration-key",
-        model_local_path=Path(os.getenv("MODEL_LOCAL_PATH", "models/multilingual-e5-small")),
+        model_local_path=Path(
+            os.getenv("FINETUNED_MODEL_LOCAL_PATH", "models/e5-credit-finetune-v1/final")
+            if variant == "finetuned"
+            else os.getenv("MODEL_LOCAL_PATH", "models/multilingual-e5-small")
+        ),
     )
     encoder = SentenceEncoder(settings)
     texts = ["query: Нужны деньги на оборудование.", "passage: Покупка станка для производства."]
@@ -39,6 +57,9 @@ def test_real_offline_encoder_and_http(payload, monkeypatch):
             "/api/v1/recommendations/rank", json=payload, headers={"X-Internal-API-Key": "integration-key"}
         )
         assert response.status_code == 200
+        assert response.json()["metadata"]["modelId"] == settings.model_id
+        assert response.json()["metadata"]["modelRevision"] == settings.model_revision
+        assert response.json()["metadata"]["maxCosineDistance"] == settings.recommendation_max_cosine_distance
         assert len(response.json()["results"]) == len(payload["candidates"])
         java = json.loads((ROOT / "examples/java-rank-request.json").read_text(encoding="utf-8"))
         java_response = client.post(

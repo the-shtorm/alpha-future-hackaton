@@ -194,6 +194,8 @@ def test_empty_distance_environment_is_unconfigured(monkeypatch):
 
     monkeypatch.setenv("RECOMMENDATION_MAX_COSINE_DISTANCE", "")
     assert (
-        Settings(environment="test", ml_internal_api_key="test").recommendation_max_cosine_distance
+        Settings(
+            model_variant="base", environment="test", ml_internal_api_key="test"
+        ).recommendation_max_cosine_distance
         == calibrated_distance()
     )

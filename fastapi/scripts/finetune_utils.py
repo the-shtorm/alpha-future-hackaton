@@ -10,6 +10,7 @@ from sklearn.metrics import average_precision_score
 from app.core.config import ROOT
 from app.schemas.requests import Profile
 from app.services.encoder import validate_vectors
+from app.services.encoder import verify_finetuned_manifest as verify_finetuned_manifest
 from app.services.text_builder import build_passage, build_query
 from scripts.calibrate import metrics, score_split
 
@@ -171,26 +172,3 @@ def write_model_manifest(directory, metadata):
         json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return data
-
-
-def verify_finetuned_manifest(directory):
-    manifest = json.loads((directory / "finetune-manifest.json").read_text(encoding="utf-8"))
-    expected = manifest["checksums"]
-    actual = {
-        p.relative_to(directory).as_posix()
-        for p in directory.rglob("*")
-        if p.is_file() and p.name != "finetune-manifest.json"
-    }
-    if actual != set(expected):
-        raise ValueError("Fine-tuned model file set differs from manifest")
-    for name, checksum in expected.items():
-        path = (directory / name).resolve()
-        if not path.is_relative_to(directory.resolve()) or path.suffix in (".bin", ".pkl", ".py", ".pickle"):
-            raise ValueError("Unsafe fine-tuned model artifact")
-        with path.open("rb") as source:
-            if hashlib.file_digest(source, "sha256").hexdigest() != checksum:
-                raise ValueError("Fine-tuned model checksum mismatch")
-    artifact_hash = hashlib.sha256(json.dumps(expected, sort_keys=True).encode()).hexdigest()
-    if artifact_hash != manifest["artifactSha256"]:
-        raise ValueError("Fine-tuned model identity mismatch")
-    return manifest

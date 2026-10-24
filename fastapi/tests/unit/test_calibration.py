@@ -65,7 +65,9 @@ def test_selection_policy_is_pinned_and_overridable():
     assert policy["calibrationSha256"] == digest(config.ROOT / "evaluation/calibration.json")
     assert policy["productsSha256"] == digest(config.ROOT / "evaluation/backend-products.json")
     assert (
-        Settings(environment="test", ml_internal_api_key="x").recommendation_max_cosine_distance
+        Settings(
+            model_variant="base", environment="test", ml_internal_api_key="x"
+        ).recommendation_max_cosine_distance
         == policy["maxCosineDistance"]
     )
     assert (

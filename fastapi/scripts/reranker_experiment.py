@@ -270,7 +270,7 @@ def main():
         )
         print("Scoring E5 calibration/development", flush=True)
         start = time.perf_counter()
-        encoder = SentenceEncoder(Settings(recommendation_max_cosine_distance=None))
+        encoder = SentenceEncoder(Settings(model_variant="base", recommendation_max_cosine_distance=None))
         e5_load = time.perf_counter() - start
         scored = {
             "e5": {

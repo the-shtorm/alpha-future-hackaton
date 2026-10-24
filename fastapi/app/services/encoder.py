@@ -7,7 +7,7 @@ from typing import Protocol
 
 import numpy as np
 
-from app.core.config import MODEL_ID, ROOT, Settings
+from app.core.config import MODEL_ID, Settings, locked_model
 
 
 class Encoder(Protocol):
@@ -52,8 +52,32 @@ def verify_manifest(directory: Path, revision: str = "") -> dict:
         path = (directory / name).resolve()
         if not path.is_relative_to(directory.resolve()) or path.suffix in (".bin", ".pkl", ".pickle", ".py"):
             raise ValueError("Unsafe model artifact")
-        if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
-            raise ValueError("Model checksum mismatch")
+        with path.open("rb") as source:
+            if hashlib.file_digest(source, "sha256").hexdigest() != expected:
+                raise ValueError("Model checksum mismatch")
+    return manifest
+
+
+def verify_finetuned_manifest(directory: Path, revision: str = "") -> dict:
+    manifest = json.loads((directory / "finetune-manifest.json").read_text(encoding="utf-8"))
+    expected = manifest["checksums"]
+    actual = {
+        p.relative_to(directory).as_posix()
+        for p in directory.rglob("*")
+        if p.is_file() and p.name != "finetune-manifest.json"
+    }
+    if actual != set(expected):
+        raise ValueError("Fine-tuned model file set differs from manifest")
+    for name, checksum in expected.items():
+        path = (directory / name).resolve()
+        if not path.is_relative_to(directory.resolve()) or path.suffix in (".bin", ".pkl", ".py", ".pickle"):
+            raise ValueError("Unsafe fine-tuned model artifact")
+        with path.open("rb") as source:
+            if hashlib.file_digest(source, "sha256").hexdigest() != checksum:
+                raise ValueError("Fine-tuned model checksum mismatch")
+    artifact_hash = hashlib.sha256(json.dumps(expected, sort_keys=True).encode()).hexdigest()
+    if artifact_hash != manifest["artifactSha256"] or (revision and artifact_hash != revision):
+        raise ValueError("Fine-tuned model identity mismatch")
     return manifest
 
 
@@ -62,12 +86,22 @@ class SentenceEncoder:
     dimension = 384
 
     def __init__(self, settings: Settings):
-        revision = settings.model_revision
-        lock = ROOT / "config/model.lock.json"
-        if not revision and lock.exists():
-            revision = json.loads(lock.read_text(encoding="utf-8"))["revision"]
-        manifest = verify_manifest(settings.model_local_path, revision)
-        self.revision = manifest["revision"]
+        if settings.model_variant == "finetuned":
+            manifest = verify_finetuned_manifest(settings.model_local_path, settings.model_revision)
+            lock = locked_model("finetuned")
+            if (
+                manifest["localModelId"] != settings.model_id
+                or manifest["baseModelId"] != lock["baseModelId"]
+                or manifest["baseRevision"] != lock["baseRevision"]
+                or manifest["dimension"] != self.dimension
+                or manifest["maxSeqLength"] != 512
+            ):
+                raise ValueError("Fine-tuned model metadata differs from runtime lock")
+            self.revision = manifest["artifactSha256"]
+        else:
+            manifest = verify_manifest(settings.model_local_path, settings.model_revision)
+            self.revision = manifest["revision"]
+        self.model_id = settings.model_id
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         os.environ["HF_HUB_OFFLINE"] = "1"
         os.environ["TRANSFORMERS_OFFLINE"] = "1"

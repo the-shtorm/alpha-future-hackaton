@@ -31,7 +31,7 @@ def main():
     try:
         start = time.perf_counter()
         catalog, calibration, _ = load_data()
-        encoder = SentenceEncoder(Settings(recommendation_max_cosine_distance=None))
+        encoder = SentenceEncoder(Settings(model_variant="base", recommendation_max_cosine_distance=None))
         reranker = LocalReranker()
         load_seconds = time.perf_counter() - start
         result = benchmark(encoder, reranker, catalog, calibration["scenarios"][0])

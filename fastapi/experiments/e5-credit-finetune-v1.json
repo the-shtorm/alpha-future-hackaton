@@ -1,7 +1,7 @@
 {
-  "status": "EXPERIMENT_ONLY",
+  "status": "LOCAL_RUNTIME_ACTIVE",
   "labelStatus": "SYNTHETIC_PROPOSED",
-  "runtimeModelChanged": false,
+  "runtimeModelChanged": true,
   "localModelPath": "models/e5-credit-finetune-v1/final",
   "archive": {
     "path": "models/exports/e5-credit-finetune-v1-116acca8c002.zip",
@@ -257,5 +257,7 @@
     },
     "transport": "ranker/model only, no HTTP or Java"
   },
-  "limitations": "Synthetic proposed labels, known 15-product catalog; no claim of unseen-product or real-customer quality. Expert review required."
+  "limitations": "Synthetic proposed labels, known 15-product catalog; no claim of unseen-product or real-customer quality. Expert review required.",
+  "runtimeModelLock": "config/finetuned-model.lock.json",
+  "runtimeSelectionPolicy": "config/finetuned-selection-policy.json"
 }

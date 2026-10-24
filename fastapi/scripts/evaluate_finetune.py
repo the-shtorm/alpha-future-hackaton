@@ -34,7 +34,7 @@ def main():
     catalog, calibration, _ = load_data()
     development = read_scenarios("holdout.json") + read_scenarios("reranker-test.json")
     print("CPU baseline: calibration and development", flush=True)
-    baseline = SentenceEncoder(Settings(recommendation_max_cosine_distance=None))
+    baseline = SentenceEncoder(Settings(model_variant="base", recommendation_max_cosine_distance=None))
     scores = {
         "baseline": {
             "calibration": score_split(baseline, catalog, calibration["scenarios"]),
@@ -76,7 +76,7 @@ def main():
     scores["fineTuned"]["finalTest"] = score_model(model, catalog, final)
     del model
     gc.collect()
-    baseline = SentenceEncoder(Settings(recommendation_max_cosine_distance=None))
+    baseline = SentenceEncoder(Settings(model_variant="base", recommendation_max_cosine_distance=None))
     scores["baseline"]["finalTest"] = score_split(baseline, catalog, final)
     assert digest(frozen) == frozen_sha
     report = {
