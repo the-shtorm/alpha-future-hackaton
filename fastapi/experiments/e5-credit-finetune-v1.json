@@ -1,0 +1,261 @@
+{
+  "status": "EXPERIMENT_ONLY",
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "runtimeModelChanged": false,
+  "localModelPath": "models/e5-credit-finetune-v1/final",
+  "archive": {
+    "path": "models/exports/e5-credit-finetune-v1-116acca8c002.zip",
+    "sha256": "7d4a7d1726c98af0d61edad92149370f72946cf397897dbdc6c75cb964f746db",
+    "sizeBytes": 487771755
+  },
+  "manifest": {
+    "localModelId": "local/e5-credit-finetune-v1",
+    "baseModelId": "intfloat/multilingual-e5-small",
+    "baseRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "labelStatus": "SYNTHETIC_PROPOSED",
+    "trainDatasetSha256": "2a606f94d05d42959b2645301ff1e7c5273b196f36ddc34e8abde19de0836836",
+    "trainingPairsSha256": "edb97f1364faf2089c387508b3e8b1748ce94a67240724cc72e1242439eff295",
+    "maxSeqLength": 512,
+    "dimension": 384,
+    "trainSteps": 1328,
+    "seed": 20261024,
+    "artifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "checksums": {
+      "1_Pooling/config.json": "bb80272f7adad76ce93073c25e18113ee66be1e91f60bcdd72aa41d05b28247e",
+      "config.json": "d90c8a402077517604c644f8c289543be33f61c8a714c30a9c7cf8784aed6517",
+      "config_sentence_transformers.json": "342ad93217e91dca54fea8f56d37b4007ac0a7d3928e2e0f788eb116c17522f0",
+      "model.safetensors": "502f9765a9cebed997794d64dcdc905721d0ca7b0c47a66262f227ea42a63b4c",
+      "modules.json": "5286260f53f0f5d318eb02f1565fd30f7ec7c6d305f41ad29e2bb3ec974046a6",
+      "README.md": "6ffbf3aff6777e78bca53f968a12b43396aba82c4db0670f7e10f88c7e8d227a",
+      "sentence_bert_config.json": "5fee3fcdc4a727fad422f0fed0c867b0921eefa9051de221521956ed42eb4c19",
+      "tokenizer.json": "fbcc3c7348739d765de2c86fce14c9c5e2dd47696dbb3cfeed294edfc712d8f0",
+      "tokenizer_config.json": "7f8e591fccaa155b910473a53702be26990095e8904323a4241f7750ecc0273e"
+    }
+  },
+  "training": {
+    "verdict": "WIN",
+    "baselineDevAP": 0.5600223850613547,
+    "fineTunedDevAP": 0.9776664912948277,
+    "deltaDevAP": 0.41764410623347303,
+    "weightDeltaL2": 0.12296349555253983,
+    "trainProfiles": 1500,
+    "trainPairs": 10610,
+    "positivePairs": 2060,
+    "steps": 1328,
+    "bestCheckpoint": "checkpoints/checkpoint-1328",
+    "bestDevAP": 0.9776664912948277,
+    "durationSeconds": 315.46122260000084,
+    "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "peakAllocatedVramBytes": 2389796864,
+    "artifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "versions": {
+      "torch": "2.11.0+cu128",
+      "transformers": "5.20.2",
+      "sentence-transformers": "5.7.0",
+      "datasets": "5.1.0",
+      "accelerate": "1.15.0"
+    },
+    "trainingArguments": {
+      "loss": "OnlineContrastiveLoss",
+      "margin": 0.5,
+      "learningRate": 2e-05,
+      "epochs": 2,
+      "batchSize": 16,
+      "bf16": true
+    },
+    "notice": "Local experiment. Calibration/final not used for optimization/checkpoint selection."
+  },
+  "selection": {
+    "objective": "Maximum calibration micro F0.5; ties higher precision then smaller distance",
+    "thresholds": {
+      "baseline": 0.1607581377029419,
+      "fineTuned": 0.4941788911819458
+    },
+    "fineTunedArtifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "inputSha256": {
+      "finetune-train.json": "2a606f94d05d42959b2645301ff1e7c5273b196f36ddc34e8abde19de0836836",
+      "calibration.json": "287315a605cef0a25618c7c0e04faf413798f2778ee59f509ce14f4b4fe991e7",
+      "holdout.json": "24047f10d28a88fede4d1bbbc97436ee1c285d190c81d4fd84a34f41ce318fb8",
+      "reranker-test.json": "dd47394557139c1eb7c2c79cb6587889d5d2aa708b0f6026f565a569301958f0",
+      "finetune-test.json": "5a2b8970eac390e1f13a65ea5ce1aa5251a986b32aa3462ae9d1376a73c4f80b"
+    },
+    "labelStatus": "SYNTHETIC_PROPOSED",
+    "notice": "Independent per-model thresholds; final data do not select weights or thresholds. Full ranked candidate lists preserved."
+  },
+  "metrics": {
+    "baseline": {
+      "calibration": {
+        "selection": {
+          "precision": 0.5530085959885387,
+          "recall": 0.7658730158730159,
+          "f1": 0.6422628951747088,
+          "tp": 193,
+          "fp": 156,
+          "fn": 59,
+          "scenarioCount": 180,
+          "abstentionCount": 0,
+          "recommendationCountHistogram": {
+            "0": 0,
+            "1": 68,
+            "2": 55,
+            "3": 57
+          },
+          "noRelevantCount": 24,
+          "noRelevantAbstentionCount": 0
+        },
+        "ranking": {
+          "average_precision": 0.5469601889390119,
+          "ndcg_at_3": 0.8206679058392172,
+          "mrr": 0.8573717948717948
+        }
+      },
+      "development": {
+        "selection": {
+          "precision": 0.5649717514124294,
+          "recall": 0.7843137254901961,
+          "f1": 0.6568144499178982,
+          "tp": 200,
+          "fp": 154,
+          "fn": 55,
+          "scenarioCount": 180,
+          "abstentionCount": 0,
+          "recommendationCountHistogram": {
+            "0": 0,
+            "1": 71,
+            "2": 44,
+            "3": 65
+          },
+          "noRelevantCount": 24,
+          "noRelevantAbstentionCount": 0
+        },
+        "ranking": {
+          "average_precision": 0.559705821292626,
+          "ndcg_at_3": 0.8329200680694351,
+          "mrr": 0.860042735042735
+        }
+      },
+      "finalTest": {
+        "selection": {
+          "precision": 0.5649717514124294,
+          "recall": 0.7751937984496124,
+          "f1": 0.6535947712418301,
+          "tp": 100,
+          "fp": 77,
+          "fn": 29,
+          "scenarioCount": 90,
+          "abstentionCount": 0,
+          "recommendationCountHistogram": {
+            "0": 0,
+            "1": 34,
+            "2": 25,
+            "3": 31
+          },
+          "noRelevantCount": 12,
+          "noRelevantAbstentionCount": 0
+        },
+        "ranking": {
+          "average_precision": 0.5216870797209565,
+          "ndcg_at_3": 0.8232972297648314,
+          "mrr": 0.8632478632478632
+        }
+      }
+    },
+    "fineTuned": {
+      "calibration": {
+        "selection": {
+          "precision": 0.9557522123893806,
+          "recall": 0.8571428571428571,
+          "f1": 0.9037656903765691,
+          "tp": 216,
+          "fp": 10,
+          "fn": 36,
+          "scenarioCount": 180,
+          "abstentionCount": 34,
+          "recommendationCountHistogram": {
+            "0": 34,
+            "1": 89,
+            "2": 34,
+            "3": 23
+          },
+          "noRelevantCount": 24,
+          "noRelevantAbstentionCount": 22
+        },
+        "ranking": {
+          "average_precision": 0.9739564250427725,
+          "ndcg_at_3": 0.9835064850290853,
+          "mrr": 0.9839743589743589
+        }
+      },
+      "development": {
+        "selection": {
+          "precision": 0.9678899082568807,
+          "recall": 0.8274509803921568,
+          "f1": 0.8921775898520085,
+          "tp": 211,
+          "fp": 7,
+          "fn": 44,
+          "scenarioCount": 180,
+          "abstentionCount": 39,
+          "recommendationCountHistogram": {
+            "0": 39,
+            "1": 86,
+            "2": 33,
+            "3": 22
+          },
+          "noRelevantCount": 24,
+          "noRelevantAbstentionCount": 23
+        },
+        "ranking": {
+          "average_precision": 0.9777146427750363,
+          "ndcg_at_3": 0.9850105835099277,
+          "mrr": 0.9877136752136753
+        }
+      },
+      "finalTest": {
+        "selection": {
+          "precision": 0.96,
+          "recall": 0.9302325581395349,
+          "f1": 0.9448818897637795,
+          "tp": 120,
+          "fp": 5,
+          "fn": 9,
+          "scenarioCount": 90,
+          "abstentionCount": 16,
+          "recommendationCountHistogram": {
+            "0": 16,
+            "1": 41,
+            "2": 15,
+            "3": 18
+          },
+          "noRelevantCount": 12,
+          "noRelevantAbstentionCount": 12
+        },
+        "ranking": {
+          "average_precision": 0.9906697391270392,
+          "ndcg_at_3": 0.9781100100143609,
+          "mrr": 0.9786324786324787
+        }
+      }
+    }
+  },
+  "cpuDockerBenchmark": {
+    "passed": true,
+    "modelId": "local/e5-credit-finetune-v1",
+    "artifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "device": "cpu",
+    "dimension": 384,
+    "candidateCount": 15,
+    "loadSeconds": 14.559549435998633,
+    "coldRankMs": 625.7422569997289,
+    "warmP50Ms": 44.07309650105162,
+    "warmP95Ms": 65.73551885094275,
+    "currentRssBytes": 948539392,
+    "cgroupMemory": {
+      "memory.current": "1147482112",
+      "memory.peak": "1147482112",
+      "memory.max": "2147483648"
+    },
+    "transport": "ranker/model only, no HTTP or Java"
+  },
+  "limitations": "Synthetic proposed labels, known 15-product catalog; no claim of unseen-product or real-customer quality. Expert review required."
+}

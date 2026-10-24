@@ -27,6 +27,7 @@ def evaluate(ranker, products, scenarios):
         result = ranker.rank(request)
         relevant = set(scenario["proposedRelevantProductIds"]) & set(ids)
         top = [p.productId for p in result.results[:3]]
+        recommended = [p.productId for p in result.results if p.isRecommended]
         rows.append(
             {
                 "id": scenario["id"],
@@ -34,6 +35,9 @@ def evaluate(ranker, products, scenarios):
                 "top3": top,
                 "scores": [p.similarityScore for p in result.results[:3]],
                 "hitAt3": bool(relevant & set(top)) if relevant else None,
+                "recommendedProductIds": recommended,
+                "recommendedCount": len(recommended),
+                "recommendedHit": bool(relevant & set(recommended)) if relevant else None,
             }
         )
     eligible = [r for r in rows if r["hitAt3"] is not None]
@@ -42,6 +46,7 @@ def evaluate(ranker, products, scenarios):
         "hitRateAt3": sum(r["hitAt3"] for r in eligible) / len(eligible) if eligible else None,
         "evaluatedCount": len(eligible),
         "noRelevantCandidateCount": len(rows) - len(eligible),
+        "noRecommendationCount": sum(r["recommendedCount"] == 0 for r in rows),
         "metadata": ranker.metadata().model_dump(),
         "scenarios": rows,
     }
@@ -58,7 +63,11 @@ def main():
         products = products["products"]
     scenarios = json.loads(args.scenarios.read_text(encoding="utf-8"))["scenarios"]
     settings = Settings()
-    report = evaluate(Ranker(SentenceEncoder(settings)), products, scenarios)
+    report = evaluate(
+        Ranker(SentenceEncoder(settings), max_cosine_distance=settings.recommendation_max_cosine_distance),
+        products,
+        scenarios,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in report.items() if k not in ("scenarios", "metadata")}))

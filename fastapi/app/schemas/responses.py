@@ -15,7 +15,8 @@ class Metadata(DTO):
     contractVersion: Literal["rank-v2"] = VERSIONS["contractVersion"]
     rankingMode: Literal["semantic_only"] = "semantic_only"
     scoreType: Literal["cosine_similarity"] = "cosine_similarity"
-    selectionPolicy: Literal["top_k_relative_no_quality_threshold"] = "top_k_relative_no_quality_threshold"
+    selectionPolicy: Literal["top_k_cosine_distance_v1"] = "top_k_cosine_distance_v1"
+    maxCosineDistance: float | None = Field(default=None, ge=0, le=2, allow_inf_nan=False)
     warnings: list[Annotated[str, Field(min_length=1, max_length=300)]] = Field(default_factory=list)
 
 
@@ -59,3 +60,5 @@ class ModelInfo(DTO):
     passageTemplateVersion: Literal["passage-v2"]
     labelsVersion: Literal["ru-v2"]
     contractVersion: Literal["rank-v2"]
+    selectionPolicy: Literal["top_k_cosine_distance_v1"] = "top_k_cosine_distance_v1"
+    maxCosineDistance: float | None = Field(default=None, ge=0, le=2, allow_inf_nan=False)

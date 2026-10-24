@@ -86,7 +86,7 @@
           "recommendations"
         ],
         "summary": "Rank",
-        "description": "Rank all Java-filtered candidates by cosine; mark relative top-K without a quality threshold.",
+        "description": "Return all candidates ranked by cosine; recommend at most topK within the configured distance.",
         "operationId": "rank_api_v1_recommendations_rank_post",
         "requestBody": {
           "content": {
@@ -907,7 +907,8 @@
             "type": "integer",
             "maximum": 3.0,
             "minimum": 1.0,
-            "title": "Topk"
+            "title": "Topk",
+            "description": "Maximum recommendations, not result count."
           },
           "semanticsVersion": {
             "type": "string",
@@ -1120,9 +1121,22 @@
           },
           "selectionPolicy": {
             "type": "string",
-            "const": "top_k_relative_no_quality_threshold",
+            "const": "top_k_cosine_distance_v1",
             "title": "Selectionpolicy",
-            "default": "top_k_relative_no_quality_threshold"
+            "default": "top_k_cosine_distance_v1"
+          },
+          "maxCosineDistance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxcosinedistance"
           },
           "warnings": {
             "items": {
@@ -1186,6 +1200,25 @@
             "type": "string",
             "const": "rank-v2",
             "title": "Contractversion"
+          },
+          "selectionPolicy": {
+            "type": "string",
+            "const": "top_k_cosine_distance_v1",
+            "title": "Selectionpolicy",
+            "default": "top_k_cosine_distance_v1"
+          },
+          "maxCosineDistance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxcosinedistance"
           }
         },
         "additionalProperties": false,
@@ -1479,6 +1512,7 @@
             "maximum": 3.0,
             "minimum": 1.0,
             "title": "Topk",
+            "description": "Maximum recommendations; all candidates are ranked.",
             "default": 3
           }
         },

@@ -12,7 +12,7 @@ router = APIRouter(
 
 @router.post("/rank", responses=ERROR_RESPONSES)
 async def rank(body: RankRequest, request: Request) -> RankResponse:
-    """Rank all Java-filtered candidates by cosine; mark relative top-K without a quality threshold."""
+    """Return all candidates ranked by cosine; recommend at most topK within the configured distance."""
     request.state.request_id = body.requestId
     if not request.app.state.ready:
         raise ServiceError(503, "MODEL_NOT_READY", "Model is not ready")

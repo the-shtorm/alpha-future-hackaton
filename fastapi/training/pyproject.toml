@@ -1,0 +1,23 @@
+[project]
+name = "credit-recsys-training"
+version = "0.1.0"
+description = "Isolated Windows CUDA environment; production remains CPU-only"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "sentence-transformers[train]==5.7.0",
+  "transformers==5.20.2",
+  "torch==2.11.0",
+  "pydantic-settings>=2.6,<3",
+  "psutil>=6,<8",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+
+[tool.uv]
+environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]

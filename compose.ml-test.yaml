@@ -5,6 +5,7 @@ services:
     environment:
       ML_INTERNAL_API_KEY: ${ML_TEST_API_KEY:?Set test key}
       MODEL_LOCAL_PATH: /models/multilingual-e5-small
+      RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
     volumes:
       - ./fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro
     ports: ["127.0.0.1::8000"]

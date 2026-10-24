@@ -1,0 +1,312 @@
+{
+  "notice": "Synthetic catalog exported from actual Java ProductSemantics, not real bank offers. Financial fields excluded.",
+  "semanticsVersion": "synthetic-semantics-1",
+  "products": [
+    {
+      "id": "cfa0b812-5c06-548d-8326-92afa31fd6ca",
+      "code": "P01",
+      "name": "Экспресс для бизнеса",
+      "type": "TERM_LOAN",
+      "version": "fbf28b87-af37-5409-ac27-04b3130277f4",
+      "purposes": [
+        "WORKING_CAPITAL",
+        "DEVELOPMENT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Разовое финансирование текущих задач и развития бизнеса",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "e6bcc340-954b-5acb-890d-1cd0e2d5c427",
+      "code": "P02",
+      "name": "Оборотный кредит",
+      "type": "TERM_LOAN",
+      "version": "c9db7c7c-d562-58f8-aeeb-05625bac3eaf",
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Разовое пополнение оборотных средств",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "b1543af7-57f9-5cf8-8f8e-e381c12fbefa",
+      "code": "P03",
+      "name": "Возобновляемая линия",
+      "type": "REVOLVING_CREDIT_LINE",
+      "version": "cb13df5d-7059-5887-bad6-5634b671746d",
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "IN_PARTS"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Повторяющееся использование и восстановление доступного лимита",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "2c4efb7d-72c4-5aed-83ee-73a27ac46ca8",
+      "code": "P04",
+      "name": "Линия под закупки",
+      "type": "NON_REVOLVING_CREDIT_LINE",
+      "version": "8f9f0bfc-7ffb-5ad8-b3c8-fef4fcb43c4a",
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "IN_PARTS"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Закупки с постепенным использованием невозобновляемого лимита",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "74145282-3d03-51c7-b82e-67567cb3d3e4",
+      "code": "P05",
+      "name": "Овердрафт",
+      "type": "OVERDRAFT",
+      "version": "04875724-1d2a-540f-9911-4a3725e317f8",
+      "purposes": [
+        "CASH_GAP"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ACCOUNT_RESERVE"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Покрытие нехватки средств на расчётном счёте",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "c466c9e1-738a-55d5-96fc-155e0da49a29",
+      "code": "P06",
+      "name": "Сезонный оборот",
+      "type": "TERM_LOAN",
+      "version": "88fb227f-0b8b-57c3-a43e-3158bc557b6d",
+      "purposes": [
+        "WORKING_CAPITAL",
+        "CASH_GAP"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Финансирование сезонной потребности в оборотных средствах",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "25523d32-6c32-5dc0-bc48-08f42f0fa284",
+      "code": "P07",
+      "name": "Оборудование",
+      "type": "TERM_LOAN",
+      "version": "5b776d78-56aa-575a-9240-f7469aac0ed0",
+      "purposes": [
+        "EQUIPMENT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Покупка оборудования с обеспечением",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "REQUIRED"
+    },
+    {
+      "id": "9b7ad13f-4748-52eb-8de5-47619e082447",
+      "code": "P08",
+      "name": "Коммерческий транспорт",
+      "type": "TERM_LOAN",
+      "version": "4d3e058d-7f4e-5a32-b072-761e6c8d6d17",
+      "purposes": [
+        "TRANSPORT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Покупка коммерческого транспорта с обеспечением",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "REQUIRED"
+    },
+    {
+      "id": "a4225246-4449-5236-badd-892a6e6361b4",
+      "code": "P09",
+      "name": "Коммерческое помещение",
+      "type": "TERM_LOAN",
+      "version": "89689003-db2c-5b50-a402-de5ce809c378",
+      "purposes": [
+        "COMMERCIAL_PROPERTY"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Покупка коммерческого помещения с обеспечением",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "REQUIRED"
+    },
+    {
+      "id": "8c846a4e-beef-522f-b0c7-f52b01d2c070",
+      "code": "P10",
+      "name": "Инвестиции под недвижимость",
+      "type": "TERM_LOAN",
+      "version": "69f17a88-3a3f-7162-86ce-3e6b2f1025d4",
+      "purposes": [
+        "DEVELOPMENT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Инвестиции и развитие под залог недвижимости",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "REQUIRED"
+    },
+    {
+      "id": "06493a48-f450-588e-b3ef-68bcfb2ebcbe",
+      "code": "P11",
+      "name": "Исполнение контракта",
+      "type": "TERM_LOAN",
+      "version": "5d429704-32ee-55e9-9c9f-c20a4ac14598",
+      "purposes": [
+        "CONTRACT_EXECUTION"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Финансирование исполнения контракта",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "9c8b3e38-37c3-5b53-80ce-769fba678be8",
+      "code": "P12",
+      "name": "Рефинансирование с залогом",
+      "type": "TERM_LOAN",
+      "version": "880da7bc-276f-52c7-b446-297a22aa68e6",
+      "purposes": [
+        "REFINANCING"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Рефинансирование под залог недвижимости",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "REQUIRED"
+    },
+    {
+      "id": "73ccc15b-4753-5647-8450-0e8d2899458c",
+      "code": "P13",
+      "name": "Небольшой кредит ИП",
+      "type": "TERM_LOAN",
+      "version": "eba3ffca-7e9b-52a8-a9ca-f67c8f338f26",
+      "purposes": [
+        "WORKING_CAPITAL",
+        "DEVELOPMENT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": null,
+      "targetSectors": [],
+      "specialization": null,
+      "targetScenario": "Небольшое разовое финансирование индивидуального предпринимателя",
+      "guarantorRequirement": "NONE",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "b642fa40-b30c-53e1-8a4a-590dbe2d4f29",
+      "code": "P14",
+      "name": "Финансирование продавца",
+      "type": "TERM_LOAN",
+      "version": "8533b753-f069-5ae4-ac5c-698c5c8f7e9f",
+      "purposes": [
+        "WORKING_CAPITAL"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": "Для ООО требуется поручительство контролирующего владельца; для ИП в DEMO не требуется",
+      "targetSectors": [],
+      "specialization": "Продавцы маркетплейсов",
+      "targetScenario": "Пополнение оборотных средств продавца маркетплейса",
+      "guarantorRequirement": "CONDITIONAL",
+      "collateralRequirement": "NONE"
+    },
+    {
+      "id": "80a9ea18-f9b1-58d5-831d-e8ea0df5a1f1",
+      "code": "P15",
+      "name": "Расширение производства",
+      "type": "TERM_LOAN",
+      "version": "10e98fcc-c76d-a92a-fa05-bc9b81a0068b",
+      "purposes": [
+        "DEVELOPMENT",
+        "EQUIPMENT"
+      ],
+      "synthetic": true,
+      "usageModes": [
+        "ONE_TIME"
+      ],
+      "securityNote": null,
+      "targetSectors": [
+        "MANUFACTURING"
+      ],
+      "specialization": null,
+      "targetScenario": "Расширение производства и покупка оборудования",
+      "guarantorRequirement": "REQUIRED",
+      "collateralRequirement": "REQUIRED"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ from app.services.ranker import Ranker
 
 
 def test_tie_topk_current_metadata_and_cache(payload, encoder):
-    ranker = Ranker(encoder)
+    ranker = Ranker(encoder, max_cosine_distance=0)
     request = RankRequest.model_validate(payload)
     request.topK = 1
     response = ranker.rank(request)
@@ -100,3 +100,63 @@ def test_invalid_encoder_vectors(kind):
         vectors[0, 0] = np.nan
     with pytest.raises(ValueError, match="invalid"):
         validate_vectors(vectors, 1)
+
+
+def set_cosines(payload, encoder, scores):
+    original = payload["candidates"][0]
+    payload["candidates"] = []
+    for i in range(len(scores)):
+        candidate = copy.deepcopy(original)
+        candidate["product"]["id"] = f"controlled-{i}"
+        candidate["product"]["targetScenario"] = f"Controlled semantic fixture {i}"
+        payload["candidates"].append(candidate)
+
+    def encode(texts):
+        values = np.zeros((len(texts), 384), dtype=np.float32)
+        for i, text in enumerate(texts):
+            score = 1 if text.startswith("query:") else scores[i]
+            values[i, 0] = score
+            values[i, 1] = np.sqrt(max(0, 1 - score**2))
+        return values
+
+    encoder.encode = encode
+
+
+@pytest.mark.parametrize(
+    "distance,count",
+    [(None, 0), (0.05, 0), (0.15, 1), (0.25, 2), (0.35, 3), (2, 3)],
+)
+def test_distance_selects_zero_to_three_but_returns_every_candidate(payload, encoder, distance, count):
+    set_cosines(payload, encoder, [0.9, 0.8, 0.7, 0.6])
+    response = Ranker(encoder, max_cosine_distance=distance).rank(RankRequest.model_validate(payload))
+    assert [p.productId for p in response.results] == [f"controlled-{i}" for i in range(4)]
+    assert [p.rank for p in response.results] == [1, 2, 3, 4]
+    assert [p.similarityScore for p in response.results] == [0.9, 0.8, 0.7, 0.6]
+    assert [p.isRecommended for p in response.results] == [i < count for i in range(4)]
+    assert response.metadata.maxCosineDistance == distance
+    assert response.metadata.selectionPolicy == "top_k_cosine_distance_v1"
+    assert bool(response.metadata.warnings) == (distance is None)
+
+
+def test_distance_boundary_is_inclusive_and_decided_before_rounding(payload, encoder):
+    set_cosines(payload, encoder, [0.4999999, 0.5, 0.5000001])
+    response = Ranker(encoder, max_cosine_distance=0.5).rank(RankRequest.model_validate(payload))
+    assert [p.productId for p in response.results] == ["controlled-2", "controlled-1", "controlled-0"]
+    assert [p.similarityScore for p in response.results] == [0.5, 0.5, 0.5]
+    assert [p.isRecommended for p in response.results] == [True, True, False]
+
+
+def test_topk_is_upper_limit_and_negative_cosine_is_not_automatically_recommended(payload, encoder):
+    set_cosines(payload, encoder, [0.9, 0.8, -0.7])
+    request = RankRequest.model_validate(payload)
+    request.topK = 1
+    response = Ranker(encoder, max_cosine_distance=2).rank(request)
+    assert len(response.results) == 3 and sum(p.isRecommended for p in response.results) == 1
+    response = Ranker(encoder, max_cosine_distance=1).rank(request.model_copy(update={"topK": 3}))
+    assert [p.isRecommended for p in response.results] == [True, True, False]
+
+
+def test_zero_distance_accepts_numerical_drift_above_unit_cosine(payload, encoder):
+    set_cosines(payload, encoder, [1.0000001])
+    response = Ranker(encoder, max_cosine_distance=0).rank(RankRequest.model_validate(payload))
+    assert response.results[0].similarityScore == 1 and response.results[0].isRecommended

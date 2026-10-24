@@ -132,6 +132,7 @@ class RankingExchange {
         var seen = new HashSet<UUID>();
         BigDecimal previous = BigDecimal.ONE;
         int rank = 1;
+        boolean recommendationsEnded = false;
         for (var item : sorted) {
             var candidate = byVersion.get(item.productVersion());
             if (candidate == null
@@ -141,10 +142,11 @@ class RankingExchange {
                     || item.similarityScore().compareTo(previous) > 0)
                 throw ApiFailure.invalid(
                         "results", "Неверные идентификаторы, повторы, порядок или оценки сходства");
-            if (item.isRecommended() != (rank <= topK(snapshot)))
+            if (item.isRecommended() && (recommendationsEnded || rank > topK(snapshot)))
                 throw ApiFailure.invalid(
                         "results.isRecommended",
-                        "Выделите ровно первые topK продуктов, максимум три");
+                        "Можно выделить от нуля до topK первых продуктов, максимум три");
+            if (!item.isRecommended()) recommendationsEnded = true;
             if (item.eligibilityStatus() != candidate.eligibilityStatus()
                     || !item.pendingConditions().isArray()
                     || !item.pendingConditions().equals(candidate.pendingConditions()))

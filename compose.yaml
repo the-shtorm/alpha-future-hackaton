@@ -68,6 +68,7 @@ services:
       ML_INTERNAL_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
       MODEL_LOCAL_PATH: /models/multilingual-e5-small
       MODEL_REVISION: ${MODEL_REVISION:-614241f622f53c4eeff9890bdc4f31cfecc418b3}
+      RECOMMENDATION_MAX_COSINE_DISTANCE: ${RECOMMENDATION_MAX_COSINE_DISTANCE:-}
     volumes:
       - ./fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro
     networks:

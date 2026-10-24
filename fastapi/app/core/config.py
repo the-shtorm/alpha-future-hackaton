@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from pydantic import Field, model_validator
@@ -13,8 +14,24 @@ VERSIONS = dict(
 )
 
 
+def calibrated_distance() -> float | None:
+    policy_file = ROOT / "config/selection-policy.json"
+    if not policy_file.exists():
+        return None
+    policy = json.loads(policy_file.read_text(encoding="utf-8"))
+    revision = json.loads((ROOT / "config/model.lock.json").read_text(encoding="utf-8"))["revision"]
+    if (
+        policy["policyVersion"] != "top_k_cosine_distance_v1"
+        or policy["modelId"] != MODEL_ID
+        or policy["modelRevision"] != revision
+        or policy["templates"] != VERSIONS
+    ):
+        raise ValueError("Selection calibration does not match the locked model and templates")
+    return policy["maxCosineDistance"]
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore")
+    model_config = SettingsConfigDict(extra="ignore", env_ignore_empty=True)
     environment: str = "production"
     ml_internal_api_key: str = ""
     model_id: str = MODEL_ID
@@ -24,6 +41,13 @@ class Settings(BaseSettings):
     torch_num_threads: int = Field(default=2, ge=1)
     torch_num_interop_threads: int = Field(default=1, ge=1)
     passage_cache_max_entries: int = Field(default=512, ge=1, le=10000)
+    recommendation_max_cosine_distance: float | None = Field(
+        default_factory=calibrated_distance,
+        ge=0,
+        le=2,
+        allow_inf_nan=False,
+        description="Maximum 1 - cosine similarity; defaults to the pinned synthetic calibration artifact.",
+    )
     max_inflight_rank_requests: int = Field(default=4, ge=1, le=4)
     admission_timeout_seconds: float = Field(default=1, gt=0, le=1)
     max_request_bytes: int = Field(default=524288, ge=1, le=524288)

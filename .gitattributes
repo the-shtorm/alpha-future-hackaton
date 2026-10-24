@@ -1,4 +1,8 @@
 * text=auto
+*.java text eol=lf
+# Frozen inputs are hashed as bytes; never rewrite their line endings on add/checkout.
+fastapi/evaluation/*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+fastapi/config/selection-policy.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
 *.sh text eol=lf
 *.sql text eol=lf
 *.yaml text eol=lf

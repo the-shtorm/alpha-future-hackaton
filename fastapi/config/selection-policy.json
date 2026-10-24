@@ -1,0 +1,17 @@
+{
+  "policyVersion": "top_k_cosine_distance_v1",
+  "modelId": "intfloat/multilingual-e5-small",
+  "modelRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "templates": {
+    "queryTemplateVersion": "query-v2",
+    "passageTemplateVersion": "passage-v2",
+    "labelsVersion": "ru-v2",
+    "contractVersion": "rank-v2"
+  },
+  "maxCosineDistance": 0.160758137703,
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "status": "SYNTHETIC_CALIBRATION_PROVISIONAL",
+  "objective": "Maximize micro F1 of actual recommended pairs after topK=3; ties prefer higher precision then smaller maximum distance.",
+  "calibrationSha256": "287315a605cef0a25618c7c0e04faf413798f2778ee59f509ce14f4b4fe991e7",
+  "productsSha256": "b88ebd0ee5b0fe4b1270ead4e01d9298d7c57894930702d19fd30cfaae7c3c5b"
+}

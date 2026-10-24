@@ -72,7 +72,9 @@ class JavaCandidate(TransportDTO):
 class JavaRankRequest(TransportDTO):
     schemaVersion: Literal["query-passage-mvp-2"]
     requestId: UUID
-    topK: Annotated[int, Field(strict=True, ge=1, le=3)]
+    topK: Annotated[
+        int, Field(strict=True, ge=1, le=3, description="Maximum recommendations, not result count.")
+    ]
     semanticsVersion: Literal["synthetic-semantics-1"]
     queryFields: QueryFields
     dictionaries: Dictionaries

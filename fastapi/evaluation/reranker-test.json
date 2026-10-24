@@ -1,0 +1,2521 @@
+{
+  "datasetVersion": "sealed-reranker-test-2",
+  "split": "sealed_final_test",
+  "productsSha256": "b88ebd0ee5b0fe4b1270ead4e01d9298d7c57894930702d19fd30cfaae7c3c5b",
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "notice": "Authored before reranker scores. Old holdout is development now. Only evaluate this test after freezing primary model/criterion on development.",
+  "scenarios": [
+    {
+      "id": "sealed-v2-ordinary-1-v1",
+      "familyId": "sealed-v2-ordinary-1",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Ветеринарная клиника оплачивает запас медикаментов одной закупкой. Это обычные текущие расходы без сезонности и продаж на маркетплейсах."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ordinary-1-v2",
+      "familyId": "sealed-v2-ordinary-1",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Ветеринарная клиника оплачивает запас медикаментов одной закупкой. Это обычные текущие расходы без сезонности и продаж на маркетплейсах."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ordinary-1-v3",
+      "familyId": "sealed-v2-ordinary-1",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": null
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ordinary-2-v1",
+      "familyId": "sealed-v2-ordinary-2",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Типографии нужна разовая закупка красок для текущих заказов. Новый станок не нужен, сезонного проекта нет."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ordinary-2-v2",
+      "familyId": "sealed-v2-ordinary-2",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Типографии нужна разовая закупка красок для текущих заказов. Новый станок не нужен, сезонного проекта нет."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ordinary-2-v3",
+      "familyId": "sealed-v2-ordinary-2",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": null
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-1-v1",
+      "familyId": "sealed-v2-seasonal-1",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Книжная лавка делает запас учебников перед началом учебного года; основная выручка приходит в августе и сентябре."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-1-v2",
+      "familyId": "sealed-v2-seasonal-1",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Книжная лавка делает запас учебников перед началом учебного года; основная выручка приходит в августе и сентябре."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-1-v3",
+      "familyId": "sealed-v2-seasonal-1",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Книжная лавка делает запас учебников перед началом учебного года; основная выручка приходит в августе и сентябре. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-2-v1",
+      "familyId": "sealed-v2-seasonal-2",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пляжный прокат финансирует подготовительные текущие расходы к летнему сезону, когда появится основная выручка."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-2-v2",
+      "familyId": "sealed-v2-seasonal-2",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Пляжный прокат финансирует подготовительные текущие расходы к летнему сезону, когда появится основная выручка."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-seasonal-2-v3",
+      "familyId": "sealed-v2-seasonal-2",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Пляжный прокат финансирует подготовительные текущие расходы к летнему сезону, когда появится основная выручка. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-1-v1",
+      "familyId": "sealed-v2-marketplace-1",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Изготавливаем кожаные сумки и продаём их через маркетплейс. Нужен разовый оборотный кредит для товарных запасов на площадке."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-1-v2",
+      "familyId": "sealed-v2-marketplace-1",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Изготавливаем кожаные сумки и продаём их через маркетплейс. Нужен разовый оборотный кредит для товарных запасов на площадке."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-1-v3",
+      "familyId": "sealed-v2-marketplace-1",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Изготавливаем кожаные сумки и продаём их через маркетплейс. Нужен разовый оборотный кредит для товарных запасов на площадке. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-2-v1",
+      "familyId": "sealed-v2-marketplace-2",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Торгуем товарами для домашних животных на Ozon уже два года, пополняем запасы для интернет-площадки одной партией."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-2-v2",
+      "familyId": "sealed-v2-marketplace-2",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Торгуем товарами для домашних животных на Ozon уже два года, пополняем запасы для интернет-площадки одной партией."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-marketplace-2-v3",
+      "familyId": "sealed-v2-marketplace-2",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Торгуем товарами для домашних животных на Ozon уже два года, пополняем запасы для интернет-площадки одной партией. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-1-v1",
+      "familyId": "sealed-v2-revolving-1",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Автомойка закупает химию по мере расходования, погашает долг и снова берёт деньги из восстановленного кредитного лимита."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-1-v2",
+      "familyId": "sealed-v2-revolving-1",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пояснение компании: Автомойка закупает химию по мере расходования, погашает долг и снова берёт деньги из восстановленного кредитного лимита."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-1-v3",
+      "familyId": "sealed-v2-revolving-1",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Автомойка закупает химию по мере расходования, погашает долг и снова берёт деньги из восстановленного кредитного лимита. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-2-v1",
+      "familyId": "sealed-v2-revolving-2",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Цветочное хозяйство хочет повторно использовать возвращённые суммы для регулярных закупок, нужен возобновляемый лимит."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-2-v2",
+      "familyId": "sealed-v2-revolving-2",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пояснение компании: Цветочное хозяйство хочет повторно использовать возвращённые суммы для регулярных закупок, нужен возобновляемый лимит."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-revolving-2-v3",
+      "familyId": "sealed-v2-revolving-2",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Цветочное хозяйство хочет повторно использовать возвращённые суммы для регулярных закупок, нужен возобновляемый лимит. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-1-v1",
+      "familyId": "sealed-v2-nonrevolving-1",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "В рамках одного проекта закупаем комплектующие по этапам из невозобновляемой линии; погашение не должно восстанавливать доступную сумму."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-1-v2",
+      "familyId": "sealed-v2-nonrevolving-1",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пояснение компании: В рамках одного проекта закупаем комплектующие по этапам из невозобновляемой линии; погашение не должно восстанавливать доступную сумму."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-1-v3",
+      "familyId": "sealed-v2-nonrevolving-1",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "В рамках одного проекта закупаем комплектующие по этапам из невозобновляемой линии; погашение не должно восстанавливать доступную сумму. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-2-v1",
+      "familyId": "sealed-v2-nonrevolving-2",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Оснащаем новый пункт продаж, выбираем оборотный лимит траншами по графику закупок, повторного использования погашенных сумм нет."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-2-v2",
+      "familyId": "sealed-v2-nonrevolving-2",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пояснение компании: Оснащаем новый пункт продаж, выбираем оборотный лимит траншами по графику закупок, повторного использования погашенных сумм нет."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-nonrevolving-2-v3",
+      "familyId": "sealed-v2-nonrevolving-2",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Оснащаем новый пункт продаж, выбираем оборотный лимит траншами по графику закупок, повторного использования погашенных сумм нет. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-1-v1",
+      "familyId": "sealed-v2-overdraft-1",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "У стоматологической лаборатории обязательные платежи раньше оплаты от клиник. Нужен овердрафт, который подстрахует расчётный счёт."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-1-v2",
+      "familyId": "sealed-v2-overdraft-1",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Пояснение компании: У стоматологической лаборатории обязательные платежи раньше оплаты от клиник. Нужен овердрафт, который подстрахует расчётный счёт."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-1-v3",
+      "familyId": "sealed-v2-overdraft-1",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "UNKNOWN",
+          "description": "У стоматологической лаборатории обязательные платежи раньше оплаты от клиник. Нужен овердрафт, который подстрахует расчётный счёт. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05",
+        "P06"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-2-v1",
+      "familyId": "sealed-v2-overdraft-2",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Заказчик платит за ремонт позже срока выплаты зарплат. Нужен краткосрочный резерв на расчётном счёте, а не инвестиционный кредит."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-2-v2",
+      "familyId": "sealed-v2-overdraft-2",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Пояснение компании: Заказчик платит за ремонт позже срока выплаты зарплат. Нужен краткосрочный резерв на расчётном счёте, а не инвестиционный кредит."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-overdraft-2-v3",
+      "familyId": "sealed-v2-overdraft-2",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "UNKNOWN",
+          "description": "Заказчик платит за ремонт позже срока выплаты зарплат. Нужен краткосрочный резерв на расчётном счёте, а не инвестиционный кредит. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05",
+        "P06"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-1-v1",
+      "familyId": "sealed-v2-equipment-1",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Предприятие расширяет производство, приобретая промышленную вышивальную машину. Готовы предоставить обеспечение."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-1-v2",
+      "familyId": "sealed-v2-equipment-1",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Предприятие расширяет производство, приобретая промышленную вышивальную машину. Готовы предоставить обеспечение."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-1-v3",
+      "familyId": "sealed-v2-equipment-1",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Предприятие расширяет производство, приобретая промышленную вышивальную машину. Готовы предоставить обеспечение. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P07",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-2-v1",
+      "familyId": "sealed-v2-equipment-2",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Фитнес-центр покупает комплект тренажёров одной суммой. Помещение арендуем, покупать его не планируем."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-2-v2",
+      "familyId": "sealed-v2-equipment-2",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Фитнес-центр покупает комплект тренажёров одной суммой. Помещение арендуем, покупать его не планируем."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-equipment-2-v3",
+      "familyId": "sealed-v2-equipment-2",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Фитнес-центр покупает комплект тренажёров одной суммой. Помещение арендуем, покупать его не планируем. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-1-v1",
+      "familyId": "sealed-v2-transport-1",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Служба экспресс-перевозок покупает коммерческий микроавтобус для доставки, готовы обсуждать залог."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-1-v2",
+      "familyId": "sealed-v2-transport-1",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Служба экспресс-перевозок покупает коммерческий микроавтобус для доставки, готовы обсуждать залог."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-1-v3",
+      "familyId": "sealed-v2-transport-1",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "UNKNOWN",
+          "description": "Служба экспресс-перевозок покупает коммерческий микроавтобус для доставки, готовы обсуждать залог. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-2-v1",
+      "familyId": "sealed-v2-transport-2",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Кейтеринговая компания приобретает грузовой фургон для развоза заказов. Не просим финансировать кухонное оборудование."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-2-v2",
+      "familyId": "sealed-v2-transport-2",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Кейтеринговая компания приобретает грузовой фургон для развоза заказов. Не просим финансировать кухонное оборудование."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-transport-2-v3",
+      "familyId": "sealed-v2-transport-2",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "UNKNOWN",
+          "description": "Кейтеринговая компания приобретает грузовой фургон для развоза заказов. Не просим финансировать кухонное оборудование. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-1-v1",
+      "familyId": "sealed-v2-property-1",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Ювелирная мастерская выкупает коммерческое помещение для магазина. Нужен кредит на покупку недвижимости."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-1-v2",
+      "familyId": "sealed-v2-property-1",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Ювелирная мастерская выкупает коммерческое помещение для магазина. Нужен кредит на покупку недвижимости."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-1-v3",
+      "familyId": "sealed-v2-property-1",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "UNKNOWN",
+          "description": "Ювелирная мастерская выкупает коммерческое помещение для магазина. Нужен кредит на покупку недвижимости. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-2-v1",
+      "familyId": "sealed-v2-property-2",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Образовательный центр покупает нежилое помещение для занятий, готов обсудить обеспечение покупки."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-2-v2",
+      "familyId": "sealed-v2-property-2",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Образовательный центр покупает нежилое помещение для занятий, готов обсудить обеспечение покупки."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-property-2-v3",
+      "familyId": "sealed-v2-property-2",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "UNKNOWN",
+          "description": "Образовательный центр покупает нежилое помещение для занятий, готов обсудить обеспечение покупки. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-1-v1",
+      "familyId": "sealed-v2-investment-1",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Компания развивает новую программную платформу и ищет инвестиционное финансирование под залог принадлежащего ей офисного здания."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-1-v2",
+      "familyId": "sealed-v2-investment-1",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Компания развивает новую программную платформу и ищет инвестиционное финансирование под залог принадлежащего ей офисного здания."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-1-v3",
+      "familyId": "sealed-v2-investment-1",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Компания развивает новую программную платформу и ищет инвестиционное финансирование под залог принадлежащего ей офисного здания. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-2-v1",
+      "familyId": "sealed-v2-investment-2",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Производитель косметики расширяет мощности и инвестирует в дополнительное оборудование и производственную линию."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-2-v2",
+      "familyId": "sealed-v2-investment-2",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Производитель косметики расширяет мощности и инвестирует в дополнительное оборудование и производственную линию."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-investment-2-v3",
+      "familyId": "sealed-v2-investment-2",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Производитель косметики расширяет мощности и инвестирует в дополнительное оборудование и производственную линию. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-1-v1",
+      "familyId": "sealed-v2-contract-1",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Швейное предприятие выполняет подписанный контракт на изготовление униформы. Финансирование нужно именно для исполнения контракта."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-1-v2",
+      "familyId": "sealed-v2-contract-1",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Швейное предприятие выполняет подписанный контракт на изготовление униформы. Финансирование нужно именно для исполнения контракта."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-1-v3",
+      "familyId": "sealed-v2-contract-1",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "UNKNOWN",
+          "description": "Швейное предприятие выполняет подписанный контракт на изготовление униформы. Финансирование нужно именно для исполнения контракта. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-2-v1",
+      "familyId": "sealed-v2-contract-2",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Исполняем государственный контракт на техническую поддержку сети учреждений. Нужен кредит на выполнение обязательств по договору."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-2-v2",
+      "familyId": "sealed-v2-contract-2",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Исполняем государственный контракт на техническую поддержку сети учреждений. Нужен кредит на выполнение обязательств по договору."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-contract-2-v3",
+      "familyId": "sealed-v2-contract-2",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "UNKNOWN",
+          "description": "Исполняем государственный контракт на техническую поддержку сети учреждений. Нужен кредит на выполнение обязательств по договору. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-1-v1",
+      "familyId": "sealed-v2-refinance-1",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Сеть магазинов хочет заменить действующий дорогой кредит новым обеспеченным кредитом под залог недвижимости, а не финансировать новую закупку."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-1-v2",
+      "familyId": "sealed-v2-refinance-1",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Сеть магазинов хочет заменить действующий дорогой кредит новым обеспеченным кредитом под залог недвижимости, а не финансировать новую закупку."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-1-v3",
+      "familyId": "sealed-v2-refinance-1",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "UNKNOWN",
+          "description": "Сеть магазинов хочет заменить действующий дорогой кредит новым обеспеченным кредитом под залог недвижимости, а не финансировать новую закупку. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-2-v1",
+      "familyId": "sealed-v2-refinance-2",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "У студии звукозаписи есть кредитные обязательства: требуется рефинансирование с обеспечением коммерческим помещением."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-2-v2",
+      "familyId": "sealed-v2-refinance-2",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: У студии звукозаписи есть кредитные обязательства: требуется рефинансирование с обеспечением коммерческим помещением."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-refinance-2-v3",
+      "familyId": "sealed-v2-refinance-2",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "UNKNOWN",
+          "description": "У студии звукозаписи есть кредитные обязательства: требуется рефинансирование с обеспечением коммерческим помещением. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-1-v1",
+      "familyId": "sealed-v2-ip-1",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Я индивидуальный предприниматель, ремонтирую велосипеды. Нужен небольшой разовый кредит на текущие расходники."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-1-v2",
+      "familyId": "sealed-v2-ip-1",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Я индивидуальный предприниматель, ремонтирую велосипеды. Нужен небольшой разовый кредит на текущие расходники."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-1-v3",
+      "familyId": "sealed-v2-ip-1",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Я индивидуальный предприниматель, ремонтирую велосипеды. Нужен небольшой разовый кредит на текущие расходники. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-2-v1",
+      "familyId": "sealed-v2-ip-2",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "ИП с обычным газетным киоском разово закупает канцелярские товары. Не работаем на маркетплейсах, сезонной потребности нет."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-2-v2",
+      "familyId": "sealed-v2-ip-2",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: ИП с обычным газетным киоском разово закупает канцелярские товары. Не работаем на маркетплейсах, сезонной потребности нет."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-ip-2-v3",
+      "familyId": "sealed-v2-ip-2",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "ИП с обычным газетным киоском разово закупает канцелярские товары. Не работаем на маркетплейсах, сезонной потребности нет. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-1-v1",
+      "familyId": "sealed-v2-no_relevant-1",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Нужна корпоративная карта только для собственных средств, без кредита и кредитного лимита."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-1-v2",
+      "familyId": "sealed-v2-no_relevant-1",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Нужна корпоративная карта только для собственных средств, без кредита и кредитного лимита."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-1-v3",
+      "familyId": "sealed-v2-no_relevant-1",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Нужна корпоративная карта только для собственных средств, без кредита и кредитного лимита. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-2-v1",
+      "familyId": "sealed-v2-no_relevant-2",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Ищем консультацию по налоговому учёту. Кредитные деньги не нужны и брать кредит не будем."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-2-v2",
+      "familyId": "sealed-v2-no_relevant-2",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Ищем консультацию по налоговому учёту. Кредитные деньги не нужны и брать кредит не будем."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-no_relevant-2-v3",
+      "familyId": "sealed-v2-no_relevant-2",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Ищем консультацию по налоговому учёту. Кредитные деньги не нужны и брать кредит не будем. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-1-v1",
+      "familyId": "sealed-v2-restricted_catalog-1",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Цеху нужен восстановляемый лимит: после погашения деньги должны снова быть доступны. Невозобновляемый механизм не подходит."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-1-v2",
+      "familyId": "sealed-v2-restricted_catalog-1",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пояснение компании: Цеху нужен восстановляемый лимит: после погашения деньги должны снова быть доступны. Невозобновляемый механизм не подходит."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-1-v3",
+      "familyId": "sealed-v2-restricted_catalog-1",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Цеху нужен восстановляемый лимит: после погашения деньги должны снова быть доступны. Невозобновляемый механизм не подходит. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-2-v1",
+      "familyId": "sealed-v2-restricted_catalog-2",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Обычные разовые текущие расходы ремонтной мастерской. Сезонности и продаж через маркетплейсы нет."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-2-v2",
+      "familyId": "sealed-v2-restricted_catalog-2",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Пояснение компании: Обычные разовые текущие расходы ремонтной мастерской. Сезонности и продаж через маркетплейсы нет."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    },
+    {
+      "id": "sealed-v2-restricted_catalog-2-v3",
+      "familyId": "sealed-v2-restricted_catalog-2",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Обычные разовые текущие расходы ремонтной мастерской. Сезонности и продаж через маркетплейсы нет. Хотим сравнить варианты для этой задачи, без лишних кредитных предложений."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED"
+    }
+  ]
+}

@@ -351,7 +351,8 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 3,
-      "default": 3
+      "default": 3,
+      "description": "Maximum recommendations; all candidates are returned in rank order."
     }
   },
   "required": [

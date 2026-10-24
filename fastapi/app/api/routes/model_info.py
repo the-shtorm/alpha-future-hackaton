@@ -9,7 +9,8 @@ router = APIRouter(prefix="/api/v1", tags=["model"], dependencies=[Depends(requi
 
 @router.get("/model-info", responses=ERROR_RESPONSES)
 async def model_info(request: Request) -> ModelInfo:
-    encoder = request.app.state.runner.ranker.encoder
+    ranker = request.app.state.runner.ranker
+    encoder = ranker.encoder
     return ModelInfo(
         **{
             "modelId": encoder.model_id,
@@ -17,6 +18,7 @@ async def model_info(request: Request) -> ModelInfo:
             "dimension": encoder.dimension,
             "maxSeqLength": 512,
             "device": "cpu",
+            "maxCosineDistance": ranker.max_cosine_distance,
             **VERSIONS,
         }
     )

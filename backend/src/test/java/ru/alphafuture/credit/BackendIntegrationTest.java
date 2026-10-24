@@ -995,6 +995,33 @@ class BackendIntegrationTest {
                 404);
     }
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {0, 1, 2, 3})
+    void rankingAcceptsUpToThreeRecommendationsAndKeepsEveryCandidate(int recommended)
+            throws Exception {
+        var answers = TestData.preliminary();
+        ((ObjectNode) answers.path("security")).put("guarantorReady", "DISCUSS");
+        var profile = profile(answers);
+        String base = "/selection-profiles/" + profile.path("id").asText();
+        var run = post(base + "/eligibility", owner, Map.of());
+        String route = base + "/recommendations/" + run.path("runId").asText();
+        var packet = get(route + "/ranking-export", owner);
+        assertThat(packet.path("candidates").size()).isGreaterThan(3);
+        var reply = rankingReply(packet);
+        for (int i = 0; i < reply.path("results").size(); i++)
+            ((ObjectNode) reply.path("results").get(i)).put("isRecommended", i < recommended);
+        var imported = post(route + "/ranking-result", owner, reply);
+        assertThat(imported.path("results")).hasSize(packet.path("candidates").size());
+        for (int i = 0; i < imported.path("results").size(); i++) {
+            var item = imported.path("results").get(i);
+            assertThat(item.path("isRecommended").asBoolean()).isEqualTo(i < recommended);
+            assertThat(item.path("rank").asInt()).isEqualTo(i + 1);
+            assertThat(item.path("pendingConditions"))
+                    .isEqualTo(packet.path("candidates").get(i).path("pendingConditions"));
+        }
+        assertThat(post(route + "/ranking-result", owner, reply)).isEqualTo(imported);
+    }
+
     @Test
     void rankingRejectsInvalidIdentityOrderScoreFlagsAndChangedApplicability() throws Exception {
         var a = TestData.preliminary();

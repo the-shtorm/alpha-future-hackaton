@@ -1,0 +1,2610 @@
+{
+  "datasetVersion": "synthetic-calibration-1",
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "productsSha256": "b88ebd0ee5b0fe4b1270ead4e01d9298d7c57894930702d19fd30cfaae7c3c5b",
+  "splitRule": "Business families 1-4 per intent in calibration, families 5-6 in holdout. All variants of a family stay together. Never includes previous 40 ML or 8 backend scenarios.",
+  "objective": "Maximize micro F1 of actual recommended pairs after topK=3; ties prefer higher precision then smaller maximum distance.",
+  "notice": "Human review required. Synthetic scenario families are not real users. High diversity does not establish representativeness.",
+  "split": "holdout",
+  "scenarios": [
+    {
+      "id": "new-ordinary-05-v1",
+      "familyId": "new-ordinary-05",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Курьерская компания разово закупает расходные материалы. Новые автомобили покупать не собираемся."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ordinary-05-v2",
+      "familyId": "new-ordinary-05",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Курьерская компания разово закупает расходные материалы. Новые автомобили покупать не собираемся. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ordinary-05-v3",
+      "familyId": "new-ordinary-05",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": null
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ordinary-06-v1",
+      "familyId": "new-ordinary-06",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Оптовик закупает посуду для местных ресторанов одной поставкой. Интернет-площадками не пользуемся."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ordinary-06-v2",
+      "familyId": "new-ordinary-06",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Оптовик закупает посуду для местных ресторанов одной поставкой. Интернет-площадками не пользуемся. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ordinary-06-v3",
+      "familyId": "new-ordinary-06",
+      "intent": "ordinary",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": null
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-05-v1",
+      "familyId": "new-seasonal-05",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Цветочная сеть пополняет оборотные средства перед праздничным всплеском спроса в марте."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-05-v2",
+      "familyId": "new-seasonal-05",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Цветочная сеть пополняет оборотные средства перед праздничным всплеском спроса в марте. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-05-v3",
+      "familyId": "new-seasonal-05",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Цветочная сеть пополняет оборотные средства перед праздничным всплеском спроса в марте. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-06-v1",
+      "familyId": "new-seasonal-06",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Летнему детскому лагерю нужны оборотные средства до начала смен, доходы сосредоточены летом."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-06-v2",
+      "familyId": "new-seasonal-06",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Летнему детскому лагерю нужны оборотные средства до начала смен, доходы сосредоточены летом. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-seasonal-06-v3",
+      "familyId": "new-seasonal-06",
+      "intent": "seasonal",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Летнему детскому лагерю нужны оборотные средства до начала смен, доходы сосредоточены летом. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P06"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-05-v1",
+      "familyId": "new-marketplace-05",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Наш основной канал продаж — маркетплейс, хотим профинансировать одну поставку игрушек."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-05-v2",
+      "familyId": "new-marketplace-05",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Наш основной канал продаж — маркетплейс, хотим профинансировать одну поставку игрушек. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-05-v3",
+      "familyId": "new-marketplace-05",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Наш основной канал продаж — маркетплейс, хотим профинансировать одну поставку игрушек. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-06-v1",
+      "familyId": "new-marketplace-06",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Производим травяные сборы и продаём их на интернет-маркетплейсе; финансируем пополнение запасов."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-06-v2",
+      "familyId": "new-marketplace-06",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Производим травяные сборы и продаём их на интернет-маркетплейсе; финансируем пополнение запасов. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-marketplace-06-v3",
+      "familyId": "new-marketplace-06",
+      "intent": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Производим травяные сборы и продаём их на интернет-маркетплейсе; финансируем пополнение запасов. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P14"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-05-v1",
+      "familyId": "new-revolving-05",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Строительная фирма хочет много раз использовать и погашать один восстановляемый оборотный лимит."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-05-v2",
+      "familyId": "new-revolving-05",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Контекст обращения: Строительная фирма хочет много раз использовать и погашать один восстановляемый оборотный лимит. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-05-v3",
+      "familyId": "new-revolving-05",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Строительная фирма хочет много раз использовать и погашать один восстановляемый оборотный лимит. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-06-v1",
+      "familyId": "new-revolving-06",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Интегратору нужен возобновляемый лимит на регулярные закупки комплектующих, деньги берём частями."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-06-v2",
+      "familyId": "new-revolving-06",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Контекст обращения: Интегратору нужен возобновляемый лимит на регулярные закупки комплектующих, деньги берём частями. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-revolving-06-v3",
+      "familyId": "new-revolving-06",
+      "intent": "revolving",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Интегратору нужен возобновляемый лимит на регулярные закупки комплектующих, деньги берём частями. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P03"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-05-v1",
+      "familyId": "new-nonrevolving-05",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Расходники для нового распределительного центра закупаем поэтапно, кредитный лимит использовать повторно не планируем."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-05-v2",
+      "familyId": "new-nonrevolving-05",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Контекст обращения: Расходники для нового распределительного центра закупаем поэтапно, кредитный лимит использовать повторно не планируем. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-05-v3",
+      "familyId": "new-nonrevolving-05",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Расходники для нового распределительного центра закупаем поэтапно, кредитный лимит использовать повторно не планируем. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-06-v1",
+      "familyId": "new-nonrevolving-06",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "При запуске прачечной текущие закупки оплачиваем траншами, остаток общего лимита постепенно уменьшается."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-06-v2",
+      "familyId": "new-nonrevolving-06",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Контекст обращения: При запуске прачечной текущие закупки оплачиваем траншами, остаток общего лимита постепенно уменьшается. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P03",
+        "P04"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-nonrevolving-06-v3",
+      "familyId": "new-nonrevolving-06",
+      "intent": "nonrevolving",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "При запуске прачечной текущие закупки оплачиваем траншами, остаток общего лимита постепенно уменьшается. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P04"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-05-v1",
+      "familyId": "new-overdraft-05",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Нужно проводить обязательные платежи при временном недостатке собственных денег на расчётном счёте."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-05-v2",
+      "familyId": "new-overdraft-05",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Контекст обращения: Нужно проводить обязательные платежи при временном недостатке собственных денег на расчётном счёте. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-05-v3",
+      "familyId": "new-overdraft-05",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "UNKNOWN",
+          "description": "Нужно проводить обязательные платежи при временном недостатке собственных денег на расчётном счёте. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P05",
+        "P06"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-06-v1",
+      "familyId": "new-overdraft-06",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели оплачивают поставки с задержкой в несколько дней; нужен короткий резерв средств на счёте."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-06-v2",
+      "familyId": "new-overdraft-06",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Контекст обращения: Покупатели оплачивают поставки с задержкой в несколько дней; нужен короткий резерв средств на счёте. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P05"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-overdraft-06-v3",
+      "familyId": "new-overdraft-06",
+      "intent": "overdraft",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "UNKNOWN",
+          "description": "Покупатели оплачивают поставки с задержкой в несколько дней; нужен короткий резерв средств на счёте. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P05",
+        "P06"
+      ],
+      "relevantProductCodes": [
+        "P05"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-05-v1",
+      "familyId": "new-equipment-05",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Складскому оператору нужен новый упаковочный станок; автомобиль и помещение не нужны."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-05-v2",
+      "familyId": "new-equipment-05",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Складскому оператору нужен новый упаковочный станок; автомобиль и помещение не нужны. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-05-v3",
+      "familyId": "new-equipment-05",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Складскому оператору нужен новый упаковочный станок; автомобиль и помещение не нужны. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-06-v1",
+      "familyId": "new-equipment-06",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Дата-центр приобретает серверное оборудование одним платежом, готов обсудить обеспечение."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-06-v2",
+      "familyId": "new-equipment-06",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Дата-центр приобретает серверное оборудование одним платежом, готов обсудить обеспечение. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-equipment-06-v3",
+      "familyId": "new-equipment-06",
+      "intent": "equipment",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Дата-центр приобретает серверное оборудование одним платежом, готов обсудить обеспечение. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P07"
+      ],
+      "relevantProductCodes": [
+        "P07"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-05-v1",
+      "familyId": "new-transport-05",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Магазин покупает рефрижераторный автомобиль для развоза продуктов."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-05-v2",
+      "familyId": "new-transport-05",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Магазин покупает рефрижераторный автомобиль для развоза продуктов. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-05-v3",
+      "familyId": "new-transport-05",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "UNKNOWN",
+          "description": "Магазин покупает рефрижераторный автомобиль для развоза продуктов. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-06-v1",
+      "familyId": "new-transport-06",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Производитель мебели приобретает собственный грузовой транспорт для доставки заказов."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-06-v2",
+      "familyId": "new-transport-06",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Производитель мебели приобретает собственный грузовой транспорт для доставки заказов. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-transport-06-v3",
+      "familyId": "new-transport-06",
+      "intent": "transport",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "TRANSPORT",
+          "usageMode": "UNKNOWN",
+          "description": "Производитель мебели приобретает собственный грузовой транспорт для доставки заказов. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P08"
+      ],
+      "relevantProductCodes": [
+        "P08"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-05-v1",
+      "familyId": "new-property-05",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Мастерская покупает производственное помещение с обеспечением."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-05-v2",
+      "familyId": "new-property-05",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Мастерская покупает производственное помещение с обеспечением. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-05-v3",
+      "familyId": "new-property-05",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "UNKNOWN",
+          "description": "Мастерская покупает производственное помещение с обеспечением. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-06-v1",
+      "familyId": "new-property-06",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Кооператив выкупает коммерческое помещение под фасовку продукции."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-06-v2",
+      "familyId": "new-property-06",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Кооператив выкупает коммерческое помещение под фасовку продукции. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-property-06-v3",
+      "familyId": "new-property-06",
+      "intent": "property",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "COMMERCIAL_PROPERTY",
+          "usageMode": "UNKNOWN",
+          "description": "Кооператив выкупает коммерческое помещение под фасовку продукции. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P09"
+      ],
+      "relevantProductCodes": [
+        "P09"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-05-v1",
+      "familyId": "new-investment-05",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Увеличиваем производственные мощности фабрики, рассматриваем финансирование развития и оборудования."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-05-v2",
+      "familyId": "new-investment-05",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Увеличиваем производственные мощности фабрики, рассматриваем финансирование развития и оборудования. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-05-v3",
+      "familyId": "new-investment-05",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Увеличиваем производственные мощности фабрики, рассматриваем финансирование развития и оборудования. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-06-v1",
+      "familyId": "new-investment-06",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Инвестируем в развитие распределительного бизнеса под залог собственного коммерческого здания."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-06-v2",
+      "familyId": "new-investment-06",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Инвестируем в развитие распределительного бизнеса под залог собственного коммерческого здания. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-investment-06-v3",
+      "familyId": "new-investment-06",
+      "intent": "investment",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Инвестируем в развитие распределительного бизнеса под залог собственного коммерческого здания. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [
+        "P10"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-05-v1",
+      "familyId": "new-contract-05",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Поставляем расходные материалы по заключённому контракту, деньги нужны для исполнения поставки."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-05-v2",
+      "familyId": "new-contract-05",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Поставляем расходные материалы по заключённому контракту, деньги нужны для исполнения поставки. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-05-v3",
+      "familyId": "new-contract-05",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "UNKNOWN",
+          "description": "Поставляем расходные материалы по заключённому контракту, деньги нужны для исполнения поставки. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-06-v1",
+      "familyId": "new-contract-06",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Перевозчик финансирует исполнение долгосрочного договора перевозок, не покупает новый транспорт."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-06-v2",
+      "familyId": "new-contract-06",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Перевозчик финансирует исполнение долгосрочного договора перевозок, не покупает новый транспорт. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-contract-06-v3",
+      "familyId": "new-contract-06",
+      "intent": "contract",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "CONTRACT_EXECUTION",
+          "usageMode": "UNKNOWN",
+          "description": "Перевозчик финансирует исполнение долгосрочного договора перевозок, не покупает новый транспорт. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P11"
+      ],
+      "relevantProductCodes": [
+        "P11"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-05-v1",
+      "familyId": "new-refinance-05",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Требуется рефинансировать текущую задолженность, готовы предоставить недвижимость в залог."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-05-v2",
+      "familyId": "new-refinance-05",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Требуется рефинансировать текущую задолженность, готовы предоставить недвижимость в залог. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-05-v3",
+      "familyId": "new-refinance-05",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "IT"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "UNKNOWN",
+          "description": "Требуется рефинансировать текущую задолженность, готовы предоставить недвижимость в залог. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-06-v1",
+      "familyId": "new-refinance-06",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Переносим существующий кредит в другой банк с залогом коммерческого помещения."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-06-v2",
+      "familyId": "new-refinance-06",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Переносим существующий кредит в другой банк с залогом коммерческого помещения. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-refinance-06-v3",
+      "familyId": "new-refinance-06",
+      "intent": "refinance",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "REFINANCING",
+          "usageMode": "UNKNOWN",
+          "description": "Переносим существующий кредит в другой банк с залогом коммерческого помещения. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P12"
+      ],
+      "relevantProductCodes": [
+        "P12"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-05-v1",
+      "familyId": "new-ip-05",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Я ИП, беру небольшую сумму на текущие расходники отделочной бригады."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-05-v2",
+      "familyId": "new-ip-05",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Я ИП, беру небольшую сумму на текущие расходники отделочной бригады. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-05-v3",
+      "familyId": "new-ip-05",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "CONSTRUCTION"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Я ИП, беру небольшую сумму на текущие расходники отделочной бригады. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-06-v1",
+      "familyId": "new-ip-06",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "ИП с курьерским бизнесом разово финансирует закупку расходных материалов."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-06-v2",
+      "familyId": "new-ip-06",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: ИП с курьерским бизнесом разово финансирует закупку расходных материалов. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-ip-06-v3",
+      "familyId": "new-ip-06",
+      "intent": "ip",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "ИП с курьерским бизнесом разово финансирует закупку расходных материалов. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P06",
+        "P13",
+        "P14"
+      ],
+      "relevantProductCodes": [
+        "P01",
+        "P02",
+        "P13"
+      ],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-05-v1",
+      "familyId": "new-no_relevant-05",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Хотим только страхование оборудования. Финансирование покупки и кредит не нужны."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-05-v2",
+      "familyId": "new-no_relevant-05",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Хотим только страхование оборудования. Финансирование покупки и кредит не нужны. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-05-v3",
+      "familyId": "new-no_relevant-05",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Хотим только страхование оборудования. Финансирование покупки и кредит не нужны. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10",
+        "P15"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-06-v1",
+      "familyId": "new-no_relevant-06",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Нужна государственная субсидия без возврата, кредитные продукты не рассматриваем."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-06-v2",
+      "familyId": "new-no_relevant-06",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Нужна государственная субсидия без возврата, кредитные продукты не рассматриваем. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-no_relevant-06-v3",
+      "familyId": "new-no_relevant-06",
+      "intent": "no_relevant",
+      "profile": {
+        "business": {
+          "sector": "AGRICULTURE"
+        },
+        "request": {
+          "purpose": "DEVELOPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Нужна государственная субсидия без возврата, кредитные продукты не рассматриваем. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P01",
+        "P10"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-05-v1",
+      "familyId": "new-restricted_catalog-05",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Нужна возобновляемая линия для повторного использования лимита, другие механизмы не подходят."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-05-v2",
+      "familyId": "new-restricted_catalog-05",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Контекст обращения: Нужна возобновляемая линия для повторного использования лимита, другие механизмы не подходят. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-05-v3",
+      "familyId": "new-restricted_catalog-05",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "LOGISTICS"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Нужна возобновляемая линия для повторного использования лимита, другие механизмы не подходят. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P04"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-06-v1",
+      "familyId": "new-restricted_catalog-06",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Разовое финансирование расходников клиники; сезонного спроса и торговли на интернет-площадках нет."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-06-v2",
+      "familyId": "new-restricted_catalog-06",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Контекст обращения: Разовое финансирование расходников клиники; сезонного спроса и торговли на интернет-площадках нет. Деньги используем для указанной задачи, без изменения назначения."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    },
+    {
+      "id": "new-restricted_catalog-06-v3",
+      "familyId": "new-restricted_catalog-06",
+      "intent": "restricted_catalog",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Разовое финансирование расходников клиники; сезонного спроса и торговли на интернет-площадках нет. В компании несколько сотрудников, ведём планирование платежей и хотим сравнить доступные предложения."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductCodes": [
+        "P06",
+        "P14"
+      ],
+      "relevantProductCodes": [],
+      "labelStatus": "SYNTHETIC_PROPOSED",
+      "labelRationale": "Semantic suitability for the explicitly stated task; specialized seasonal/marketplace products require positive evidence, unknown is not positive evidence. Labels authored before inference, not approval decisions."
+    }
+  ]
+}

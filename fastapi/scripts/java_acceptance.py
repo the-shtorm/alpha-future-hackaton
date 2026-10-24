@@ -14,10 +14,12 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def call(url, method="GET", body=None, token=None):
+def call(url, method="GET", body=None, token=None, internal_key=None):
     headers = {"Content-Type": "application/json"}
     if token:
         headers["Authorization"] = "Bearer " + token
+    if internal_key:
+        headers["X-Internal-API-Key"] = internal_key
     data = json.dumps(body, ensure_ascii=False).encode() if body is not None else None
     with urlopen(Request(url, data=data, method=method, headers=headers), timeout=30) as response:
         return json.load(response)
@@ -26,9 +28,13 @@ def call(url, method="GET", body=None, token=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "work/ml-acceptance/java-e2e.json")
+    parser.add_argument("--max-cosine-distance", type=float, default=None)
     args = parser.parse_args()
     project = "recsys-java-" + secrets.token_hex(5)
     env = dict(os.environ)
+    env["ML_TEST_MAX_COSINE_DISTANCE"] = (
+        str(args.max_cosine_distance) if args.max_cosine_distance is not None else ""
+    )
     for name in ("API_KEY", "DB_PASSWORD", "DB_APP_PASSWORD", "DB_MIGRATOR_PASSWORD", "DEMO_PASSWORD"):
         env["ML_TEST_" + name] = secrets.token_hex(24)
     base = ["docker", "compose", "-p", project, "-f", str(ROOT / "compose.ml-test.yaml")]
@@ -66,6 +72,9 @@ def main():
 
         java_url = address("backend", 8080)
         ml_url = address("fastapi", 8000)
+        threshold = call(ml_url + "/api/v1/model-info", internal_key=env["ML_TEST_API_KEY"])[
+            "maxCosineDistance"
+        ]
         deadline = time.monotonic() + 90
         while True:
             try:
@@ -110,7 +119,15 @@ def main():
                 imported = call(run + "/ranking-result", token=token)
                 originals = {c["productId"]: c for c in packet["candidates"]}
                 assert len(imported["results"]) == len(originals) > 0
-                assert sum(r["isRecommended"] for r in imported["results"]) == min(3, len(originals))
+                recommended_count = sum(r["isRecommended"] for r in imported["results"])
+                assert recommended_count <= min(3, len(originals))
+                for item in imported["results"]:
+                    if item["isRecommended"]:
+                        assert threshold is not None
+                        # HTTP scores are rounded; boundary decisions use full precision inside ML.
+                        assert item["similarityScore"] >= 1 - threshold - 0.000001
+                if threshold is None:
+                    assert recommended_count == 0
                 assert set(imported["metadata"]) == {
                     "model",
                     "modelVersion",
@@ -165,6 +182,7 @@ def main():
                     "variant": variant,
                     "status": selection["rankingStatus"],
                     "candidateCount": len(selection["results"]),
+                    "recommendedCount": sum(r.get("isRecommended", False) for r in selection["results"]),
                 }
             )
         stats = json.loads(
@@ -175,6 +193,7 @@ def main():
         )
         report = {
             "passed": True,
+            "maxCosineDistance": threshold,
             "transport": "real Java HTTP gateway -> CPU E5 -> Java immutable import",
             "cases": results,
             "mlContainerStats": stats,

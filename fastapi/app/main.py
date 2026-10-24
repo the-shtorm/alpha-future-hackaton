@@ -30,7 +30,14 @@ def create_app(settings: Settings | None = None, encoder_factory=None) -> FastAP
             encoder = await anyio.to_thread.run_sync(lambda: (encoder_factory or SentenceEncoder)(config))
         except Exception:
             raise RuntimeError("Model initialization failed; verify local model and configuration") from None
-        app.state.runner = RankRunner(Ranker(encoder, config.passage_cache_max_entries), config)
+        app.state.runner = RankRunner(
+            Ranker(
+                encoder,
+                config.passage_cache_max_entries,
+                max_cosine_distance=config.recommendation_max_cosine_distance,
+            ),
+            config,
+        )
         app.state.ready = True
         try:
             yield

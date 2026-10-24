@@ -140,4 +140,6 @@ class RankRequest(DTO):
     requestId: str = Field(min_length=1, max_length=120)
     profile: Profile
     candidates: list[Candidate] = Field(max_length=100)
-    topK: Annotated[StrictInt, Field(ge=1, le=3)] = 3
+    topK: Annotated[
+        StrictInt, Field(ge=1, le=3, description="Maximum recommendations; all candidates are ranked.")
+    ] = 3

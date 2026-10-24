@@ -44,7 +44,11 @@ def encoder():
 @pytest.fixture
 def settings():
     return Settings(
-        environment="test", ml_internal_api_key="test-key", docs_enabled=True, admission_timeout_seconds=0.03
+        environment="test",
+        ml_internal_api_key="test-key",
+        docs_enabled=True,
+        admission_timeout_seconds=0.03,
+        recommendation_max_cosine_distance=None,
     )
 
 

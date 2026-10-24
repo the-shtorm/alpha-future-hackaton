@@ -32,6 +32,7 @@ def test_java_reply_matches_contract_and_preserves_conditions(client, java_paylo
     }
     assert reply["metadata"]["modelVersion"] == encoder.revision
     assert len(reply["results"]) == len(java_payload["candidates"])
+    assert not any(item["isRecommended"] for item in reply["results"])
     originals = {c["productId"]: c for c in java_payload["candidates"]}
     for item in reply["results"]:
         original = originals[item["productId"]]

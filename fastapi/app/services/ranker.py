@@ -14,12 +14,18 @@ logger = logging.getLogger("credit_recsys")
 
 
 class Ranker:
-    def __init__(self, encoder: Encoder, capacity=512):
+    def __init__(self, encoder: Encoder, capacity=512, *, max_cosine_distance: float | None = None):
         self.encoder = encoder
         self.cache = PassageCache(capacity)
+        self.max_cosine_distance = max_cosine_distance
 
     def metadata(self):
-        return Metadata(modelId=self.encoder.model_id, modelRevision=self.encoder.revision)
+        return Metadata(
+            modelId=self.encoder.model_id,
+            modelRevision=self.encoder.revision,
+            maxCosineDistance=self.max_cosine_distance,
+            warnings=["RECOMMENDATION_THRESHOLD_NOT_CONFIGURED"] if self.max_cosine_distance is None else [],
+        )
 
     def rank(self, request: RankRequest) -> RankResponse:
         start = perf_counter()
@@ -52,21 +58,29 @@ class Ranker:
         results = []
         for rank, index in enumerate(order, 1):
             candidate = request.candidates[index]
+            score = float(np.clip(scores[index], -1, 1))
             results.append(
                 RankedProduct(
                     productId=ids[index],
                     productVersion=candidate.product.version,
                     rank=rank,
-                    similarityScore=round(float(np.clip(scores[index], -1, 1)), 6),
-                    isRecommended=rank <= request.topK,
+                    similarityScore=round(score, 6),
+                    isRecommended=(
+                        rank <= request.topK
+                        and self.max_cosine_distance is not None
+                        and 1 - score <= self.max_cosine_distance
+                    ),
                     eligibilityStatus=candidate.eligibilityStatus,
                     pendingConditions=candidate.pendingConditions,
                 )
             )
         logger.info(
-            "rank requestId=%r count=%d duration_ms=%.2f cache_hits=%d cache_misses=%d revision=%s contract=rank-v2",
+            "rank requestId=%r count=%d recommended_count=%d max_cosine_distance=%s "
+            "duration_ms=%.2f cache_hits=%d cache_misses=%d revision=%s contract=rank-v2",
             request.requestId,
             len(ids),
+            sum(p.isRecommended for p in results),
+            self.max_cosine_distance,
             (perf_counter() - start) * 1000,
             self.cache.hits - hits,
             self.cache.misses - misses,

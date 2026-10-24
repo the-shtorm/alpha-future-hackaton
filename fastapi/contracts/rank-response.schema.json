@@ -116,7 +116,7 @@
           "const": "cosine_similarity"
         },
         "selectionPolicy": {
-          "const": "top_k_relative_no_quality_threshold"
+          "const": "top_k_cosine_distance_v1"
         },
         "warnings": {
           "type": "array",
@@ -125,6 +125,16 @@
             "minLength": 1,
             "maxLength": 300
           }
+        },
+        "maxCosineDistance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 2,
+          "default": null,
+          "description": "Maximum cosine distance for recommendation; null means no recommendations are marked."
         }
       },
       "required": [

@@ -22,6 +22,11 @@ def test_http_happy_path_schema_and_model_info(client, headers, payload):
     assert client.get("/health/ready").json() == {"status": "ready"}
     info = client.get("/api/v1/model-info", headers=headers).json()
     assert info["dimension"] == 384 and "Path" not in str(info)
+    assert info["selectionPolicy"] == "top_k_cosine_distance_v1"
+    assert info["maxCosineDistance"] is None
+    assert len(response.json()["results"]) == len(payload["candidates"])
+    assert not any(p["isRecommended"] for p in response.json()["results"])
+    assert response.json()["metadata"]["warnings"] == ["RECOMMENDATION_THRESHOLD_NOT_CONFIGURED"]
 
 
 @pytest.mark.parametrize(
@@ -166,3 +171,29 @@ def test_health_remains_responsive_and_busy_has_retry_after(settings, encoder, p
         finally:
             release.set()
         assert first.result().status_code == 200
+
+
+@pytest.mark.parametrize("distance", [-0.01, 2.01, float("nan"), float("inf")])
+def test_invalid_selection_distance_fails_configuration(distance):
+    with pytest.raises(ValueError):
+        Settings(environment="test", ml_internal_api_key="test", recommendation_max_cosine_distance=distance)
+
+
+def test_configured_distance_reaches_ranker_and_model_info(settings, encoder, payload, headers):
+    settings.recommendation_max_cosine_distance = 0
+    with TestClient(create_app(settings, lambda _: encoder)) as client:
+        response = client.post(URL, json=payload, headers=headers).json()
+        assert len(response["results"]) == len(payload["candidates"])
+        assert sum(p["isRecommended"] for p in response["results"]) == min(3, len(payload["candidates"]))
+        assert response["metadata"]["maxCosineDistance"] == 0 and not response["metadata"]["warnings"]
+        assert client.get("/api/v1/model-info", headers=headers).json()["maxCosineDistance"] == 0
+
+
+def test_empty_distance_environment_is_unconfigured(monkeypatch):
+    from app.core.config import calibrated_distance
+
+    monkeypatch.setenv("RECOMMENDATION_MAX_COSINE_DISTANCE", "")
+    assert (
+        Settings(environment="test", ml_internal_api_key="test").recommendation_max_cosine_distance
+        == calibrated_distance()
+    )
