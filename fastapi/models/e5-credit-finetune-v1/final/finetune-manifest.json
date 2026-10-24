@@ -1,0 +1,24 @@
+{
+  "localModelId": "local/e5-credit-finetune-v1",
+  "baseModelId": "intfloat/multilingual-e5-small",
+  "baseRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "labelStatus": "SYNTHETIC_PROPOSED",
+  "trainDatasetSha256": "2a606f94d05d42959b2645301ff1e7c5273b196f36ddc34e8abde19de0836836",
+  "trainingPairsSha256": "edb97f1364faf2089c387508b3e8b1748ce94a67240724cc72e1242439eff295",
+  "maxSeqLength": 512,
+  "dimension": 384,
+  "trainSteps": 1328,
+  "seed": 20261024,
+  "artifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+  "checksums": {
+    "1_Pooling/config.json": "bb80272f7adad76ce93073c25e18113ee66be1e91f60bcdd72aa41d05b28247e",
+    "config.json": "d90c8a402077517604c644f8c289543be33f61c8a714c30a9c7cf8784aed6517",
+    "config_sentence_transformers.json": "342ad93217e91dca54fea8f56d37b4007ac0a7d3928e2e0f788eb116c17522f0",
+    "model.safetensors": "502f9765a9cebed997794d64dcdc905721d0ca7b0c47a66262f227ea42a63b4c",
+    "modules.json": "5286260f53f0f5d318eb02f1565fd30f7ec7c6d305f41ad29e2bb3ec974046a6",
+    "README.md": "6ffbf3aff6777e78bca53f968a12b43396aba82c4db0670f7e10f88c7e8d227a",
+    "sentence_bert_config.json": "5fee3fcdc4a727fad422f0fed0c867b0921eefa9051de221521956ed42eb4c19",
+    "tokenizer.json": "fbcc3c7348739d765de2c86fce14c9c5e2dd47696dbb3cfeed294edfc712d8f0",
+    "tokenizer_config.json": "7f8e591fccaa155b910473a53702be26990095e8904323a4241f7750ecc0273e"
+  }
+}
