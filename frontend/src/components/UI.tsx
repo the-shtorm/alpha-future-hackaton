@@ -1,4 +1,13 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@alfalab/core-components-button';
 import { Input } from '@alfalab/core-components-input';
 
@@ -132,31 +141,194 @@ export function Field({
     />
   );
 }
+/** A single rounded control and an accessible, keyboard-operated popup. */
 export function Select({
   label,
   value,
   options,
   onChange,
+  error,
 }: {
   label: string;
   value: string;
   options: Record<string, string>;
   onChange: (value: string) => void;
+  error?: string;
 }) {
+  const id = useId(),
+    root = useRef<HTMLDivElement>(null),
+    trigger = useRef<HTMLButtonElement>(null),
+    list = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false),
+    [active, setActive] = useState(0);
+  const [position, setPosition] = useState({ left: 0, top: 0, width: 0, maxHeight: 280 });
+  const entries = Object.entries(options),
+    selected = Math.max(
+      0,
+      entries.findIndex(([key]) => key === value),
+    );
+  const typed = useRef({ text: '', time: 0 });
+  const show = () => {
+    setActive(selected);
+    setOpen(true);
+  };
+  const choose = (index: number) => {
+    if (entries[index]) onChange(entries[index][0]);
+    setOpen(false);
+    trigger.current?.focus();
+  };
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const rect = root.current!.getBoundingClientRect();
+      const below = window.innerHeight - rect.bottom - 16,
+        above = rect.top - 16;
+      const height = Math.min(entries.length * 42 + 12, 280);
+      const useAbove = below < height && above > below;
+      const maxHeight = Math.max(42, Math.min(height, useAbove ? above : below));
+      setPosition({
+        left: Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8)),
+        top: useAbove ? rect.top - maxHeight - 7 : rect.bottom + 7,
+        width: rect.width,
+        maxHeight,
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open, entries.length]);
+  useEffect(() => {
+    if (!open) return;
+    const outside = (event: PointerEvent) => {
+      if (
+        !root.current?.contains(event.target as Node) &&
+        !list.current?.contains(event.target as Node)
+      )
+        setOpen(false);
+    };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [open]);
+  useEffect(() => {
+    if (open) list.current?.children[active]?.scrollIntoView({ block: 'nearest' });
+  }, [open, active]);
+  const keyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Escape') {
+      setOpen(false);
+      event.preventDefault();
+      return;
+    }
+    if (event.key === 'Tab') {
+      setOpen(false);
+      return;
+    }
+    if (['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter', ' '].includes(event.key)) {
+      event.preventDefault();
+      if (!open) {
+        show();
+        return;
+      }
+      if (event.key === 'Enter' || event.key === ' ') {
+        choose(active);
+        return;
+      }
+      setActive((current) =>
+        event.key === 'Home'
+          ? 0
+          : event.key === 'End'
+            ? entries.length - 1
+            : (current + (event.key === 'ArrowDown' ? 1 : -1) + entries.length) % entries.length,
+      );
+      return;
+    }
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      const now = Date.now();
+      typed.current = {
+        text:
+          (now - typed.current.time < 700 ? typed.current.text : '') +
+          event.key.toLocaleLowerCase('ru'),
+        time: now,
+      };
+      const found = entries.findIndex(([, text]) =>
+        text.toLocaleLowerCase('ru').startsWith(typed.current.text),
+      );
+      if (found >= 0) {
+        setActive(found);
+        setOpen(true);
+      }
+      event.preventDefault();
+    }
+  };
   return (
-    <label className="select-field">
-      <span>{label}</span>
-      <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)}>
-        {Object.entries(options).map(([key, text]) => (
-          <option key={key} value={key}>
-            {text}
-          </option>
-        ))}
-      </select>
-      <span className="select-chevron" aria-hidden="true">
-        ⌄
-      </span>
-    </label>
+    <div ref={root} className={`select-field ${open ? 'is-open' : ''} ${error ? 'invalid' : ''}`}>
+      <span id={`${id}-label`}>{label}</span>
+      <button
+        ref={trigger}
+        type="button"
+        className="select-trigger"
+        role="combobox"
+        aria-labelledby={`${id}-label`}
+        aria-expanded={open}
+        aria-controls={open ? `${id}-list` : undefined}
+        aria-activedescendant={open ? `${id}-option-${active}` : undefined}
+        aria-haspopup="listbox"
+        aria-invalid={!!error}
+        aria-describedby={error ? `${id}-error` : undefined}
+        onClick={() => (open ? setOpen(false) : show())}
+        onKeyDown={keyboard}
+        onBlur={() => setOpen(false)}
+      >
+        <span>{options[value] ?? entries[0]?.[1] ?? 'Выберите значение'}</span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {error && (
+        <small id={`${id}-error`} className="select-error" role="alert">
+          {error}
+        </small>
+      )}
+      {open &&
+        createPortal(
+          <div
+            ref={list}
+            id={`${id}-list`}
+            className="select-options"
+            role="listbox"
+            aria-labelledby={`${id}-label`}
+            style={position}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {entries.map(([key, text], i) => (
+              <div
+                id={`${id}-option-${i}`}
+                key={key}
+                role="option"
+                aria-selected={key === value}
+                className={`select-option ${i === active ? 'active' : ''}`}
+                onMouseMove={() => setActive(i)}
+                onClick={() => choose(i)}
+              >
+                <span>{text}</span>
+                {key === value && <Icon name="check" size={17} />}
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </div>
   );
 }
 export function Banner({

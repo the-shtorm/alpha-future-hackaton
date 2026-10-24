@@ -244,6 +244,7 @@ class RankingExchange {
     }
 
     private void requireCurrent(UUID id, UUID runId, JsonNode snapshot) {
+        profiles.requireCurrentRun(id, runId);
         var profile = profiles.get(id);
         if (!SelectionProfiles.isCurrent(profile, snapshot, runId))
             throw new ApiFailure(

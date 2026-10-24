@@ -174,7 +174,7 @@ class SelectionProfiles {
         var row =
                 db
                         .sql(
-                                "SELECT profile_snapshot,created_at FROM credit.recommendation_run WHERE id=:run AND profile_id=:profile")
+                                "SELECT profile_snapshot,created_at,policy_version FROM credit.recommendation_run WHERE id=:run AND profile_id=:profile")
                         .param("run", runId)
                         .param("profile", id)
                         .query()
@@ -203,7 +203,8 @@ class SelectionProfiles {
                 "personalRatingAvailable",
                 false,
                 "current",
-                isCurrent(response(profile), snapshot, runId),
+                Eligibility.VERSION.equals(row.get("policy_version"))
+                        && isCurrent(response(profile), snapshot, runId),
                 "items",
                 items);
     }
@@ -213,6 +214,7 @@ class SelectionProfiles {
     Map<String, Object> choose(@PathVariable UUID id, @Valid @RequestBody Choose body) {
         var row = load(id, true, true);
         requireCurrentSchema(row);
+        requireCurrentRun(id, body.runId());
         if (((Number) row.get("row_version")).longValue() != body.expectedVersion())
             throw ApiFailure.conflict();
         var run =
@@ -251,6 +253,8 @@ class SelectionProfiles {
                 || row.get("selected_recommendation_run_id") == null)
             throw new ApiFailure(
                     422, "PRODUCT_REQUIRED", "Выберите продукт по актуальному подбору");
+        requireCurrentRun(id, (UUID) row.get("selected_recommendation_run_id"));
+        form.requireSelectionFields(json.read(row.get("answers").toString()));
         return new Transfer(
                 id,
                 (UUID) row.get("party_id"),
@@ -276,6 +280,21 @@ class SelectionProfiles {
                         .orElseThrow(ApiFailure::missing);
         access.member((UUID) row.get("party_id"), write, false);
         return row;
+    }
+
+    /** Старые снимки доступны для истории, но не для нового выбора или выдачи заявки. */
+    void requireCurrentRun(UUID id, UUID runId) {
+        String version =
+                db.sql(
+                                "SELECT policy_version FROM credit.recommendation_run WHERE id=:run AND profile_id=:id")
+                        .param("run", runId)
+                        .param("id", id)
+                        .query(String.class)
+                        .optional()
+                        .orElseThrow(ApiFailure::missing);
+        if (!Eligibility.VERSION.equals(version))
+            throw new ApiFailure(
+                    409, "SELECTION_STALE", "Правила проверки изменились; повторите подбор");
     }
 
     private void requireCurrentSchema(Map<String, Object> row) {

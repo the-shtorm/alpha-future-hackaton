@@ -350,13 +350,13 @@ export function App() {
                 view="secondary"
                 size={48}
                 disabled={busy}
+                leftAddons={<Icon name="user" size={18} />}
                 onClick={() => {
                   setIntent(null);
                   setLoginError('');
                   setLoginOpen(true);
                 }}
               >
-                <Icon name="user" size={18} />
                 Войти
               </Button>
             )}
@@ -387,6 +387,7 @@ export function App() {
             partyId={partyId}
             onParty={changeParty}
             dictionary={dictionary}
+            products={products}
             onBack={() => setPage('catalog')}
             onSubmit={showResults}
             busy={busy}

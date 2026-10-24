@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /** Проверяет применимость продукта по предварительной форме, не принимает кредитных решений. */
 @Component
 class Eligibility {
-    static final String VERSION = "eligibility-3.0";
+    static final String VERSION = "eligibility-3.1";
 
     enum Status {
         ELIGIBLE,
@@ -141,7 +141,13 @@ class Eligibility {
                 "REVENUE_BELOW_MINIMUM",
                 "financial.revenue",
                 average == null ? Outcome.UNKNOWN : enough ? Outcome.PASS : Outcome.FAIL,
-                "Проверка среднемесячной выручки",
+                average == null
+                        ? "Уточните выручку и период для проверки условий продукта"
+                        : enough
+                                ? "Требование к среднемесячной выручке выполнено"
+                                : "Среднемесячная выручка ниже минимума продукта: нужно не менее "
+                                        + minRevenue.stripTrailingZeros().toPlainString()
+                                        + " ₽ в месяц",
                 average,
                 minRevenue);
         int window = rules.path("revenue_window_months").asInt();

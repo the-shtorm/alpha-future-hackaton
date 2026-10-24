@@ -48,9 +48,7 @@ h3 {
 }
 button:focus-visible,
 a:focus-visible,
-summary:focus-visible,
-select:focus-visible,
-input:focus-visible {
+summary:focus-visible {
   outline: 3px solid #667eff;
   outline-offset: 3px;
 }
@@ -1961,5 +1959,217 @@ input:focus-visible {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Form width includes its summary column; keep equal whitespace on large displays. */
+.wizard-page {
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.wizard-layout {
+  width: 100%;
+}
+.select-field {
+  position: relative;
+  padding: 8px 15px 7px;
+  border: 1px solid transparent;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+.select-field:focus-within,
+.select-field.is-open {
+  box-shadow: 0 0 0 2px #7d85ff;
+  border-color: transparent;
+}
+.select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  text-align: left;
+  color: #28282d;
+  padding: 0;
+  min-height: 24px;
+  width: 100%;
+  font-size: 14px;
+  line-height: 23px;
+}
+.select-trigger > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-trigger > svg {
+  flex-shrink: 0;
+  color: #777784;
+  transition: transform 0.15s;
+}
+.is-open .select-trigger > svg {
+  transform: rotate(180deg);
+}
+.select-trigger:focus-visible {
+  outline: none;
+}
+.select-trigger:disabled {
+  color: #92929a;
+}
+.select-options {
+  position: fixed;
+  z-index: 1000;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: white;
+  padding: 6px;
+  border: 1px solid #e3e3eb;
+  border-radius: 13px;
+  box-shadow: 0 12px 35px #30304426;
+}
+.select-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #393941;
+  cursor: pointer;
+}
+.select-option.active {
+  background: #f1f1f6;
+}
+.select-option[aria-selected='true'] {
+  color: #d52d22;
+  background: #fff0ed;
+}
+.select-option svg {
+  flex-shrink: 0;
+}
+.select-field.invalid {
+  border-color: #ed6157;
+}
+.select-error {
+  color: #d63f34;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.date-field:focus-within {
+  box-shadow: 0 0 0 2px #7d85ff;
+}
+.date-field input:focus {
+  outline: none;
+}
+
+/* Short, finite motion: feedback never delays navigation or form submission. */
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes popup-enter {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .site-main > :is(.wizard-page, .results-page, .account-page),
+  .catalog-hero,
+  .application-layout {
+    animation: surface-enter 220ms ease-out backwards;
+  }
+  .hero-copy > *,
+  .wizard-step-content,
+  .product-grid > .product-card,
+  .saved-list > article,
+  .empty,
+  .banner,
+  details[open] > :not(summary) {
+    animation: content-enter 280ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  }
+  .hero-copy > :nth-child(2),
+  .product-grid > :nth-child(3n + 2),
+  .saved-list > :nth-child(3n + 2) {
+    animation-delay: 45ms;
+  }
+  .hero-copy > :nth-child(n + 3),
+  .product-grid > :nth-child(3n + 3),
+  .saved-list > :nth-child(3n + 3) {
+    animation-delay: 90ms;
+  }
+  .hero-visual {
+    animation: surface-enter 420ms ease-out 90ms backwards;
+  }
+  .modal[open] {
+    animation: content-enter 220ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  }
+  .modal[open]::backdrop {
+    animation: surface-enter 180ms ease-out backwards;
+  }
+  .select-options {
+    transform-origin: center;
+    animation: popup-enter 140ms ease-out backwards;
+  }
+  .product-card {
+    transition:
+      translate 180ms ease-out,
+      box-shadow 180ms ease-out,
+      border-color 180ms ease-out;
+  }
+  .site-header nav button,
+  .category-tabs button,
+  .business-kind button,
+  .usage-options button,
+  .wizard-progress > div,
+  .wizard-progress > div > span {
+    transition:
+      background-color 180ms ease-out,
+      border-color 180ms ease-out,
+      color 180ms ease-out,
+      box-shadow 180ms ease-out;
+  }
+  .product-actions button svg,
+  .hero-actions button svg,
+  .wizard-bottom button svg {
+    transition: translate 160ms ease-out;
+  }
+  .product-actions button:not(:disabled):is(:hover, :focus-visible) svg,
+  .hero-actions button:not(:disabled):is(:hover, :focus-visible) svg,
+  .wizard-bottom button:last-child:not(:disabled):is(:hover, :focus-visible) svg {
+    translate: 3px 0;
+  }
+  .wizard-bottom button:first-child:not(:disabled):is(:hover, :focus-visible) svg {
+    translate: -3px 0;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .product-card:hover {
+      translate: 0 -3px;
+    }
   }
 }
