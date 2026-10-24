@@ -1,74 +1,9 @@
-# Данные backend: две отдельные схемы
+# Данные backend
 
-Источники: [Preliminary Form 1.0](preliminary_form.md), [Data Policy 2.1](data-policy.md).
+Текущая схема полей: [Preliminary Form 2.0 / Data Policy 3.0](backend-fields-v3.md).
+15 полей формы, 13 переносимых, 17 полей заявки.
 
-## Предварительная форма: 19 полей
-
-| Поле | Тип JSON | Назначение |
-|---|---|---|
-| `registration.borrowerKind` | enum string | IP / LLC |
-| `business.sector` | enum string | Отрасль |
-| `business.mspRegistry` | boolean | Членство в МСП; не категория размера |
-| `registration.registeredOn` | date string | YYYY-MM-DD |
-| `business.actualStartedOn` | date string | Не раньше регистрации |
-| `business.taxRegime` | enum string | OSNO/USN/PSN/AUSN/NPD/COMBINED/OTHER/UNKNOWN |
-| `financial.revenue` | decimal string | Выручка за период |
-| `financial.periodFrom` | date string | Начало периода |
-| `financial.periodTo` | date string | Конец периода |
-| `request.purpose` | enum string | Цель из каталога |
-| `request.amount` | decimal string | Желаемая сумма |
-| `request.termMonths` | integer | Срок в месяцах |
-| `registration.country` | enum string | Условное: страна |
-| `business.region` | string | Условное: регион |
-| `business.ipAgeYears` | integer | Условное: только IP |
-| `security.collateralReady` | boolean | Условное: готовность к залогу |
-| `security.guarantorReady` | boolean | Условное: готовность к поручителю |
-| `business.marketplaceMonths` | integer | Условное: стаж маркетплейса |
-| `business.bankAccountMonths` | integer | Условное: стаж счета |
-
-Первые 12 — основной набор, последние 7 — условные поля продуктов/сценариев.
-Долги, доля просрочек, стоимость залога и собственное участие сюда не принимаются.
-Частичное сохранение разрешено. Проверка применимости не принимает кредитных решений.
-
-## Окончательная заявка: 15 полей
-
-| Поле | Тип JSON | Назначение |
-|---|---|---|
-| `registration.borrowerKind` | enum string | IP / LLC |
-| `business.mspRegistry` | boolean | Членство в МСП; не категория размера |
-| `registration.registeredOn` | date string | YYYY-MM-DD |
-| `business.actualStartedOn` | date string | Не раньше регистрации |
-| `business.taxRegime` | enum string | OSNO/USN/PSN/AUSN/NPD/COMBINED/OTHER/UNKNOWN |
-| `financial.revenue` | decimal string | Выручка за период |
-| `financial.periodFrom` | date string | Начало периода |
-| `financial.periodTo` | date string | Конец периода |
-| `request.purpose` | enum string | Цель из каталога |
-| `request.amount` | decimal string | Желаемая сумма |
-| `request.termMonths` | integer | Срок в месяцах |
-| `financial.monthlyDebtPayment` | decimal string | Новый ввод: текущие платежи, 0 если нет |
-| `financial.overdue` | decimal number | Новый ввод: доля [0,1], не boolean и не строка |
-| `security.collateralValue` | decimal string | Новый ввод: стоимость обеспечения |
-| `project.ownContributionPct` | decimal percent string | Новый ввод: процент собственных средств 0..100 |
-
-Переносятся только 11 общих полей. Четыре новых поля заполняются отдельно.
-Остальные восемь полей подбора остаются в preliminaryContext, не в answers заявки.
-Для банковской проверки требуются 11 общих полей и платежи/просрочка; стоимость
-обеспечения и собственное участие обязательны по условиям продукта.
-Для создания черновика нужны сумма/срок/цель/форма бизнеса; остальное можно дополнить.
-ИНН, название компании, владельцы и выбранная версия продукта — отдельные серверные реквизиты.
-
-## Типы, пропуски и подтверждение
-
-Деньги — неотрицательная десятичная строка до 17 цифр целой части и 2 после точки;
-сумма кредита положительна. Процент собственных средств — строка 0..100.
-Срок — integer 1..1200; прочий стаж — integer 0..1200. Даты — прошедшие YYYY-MM-DD.
-Строки непустые, до 1000 символов. Будущие даты и несовместимый режим ООО отклоняются.
-
-value_status: KNOWN для известного допустимого значения (включая 0/false), UNKNOWN для
-пропуска/null/кода UNKNOWN, INVALID для технически невозможного значения.
-Невалидный ввод API отклоняет 400. Источник и verification_status учитываются отдельно:
-ручные сведения сохраняются DECLARED, а подтверждение владельцем фиксируется при submit.
-KNOWN не означает независимую проверку банком или реестром.
+Ниже описан сохранённый финансовый алгоритм 2.1 и DEMO-заглушка, а не ML 3.0.
 
 ## Финансовые расчеты
 
@@ -121,3 +56,6 @@ category REVENUE/REVENUE_REFUND/INTERNAL_TRANSFER/LOAN/EXPENSE/UNKNOWN.
 UNKNOWN-категория или отсутствие банковской проверки не считаются нулевой выручкой.
 После PASS любое точное расхождение с заявленной выручкой направляет на ручную проверку.
 Это консервативное правило демо; числовой порог существенности не выдумывается.
+
+
+Новый сценарий ручного обмена и форма 1.1: [Query/Passage MVP — реализация](ranking-exchange.md).

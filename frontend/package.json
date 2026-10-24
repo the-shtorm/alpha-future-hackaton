@@ -1,0 +1,30 @@
+{
+  "name": "alpha-business-cabinet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node tests/form.test.mjs"
+  },
+  "dependencies": {
+    "@alfalab/core-components-config": "1.1.0",
+    "@alfalab/core-components-stack-context": "1.0.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "@alfalab/core-components-button": "13.2.4",
+    "@alfalab/core-components-input": "17.2.2",
+    "@alfalab/core-components-textarea": "10.1.4",
+    "@alfalab/core-components-vars": "11.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.1.12"
+  }
+}

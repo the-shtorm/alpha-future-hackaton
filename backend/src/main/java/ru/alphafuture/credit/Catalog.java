@@ -1,5 +1,6 @@
 package ru.alphafuture.credit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,6 +25,36 @@ class Catalog {
             JsonNode purposes,
             JsonNode policy,
             boolean synthetic) {
+        /** Механизм финансирования в словаре Data Policy 3.0 и Query/Passage. */
+        @JsonProperty("type")
+        String type() {
+            return switch (policy.path("facility_kind").asText()) {
+                case "TERM" -> "TERM_LOAN";
+                case "REVOLVING_LINE" -> "REVOLVING_CREDIT_LINE";
+                case "NON_REVOLVING_LINE" -> "NON_REVOLVING_CREDIT_LINE";
+                case "OVERDRAFT" -> "OVERDRAFT";
+                default -> null;
+            };
+        }
+
+        /** Процентная ставка хранится в процентных пунктах, без деления на 100. */
+        @JsonProperty("interestRateType")
+        String interestRateType() {
+            String type = policy.path("pricing").path("rate_type").asText();
+            return Set.of("FIXED", "VARIABLE").contains(type) ? type : null;
+        }
+
+        @JsonProperty("usageModes")
+        List<String> usageModes() {
+            if (type() == null) return List.of();
+            return List.of(
+                    switch (type()) {
+                        case "TERM_LOAN" -> "ONE_TIME";
+                        case "OVERDRAFT" -> "ACCOUNT_RESERVE";
+                        default -> "IN_PARTS";
+                    });
+        }
+
         BigDecimal rate() {
             return annualRatePct == null ? null : new BigDecimal(annualRatePct);
         }
@@ -34,7 +65,11 @@ class Catalog {
     private static final String COLUMNS =
             "SELECT p.id,v.id AS version_id,p.code,p.name,v.currency,v.min_amount,v.max_amount,v.min_term_months,v.max_term_months,v.annual_rate_pct,v.allowed_borrower_kinds,v.allowed_purposes,v.policy,p.is_synthetic FROM credit.credit_product p JOIN credit.credit_product_version v ON v.product_id=p.id ";
     private static final String ACTIVE =
-            "p.active AND v.effective_from<=now() AND (v.effective_to IS NULL OR v.effective_to>now())";
+            "p.active AND v.effective_from<=now() AND (v.effective_to IS NULL OR v.effective_to>now()) "
+                    + "AND NOT EXISTS (SELECT 1 FROM credit.credit_product_version newer "
+                    + "WHERE newer.product_id=v.product_id AND newer.effective_from<=now() "
+                    + "AND (newer.effective_to IS NULL OR newer.effective_to>now()) "
+                    + "AND (newer.effective_from,newer.id)>(v.effective_from,v.id))";
 
     Catalog(JdbcClient db, Json json) {
         this.db = db;
@@ -148,7 +183,9 @@ class Catalog {
 
     Product frozen(JsonNode snapshot) {
         try {
-            return json.mapper.treeToValue(snapshot, Product.class);
+            var stored = (com.fasterxml.jackson.databind.node.ObjectNode) snapshot.deepCopy();
+            stored.remove(List.of("type", "interestRateType", "usageModes"));
+            return json.mapper.treeToValue(stored, Product.class);
         } catch (Exception ex) {
             throw new IllegalStateException("Stored product snapshot is invalid", ex);
         }

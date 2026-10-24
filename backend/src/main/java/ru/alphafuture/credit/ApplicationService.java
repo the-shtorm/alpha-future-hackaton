@@ -24,7 +24,8 @@ class ApplicationService {
             UUID assignedTo,
             UUID profileId,
             Long profileVersion,
-            JsonNode preliminaryContext) {}
+            JsonNode preliminaryContext,
+            String formVersion) {}
 
     record HumanDecision(DataPolicy.Kind kind, String reason, List<String> missingFields) {}
 
@@ -94,7 +95,8 @@ class ApplicationService {
                                                         ? json.mapper.createObjectNode()
                                                         : json.read(
                                                                 rs.getString(
-                                                                        "source_preliminary_snapshot"))))
+                                                                        "source_preliminary_snapshot")),
+                                                rs.getString("form_version")))
                         .optional()
                         .orElseThrow(ApiFailure::missing);
         if (!bank) access.member(app.partyId(), write, owner);
@@ -278,14 +280,23 @@ class ApplicationService {
         editable(app, expected);
         if (patch == null || !patch.isObject())
             throw ApiFailure.invalid("answers", "Нужен объект изменений");
-        var answers = json.merge(app.answers(), patch);
+        // Upgrade only an editable draft. Submitted revisions and original context stay immutable.
+        var base = FormPolicy.project(app.answers(), FormPolicy.APPLICATION_FIELDS);
+        if (!FormPolicy.APPLICATION_VERSION.equals(app.formVersion())) {
+            var inherited =
+                    FormPolicy.project(
+                            app.preliminaryContext().path("answers"), FormPolicy.TRANSFER_FIELDS);
+            base = json.merge(inherited, base);
+        }
+        var answers = json.merge(base, patch);
         form.validate(answers);
         catalog.validate(catalog.get(app.productVersionId(), false), answers);
         party(app.partyId(), answers);
         db.sql(
-                        "UPDATE credit.loan_application SET draft_answers=CAST(:answers AS jsonb),draft_field_sources=CAST(:sources AS jsonb),requested_amount=:amount,requested_term_months=:term,purpose=:purpose,row_version=row_version+1 WHERE id=:id")
+                        "UPDATE credit.loan_application SET form_version=:form,draft_answers=CAST(:answers AS jsonb),draft_field_sources=CAST(:sources AS jsonb),requested_amount=:amount,requested_term_months=:term,purpose=:purpose,row_version=row_version+1 WHERE id=:id")
                 .param("id", id)
                 .param("answers", json.write(answers))
+                .param("form", FormPolicy.APPLICATION_VERSION)
                 .param("sources", json.write(sources(answers, app.answers(), app.fieldSources())))
                 .param("amount", FormPolicy.money(answers, "request.amount"))
                 .param("term", FormPolicy.value(answers, "request.termMonths").asInt())
@@ -398,8 +409,9 @@ class ApplicationService {
                                         .put("financialEvidenceId", evidence.toString()));
         String canonical = json.canonical(snapshot), hash = Json.hash(canonical);
         db.sql(
-                        "INSERT INTO credit.application_revision(id,application_id,revision_no,submitted_by,form_version,product_version_id,snapshot,snapshot_sha256,submission_evidence,submitted_at) VALUES (:revision,:app,(SELECT coalesce(max(revision_no),0)+1 FROM credit.application_revision WHERE application_id=:app),:user,'application-2.1',:product,CAST(:snapshot AS jsonb),:hash,CAST(:evidence AS jsonb),:now)")
+                        "INSERT INTO credit.application_revision(id,application_id,revision_no,submitted_by,form_version,product_version_id,snapshot,snapshot_sha256,submission_evidence,submitted_at) VALUES (:revision,:app,(SELECT coalesce(max(revision_no),0)+1 FROM credit.application_revision WHERE application_id=:app),:user,:form,:product,CAST(:snapshot AS jsonb),:hash,CAST(:evidence AS jsonb),:now)")
                 .param("revision", revision)
+                .param("form", FormPolicy.APPLICATION_VERSION)
                 .param("app", id)
                 .param("user", access.user())
                 .param("product", app.productVersionId())
@@ -731,7 +743,13 @@ class ApplicationService {
                         .anyMatch(reason -> reason.result() == Eligibility.Outcome.REVIEW)) {
             conditions.put("requiresManualReview", true);
             conditions.put("reasonCode", "MANUAL_REVIEW_REQUIRED");
-            conditions.put("manualReviewReason", "REVENUE_HISTORY_INCOMPLETE");
+            conditions.put(
+                    "manualReviewReasons",
+                    applicable.reasons().stream()
+                            .filter(reason -> reason.result() == Eligibility.Outcome.REVIEW)
+                            .map(Eligibility.Reason::code)
+                            .distinct()
+                            .toList());
         }
         return new DataPolicy.Review(
                 result.kind(), result.reason(), conditions, result.alternativeTerms());

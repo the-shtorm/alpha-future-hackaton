@@ -89,10 +89,10 @@ class DemoScenarios {
         var base =
                 json.read(
                         """
-            {"request":{"amount":"1000000.00","termMonths":12,"purpose":"WORKING_CAPITAL"},
-            "registration":{"borrowerKind":"LLC","registeredOn":"2020-01-01","country":"RU"},
-            "business":{"actualStartedOn":"2020-01-01","sector":"TRADE","region":"77","taxRegime":"USN","mspRegistry":true,"marketplaceMonths":12,"bankAccountMonths":12},
-            "financial":{"revenue":"24000000.00"},"security":{"collateralReady":false,"guarantorReady":true}}
+            {"request":{"amount":"1000000.00","termMonths":12,"purpose":"WORKING_CAPITAL","usageMode":"ONE_TIME"},
+            "registration":{"borrowerKind":"LLC"},
+            "business":{"actualStartedOn":"2020-01-01","sector":"TRADE","taxRegime":"USN","mspRegistry":true},
+            "financial":{"revenue":"24000000.00"},"security":{"collateralReady":"NO","guarantorReady":"YES"}}
             """);
         ((ObjectNode) base.path("financial"))
                 .put("periodFrom", start.toString())
@@ -182,7 +182,7 @@ class DemoScenarios {
         ((ObjectNode) secured.path("request"))
                 .put("purpose", "EQUIPMENT")
                 .put("amount", "3000000.00");
-        ((ObjectNode) secured.path("security")).put("collateralReady", true);
+        ((ObjectNode) secured.path("security")).put("collateralReady", "YES");
         var security = additional.deepCopy();
         ((ObjectNode) security.path("security")).put("collateralValue", "4000000.00");
         ((ObjectNode) security.path("project")).put("ownContributionPct", "20.00");

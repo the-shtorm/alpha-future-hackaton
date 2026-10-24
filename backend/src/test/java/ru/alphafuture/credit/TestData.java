@@ -16,10 +16,10 @@ class TestData {
         return (ObjectNode)
                 JSON.read(
                         """
-        {"request":{"purpose":"WORKING_CAPITAL","amount":"1000000.00","termMonths":12},
-        "registration":{"borrowerKind":"LLC","registeredOn":"2020-01-01","country":"RU"},
-        "business":{"actualStartedOn":"2020-01-01","region":"77","sector":"TRADE","taxRegime":"USN","mspRegistry":false,"marketplaceMonths":12,"bankAccountMonths":12},
-        "financial":{"revenue":"24000000.00","periodFrom":"2025-10-01","periodTo":"2026-09-30"},"security":{"collateralReady":false,"guarantorReady":true}}
+        {"request":{"purpose":"WORKING_CAPITAL","usageMode":"ONE_TIME","amount":"1000000.00","termMonths":12},
+        "registration":{"borrowerKind":"LLC"},
+        "business":{"actualStartedOn":"2020-01-01","sector":"TRADE","taxRegime":"USN","mspRegistry":false},
+        "financial":{"revenue":"24000000.00","periodFrom":"2025-10-01","periodTo":"2026-09-30"},"security":{"collateralReady":"NO","guarantorReady":"YES"}}
         """);
     }
 

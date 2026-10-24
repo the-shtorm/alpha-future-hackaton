@@ -12,3 +12,5 @@ work/
 __pycache__/
 *.pyc
 
+
+**/*.tsbuildinfo

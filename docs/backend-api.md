@@ -1,4 +1,6 @@
-# REST API: Data Policy 2.1 и Preliminary Form 1.0
+> Актуальная схема: [Preliminary Form 2.0 / Data Policy 3.0](backend-fields-v3.md). Изменены поля; алгоритм ML 3.0 не реализован.
+
+# REST API: Data Policy 2.1 и Preliminary Form 2.0
 
 Base URL: `http://localhost:8080`, учитывайте BACKEND_PORT из .env.
 Swagger: `/swagger-ui/index.html`; OpenAPI: `/v3/api-docs`.
@@ -18,11 +20,11 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 | GET | `/companies/{id}/profile` | Нет | Сведения доступной компании | Участник компании |
 | GET | `/products` | page=0, size=12 (1..50) | Каталог действующих версий, totalElements | No Auth |
 | GET | `/products/{id}` | UUID продукта или версии | Полные условия выбранной версии | No Auth |
-| GET | `/forms/application` | Нет | 15 полей окончательной заявки и 11 transferredFields | Любой пользователь |
-| POST | `/selection-profiles` | partyId, answers | 19 полей, частичная форма; rowVersion, fieldSources, value_status | OWNER/EDITOR |
+| GET | `/forms/application` | Нет | 17 полей окончательной заявки и 13 transferredFields | Любой пользователь |
+| POST | `/selection-profiles` | partyId, answers | 15 полей, частичная форма; rowVersion, fieldSources, value_status | OWNER/EDITOR |
 | GET | `/selection-profiles/{id}` | Нет | Форма подбора; изменение сбрасывает выбор продукта | Участник компании |
 | PATCH | `/selection-profiles/{id}` | expectedVersion, answers | Форма подбора; изменение сбрасывает выбор продукта | OWNER/EDITOR |
-| POST | `/applications` | profileId, expectedProfileVersion, answers (дополнения по схеме 15 полей) | DRAFT из выбранного профиля, отдельно preliminaryContext | OWNER/EDITOR |
+| POST | `/applications` | profileId, expectedProfileVersion, answers (дополнения по схеме 17 полей) | DRAFT из выбранного профиля, отдельно preliminaryContext | OWNER/EDITOR |
 | GET | `/applications` | page, size | Заявки доступных компаний | Участник компании |
 | GET | `/applications/{id}` | Нет | Текущий черновик/статус/версия | Участник или банк |
 | PATCH | `/applications/{id}` | expectedVersion, answers | Слияние ответов, версия +1 | OWNER/EDITOR; DRAFT/NEEDS_INFO |
@@ -42,7 +44,7 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 | POST | `/applications/{id}/offers/accept` | offerId, confirmed=true | OFFER_ACCEPTED | OWNER |
 | POST | `/applications/{id}/contract/sign` | confirmed=true | SIGNED, условный договор | OWNER |
 | POST | `/bank/applications/{id}/disburse` | confirmed=true | DISBURSED, одна синтетическая запись | Назначенный BANK_APPROVER |
-| GET | `/forms/preliminary` | Нет | 19 полей; 7 conditionalFields | Любой пользователь |
+| GET | `/forms/preliminary` | Нет | 15 полей; 5 requiredForSelection | Любой пользователь |
 | POST | `/selection-profiles/{id}/eligibility` | Нет | runId, profileVersion, причины; порядок по применимости/коду, personalRatingAvailable=false | OWNER/EDITOR |
 | GET | `/selection-profiles/{id}/recommendations/{runId}` | Нет | Сохраненный результат; current=false после изменения формы | Участник компании |
 | PUT | `/selection-profiles/{id}/selected-product` | expectedVersion, runId, productVersionId | Выбран продукт; rowVersion+1; старый run →409, INELIGIBLE →422 | OWNER/EDITOR |
@@ -57,7 +59,7 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 
 ## Переход от формы к заявке
 
-1. POST /selection-profiles с partyId и 19-польной формой.
+1. POST /selection-profiles с partyId и 15-польной формой.
 2. POST /selection-profiles/{id}/eligibility: сохранить runId.
 3. PUT /selection-profiles/{id}/selected-product с текущей expectedVersion и выбранной версией.
 4. POST /applications:
@@ -74,14 +76,14 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 }
 ```
 
-Сервер переносит ровно 11 общих полей. Дополнения/редактирование принимаются только по
-15-польной схеме заявки. partyId/productVersionId/status/fieldSources не подменяются клиентом.
+Сервер переносит ровно 13 общих полей. Дополнения/редактирование принимаются только по
+17-польной схеме заявки. partyId/productVersionId/status/fieldSources не подменяются клиентом.
 Отдельный preliminaryContext хранит источник выбора. После PATCH формы выбор сбрасывается;
 старый результат сохраняется и не может использоваться для нового выбора.
 
 PATCH заявки: expectedVersion и answers; null удаляет поле, массивы не являются полями анкеты.
 В DRAFT/NEEDS_INFO можно явно обновить контекст того же профиля через refresh-preliminary;
-текущие 15 ответов при этом не перезаписываются.
+текущие 17 ответов при этом не перезаписываются.
 
 ## Подача и банковская обработка
 
@@ -168,3 +170,18 @@ application/problem+json содержит code/detail/fields без SQL, ток�
 409 — версия, статус, чужое назначение, hash или идемпотентность;
 413 — размер файла; 422 — запрет выбора/одобрения или отсутствие макроконтекста;
 503 — недоступный файл. Машинные причины бизнес-проверок — conditions.reasonCode и eligibility.reasons.
+
+
+Новый сценарий ручного обмена и форма 2.0: [Query/Passage MVP — реализация](ranking-exchange.md).
+
+
+## Ручное ранжирование MVP
+
+| Метод | Endpoint | Результат | Доступ |
+|---|---|---|---|
+| GET | `/forms/preliminary/dictionaries` | Общие словари целей, отраслей, использования и readiness | Авторизованный пользователь |
+| GET | `/selection-profiles/{id}/recommendations/{runId}/ranking-export` | Снимок формы, queryFields, допустимые версии и предупреждения | Член компании |
+| POST | `/selection-profiles/{id}/recommendations/{runId}/ranking-result` | Проверка и неизменяемое сохранение внешнего порядка/similarityScore | OWNER/EDITOR |
+| GET | `/selection-profiles/{id}/recommendations/{runId}/ranking-result` | Сходство вместе с исходными eligibilityStatus/pendingConditions | Член компании |
+
+Тело ответа команды и ошибки: [контракт обмена](ranking-exchange.md).

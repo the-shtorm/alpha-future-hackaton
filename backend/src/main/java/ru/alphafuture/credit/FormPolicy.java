@@ -6,7 +6,7 @@ import java.time.*;
 import java.util.*;
 import org.springframework.stereotype.Component;
 
-/** Раздельные схемы Preliminary Form 1.0 (19 полей) и Data Policy 2.1 (15 полей). */
+/** Схемы Preliminary Form 2.0 и полей Data Policy 3.0: 15 и 17 явных путей JSON. */
 @Component
 class FormPolicy {
     enum Type {
@@ -31,15 +31,17 @@ class FormPolicy {
         APPLICATION
     }
 
-    static final String PRELIMINARY_VERSION = "preliminary-1.0";
-    static final String APPLICATION_VERSION = "application-2.1";
+    static final String PRELIMINARY_VERSION = "preliminary-2.0";
+    static final String APPLICATION_VERSION = "application-3.0";
     static final Set<String> TRANSFER_FIELDS =
             Set.of(
                     "request.amount",
                     "request.termMonths",
                     "request.purpose",
                     "registration.borrowerKind",
-                    "registration.registeredOn",
+                    "business.sector",
+                    "security.collateralReady",
+                    "security.guarantorReady",
                     "business.actualStartedOn",
                     "business.taxRegime",
                     "business.mspRegistry",
@@ -60,16 +62,7 @@ class FormPolicy {
                         "project.ownContributionPct"));
         APPLICATION_FIELDS = Collections.unmodifiableSet(application);
         var preliminary = new TreeSet<>(TRANSFER_FIELDS);
-        preliminary.addAll(
-                List.of(
-                        "business.sector",
-                        "registration.country",
-                        "business.region",
-                        "business.ipAgeYears",
-                        "security.collateralReady",
-                        "security.guarantorReady",
-                        "business.marketplaceMonths",
-                        "business.bankAccountMonths"));
+        preliminary.addAll(List.of("request.usageMode", "request.description"));
         PRELIMINARY_FIELDS = Collections.unmodifiableSet(preliminary);
         var fields = new TreeMap<String, Type>();
         for (var entry :
@@ -81,32 +74,24 @@ class FormPolicy {
                                                 "financial.monthlyDebtPayment",
                                                 "security.collateralValue"),
                                 Type.PERCENT, List.of("project.ownContributionPct"),
-                                Type.INTEGER,
-                                        List.of(
-                                                "request.termMonths",
-                                                "business.ipAgeYears",
-                                                "business.marketplaceMonths",
-                                                "business.bankAccountMonths"),
+                                Type.INTEGER, List.of("request.termMonths"),
                                 Type.DATE,
                                         List.of(
-                                                "registration.registeredOn",
                                                 "business.actualStartedOn",
                                                 "financial.periodFrom",
                                                 "financial.periodTo"),
-                                Type.BOOLEAN,
-                                        List.of(
-                                                "business.mspRegistry",
-                                                "security.collateralReady",
-                                                "security.guarantorReady"),
+                                Type.BOOLEAN, List.of("business.mspRegistry"),
                                 Type.FRACTION, List.of("financial.overdue"),
                                 Type.CODE,
                                         List.of(
                                                 "request.purpose",
+                                                "request.usageMode",
+                                                "security.collateralReady",
+                                                "security.guarantorReady",
                                                 "registration.borrowerKind",
-                                                "registration.country",
                                                 "business.sector",
                                                 "business.taxRegime"),
-                                Type.TEXT, List.of("business.region"))
+                                Type.TEXT, List.of("request.description"))
                         .entrySet())
             entry.getValue().forEach(key -> fields.put(key, entry.getKey()));
         FIELDS = Collections.unmodifiableMap(fields);
@@ -158,40 +143,58 @@ class FormPolicy {
         String kind = text(answers, "registration.borrowerKind");
         if (kind != null && !Set.of("IP", "LLC").contains(kind))
             throw ApiFailure.invalid("registration.borrowerKind", "Укажите IP или LLC");
-        if (stage == Stage.PRELIMINARY
-                && kind != null
-                && !kind.equals("IP")
-                && text(answers, "business.ipAgeYears") != null)
-            throw ApiFailure.invalid("business.ipAgeYears", "Поле заполняется только для ИП");
         String regime = text(answers, "business.taxRegime");
         if (regime != null
-                && !Set.of("OSNO", "USN", "PSN", "AUSN", "NPD", "COMBINED", "OTHER", "UNKNOWN")
-                        .contains(regime))
+                && !Set.of("OSNO", "USN", "PSN", "AUSN", "NPD", "UNKNOWN").contains(regime))
             throw ApiFailure.invalid("business.taxRegime", "Неизвестный налоговый режим");
         if ("LLC".equals(kind) && Set.of("PSN", "NPD").contains(regime == null ? "" : regime))
             throw ApiFailure.invalid("business.taxRegime", "Налоговый режим несовместим с ООО");
+        checkCode(answers, "request.usageMode", RankingVocabulary.USAGE_MODES.keySet());
+        checkCode(answers, "request.purpose", RankingVocabulary.PURPOSES.keySet());
+        var sectors = new HashSet<>(RankingVocabulary.SECTORS.keySet());
+        sectors.add("UNKNOWN"); // Explicit unknown in drafts is never a known sector at scoring.
+        checkCode(answers, "business.sector", sectors);
+        for (String field : List.of("security.collateralReady", "security.guarantorReady"))
+            checkCode(answers, field, RankingVocabulary.READINESS.keySet());
+        String description = text(answers, "request.description");
+        if (description != null
+                && (description.length() > 500 || description.matches("(?s).*<[^>]*>.*")))
+            throw ApiFailure.invalid("request.description", "Не более 500 символов, без HTML");
         LocalDate from = date(answers, "financial.periodFrom"),
-                to = date(answers, "financial.periodTo"),
-                registered = date(answers, "registration.registeredOn"),
-                started = date(answers, "business.actualStartedOn");
+                to = date(answers, "financial.periodTo");
         if (from != null && to != null && from.isAfter(to))
             throw ApiFailure.invalid("financial.periodTo", "Конец периода раньше начала");
-        if (registered != null && started != null && started.isBefore(registered))
-            throw ApiFailure.invalid(
-                    "business.actualStartedOn", "Начало деятельности раньше регистрации");
+    }
+
+    /** Минимальные ответы нужны до фильтрации, но не для сохранения черновика. */
+    void requireSelectionFields(JsonNode answers) {
+        for (String path :
+                List.of(
+                        "registration.borrowerKind",
+                        "request.purpose",
+                        "request.amount",
+                        "request.termMonths",
+                        "request.usageMode"))
+            if (text(answers, path) == null)
+                throw ApiFailure.invalid(path, "Обязательное поле для подбора");
+    }
+
+    private void checkCode(JsonNode answers, String field, Set<String> codes) {
+        String value = text(answers, field);
+        if (value != null && !codes.contains(value))
+            throw ApiFailure.invalid(field, "Неизвестный код");
     }
 
     private void validateValue(String path, JsonNode value, Type type) {
         switch (type) {
             case MONEY, PERCENT -> {
                 if (!value.isTextual()
-                        || !value.asText().matches("(?:0|[1-9][0-9]{0,16})(?:\\.[0-9]{1,2})?"))
+                        || !value.asText().matches("(?:0|[1-9][0-9]{0,16})\\.[0-9]{2}"))
                     throw ApiFailure.invalid(
                             path,
-                            "Нужна неотрицательная десятичная строка, до 2 знаков после точки");
+                            "Нужна неотрицательная десятичная строка с 2 знаками после точки");
                 var number = new BigDecimal(value.asText());
-                if ((path.equals("request.amount") || path.equals("project.purchasePrice"))
-                        && number.signum() == 0)
+                if (path.equals("request.amount") && number.signum() == 0)
                     throw ApiFailure.invalid(path, "Нужно положительное значение");
                 if (type == Type.PERCENT && number.compareTo(new BigDecimal("100")) > 0)
                     throw ApiFailure.invalid(path, "Процент должен быть от 0 до 100");
@@ -206,7 +209,7 @@ class FormPolicy {
                 if (!value.isIntegralNumber()
                         || !value.canConvertToInt()
                         || value.asInt() < 0
-                        || value.asInt() > 1200
+                        || value.asInt() > 360
                         || path.equals("request.termMonths") && value.asInt() == 0)
                     throw ApiFailure.invalid(path, "Недопустимое целое число");
             }
@@ -248,7 +251,7 @@ class FormPolicy {
                                     && !node.isNull()
                                     && !(type == Type.CODE && node.asText().equals("UNKNOWN"))) {
                                 try {
-                                    validateValue(key, node, type);
+                                    validate(project(answers, Set.of(key)), stage);
                                     status = ValueStatus.KNOWN;
                                 } catch (ApiFailure ex) {
                                     status = ValueStatus.INVALID;
@@ -264,7 +267,7 @@ class FormPolicy {
         var result = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();
         for (String path : fields) {
             var node = value(source, path);
-            if (node.isMissingNode() || node.isNull()) continue;
+            if (node.isMissingNode()) continue;
             var parts = path.split("\\.");
             var section =
                     result.has(parts[0])

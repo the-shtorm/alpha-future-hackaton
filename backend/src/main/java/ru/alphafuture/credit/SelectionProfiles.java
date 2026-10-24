@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Предварительная форма 1.0, проверка продуктов и фиксация выбора; окончательные данные не
+ * Предварительная форма 2.0, проверка продуктов и фиксация выбора; окончательные данные не
  * принимаются.
  */
 @RestController
@@ -93,11 +93,13 @@ class SelectionProfiles {
         if (!body.answers().isObject())
             throw ApiFailure.invalid("answers", "Нужен объект изменений");
         var old = json.read(row.get("answers").toString());
-        var answers = json.merge(old, body.answers());
+        var answers =
+                json.merge(FormPolicy.project(old, FormPolicy.PRELIMINARY_FIELDS), body.answers());
         form.validatePreliminary(answers);
         db.sql(
-                        "UPDATE credit.preliminary_profile SET answers=CAST(:answers AS jsonb),field_sources=CAST(:sources AS jsonb),selected_product_version_id=NULL,selected_recommendation_run_id=NULL,row_version=row_version+1 WHERE id=:id")
+                        "UPDATE credit.preliminary_profile SET form_version=:form,answers=CAST(:answers AS jsonb),field_sources=CAST(:sources AS jsonb),selected_product_version_id=NULL,selected_recommendation_run_id=NULL,row_version=row_version+1 WHERE id=:id")
                 .param("id", id)
+                .param("form", FormPolicy.PRELIMINARY_VERSION)
                 .param("answers", json.write(answers))
                 .param(
                         "sources",
@@ -115,7 +117,9 @@ class SelectionProfiles {
     Map<String, Object> evaluate(@PathVariable UUID id) {
         var row = load(id, true, true);
         var answers = json.read(row.get("answers").toString());
+        requireCurrentSchema(row);
         form.validatePreliminary(answers);
+        form.requireSelectionFields(answers);
         Instant asOf = Instant.now();
         var products = catalog.all();
         var results =
@@ -137,7 +141,13 @@ class SelectionProfiles {
                         "asOf",
                         asOf.toString(),
                         "products",
-                        products);
+                        products,
+                        "semanticsVersion",
+                        ProductSemantics.VERSION,
+                        "semanticProducts",
+                        products.stream().map(ProductSemantics::describe).toList(),
+                        "rankingTopK",
+                        RankingExchange.TOP_K);
         db.sql(
                         "INSERT INTO credit.recommendation_run(id,profile_id,profile_snapshot,model_version,policy_version) VALUES (:id,:profile,CAST(:snapshot AS jsonb),'NOT_USED',:policy)")
                 .param("id", run)
@@ -193,7 +203,7 @@ class SelectionProfiles {
                 "personalRatingAvailable",
                 false,
                 "current",
-                snapshot.path("answers").equals(json.read(profile.get("answers").toString())),
+                isCurrent(response(profile), snapshot, runId),
                 "items",
                 items);
     }
@@ -202,6 +212,7 @@ class SelectionProfiles {
     @Transactional
     Map<String, Object> choose(@PathVariable UUID id, @Valid @RequestBody Choose body) {
         var row = load(id, true, true);
+        requireCurrentSchema(row);
         if (((Number) row.get("row_version")).longValue() != body.expectedVersion())
             throw ApiFailure.conflict();
         var run =
@@ -234,6 +245,7 @@ class SelectionProfiles {
 
     Transfer transfer(UUID id, long expected) {
         var row = load(id, true, true);
+        requireCurrentSchema(row);
         if (((Number) row.get("row_version")).longValue() != expected) throw ApiFailure.conflict();
         if (row.get("selected_product_version_id") == null
                 || row.get("selected_recommendation_run_id") == null)
@@ -249,7 +261,7 @@ class SelectionProfiles {
                 (UUID) row.get("selected_recommendation_run_id"));
     }
 
-    private Map<String, Object> load(UUID id, boolean write, boolean lock) {
+    Map<String, Object> load(UUID id, boolean write, boolean lock) {
         var row =
                 db
                         .sql(
@@ -264,6 +276,24 @@ class SelectionProfiles {
                         .orElseThrow(ApiFailure::missing);
         access.member((UUID) row.get("party_id"), write, false);
         return row;
+    }
+
+    private void requireCurrentSchema(Map<String, Object> row) {
+        if (!FormPolicy.PRELIMINARY_VERSION.equals(row.get("form_version")))
+            throw new ApiFailure(
+                    409,
+                    "FORM_UPGRADE_REQUIRED",
+                    "Сохраните предварительную форму по новой схеме и повторите подбор");
+    }
+
+    static boolean isCurrent(Map<String, Object> profile, JsonNode snapshot, UUID runId) {
+        long version = ((Number) profile.get("rowVersion")).longValue();
+        long source = snapshot.path("profileVersion").asLong();
+        return FormPolicy.PRELIMINARY_VERSION.equals(profile.get("formVersion"))
+                && FormPolicy.PRELIMINARY_VERSION.equals(snapshot.path("formVersion").asText())
+                && snapshot.path("answers").equals(profile.get("answers"))
+                && (version == source
+                        || version == source + 1 && runId.equals(profile.get("selectedRunId")));
     }
 
     private Map<String, Object> response(Map<String, Object> row) {

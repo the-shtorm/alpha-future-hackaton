@@ -1,4 +1,6 @@
-# Postman: Data Policy 2.1 / Preliminary Form 1.0
+> Актуальная схема: [Preliminary Form 2.0 / Data Policy 3.0](backend-fields-v3.md). Изменены поля; алгоритм ML 3.0 не реализован.
+
+# Postman: Data Policy 2.1 / Preliminary Form 2.0
 
 Это новая последовательность: форма подбора → eligibility → выбор → отдельная заявка.
 Старые запросы создания заявки через partyId/productVersionId заменены созданием из profileId.
@@ -48,17 +50,17 @@ POST /selection-profiles с ownerToken:
 {
  "partyId":"{{partyId}}",
  "answers":{
-  "request":{"purpose":"WORKING_CAPITAL","amount":"1000000.00","termMonths":12},
-  "registration":{"borrowerKind":"LLC","registeredOn":"2020-01-01","country":"RU"},
-  "business":{"actualStartedOn":"2020-01-01","region":"77","sector":"TRADE","taxRegime":"USN","mspRegistry":true,"marketplaceMonths":12,"bankAccountMonths":12},
+  "request":{"purpose":"WORKING_CAPITAL","usageMode":"ONE_TIME","amount":"1000000.00","termMonths":12},
+  "registration":{"borrowerKind":"LLC"},
+  "business":{"actualStartedOn":"2020-01-01","sector":"TRADE","taxRegime":"USN","mspRegistry":true},
   "financial":{"revenue":"24000000.00","periodFrom":"2025-10-01","periodTo":"2026-09-30"},
-  "security":{"collateralReady":false,"guarantorReady":true}
+  "security":{"collateralReady":"NO","guarantorReady":"YES"}
  }
 }
 ```
 
 Для текущей даты учитывайте прошедший полный финансовый период. Для IP используется
-соответствующая компания кабинета и business.ipAgeYears; у LLC это поле не передается.
+соответствующая компания кабинета; возраст физлица в форму не передается.
 Сохраните id в profileId, rowVersion (первоначально 0). Денег/просрочек окончательной заявки
 в этой форме нет. Добавление overdue или monthlyDebtPayment должно вернуть 400.
 Частичная форма с answers={} допустима: незаполненные поля UNKNOWN.
@@ -98,9 +100,9 @@ POST /applications:
 ```
 
 Сохраните id в applicationId, rowVersion в expectedVersion.
-Проверьте: 11 общих полей перенесены; sector/country/region/collateralReady не появились
-в answers, а остались в preliminaryContext. verification_status ручных значений —DECLARED.
-Попытка добавить в answers заявки sector или taxId →400.
+Проверьте: 13 общих полей перенесены, включая sector/collateralReady/guarantorReady; usageMode
+и description остались только в preliminaryContext. verification_status ручных значений —DECLARED.
+Попытка добавить в answers заявки usageMode, description или taxId →400.
 GET /applications и /applications/{{applicationId}} — чтение состояния.
 POST /applications/{{applicationId}}/validate — предварительный расчет, не сохраненное решение банка.
 
@@ -176,7 +178,7 @@ REQUEST_INFO/NEEDS_INFO с financial.overdue. PATCH с актуальной expe
 добавляет overdue; новый submit с новым ключом создает новую revisionId.
 Старая ревизия/hash не меняются.
 
-Если нужно дополнить поле предварительного этапа, например country:
+Если нужно дополнить поле предварительного этапа, например usageMode:
 PATCH профиля → новый eligibility → новый selected-product. Затем в DRAFT/NEEDS_INFO
 POST /applications/{{applicationId}}/refresh-preliminary:
 
@@ -228,8 +230,8 @@ UNKNOWN-категория или непроверенное доказател�
 | `GET /companies/{id}/profile` | Сведения доступной компании; доступ: Участник компании. |
 | `GET /products` | Каталог действующих версий, totalElements; доступ: No Auth. |
 | `GET /products/{id}` | Полные условия выбранной версии; доступ: No Auth. |
-| `GET /forms/application` | 15 полей окончательной заявки и 11 transferredFields; доступ: Любой пользователь. |
-| `POST /selection-profiles` | 19 полей, частичная форма; rowVersion, fieldSources, value_status; доступ: OWNER/EDITOR. |
+| `GET /forms/application` | 17 полей окончательной заявки и 13 transferredFields; доступ: Любой пользователь. |
+| `POST /selection-profiles` | 15 полей, частичная форма; rowVersion, fieldSources, value_status; доступ: OWNER/EDITOR. |
 | `GET /selection-profiles/{id}` | Форма подбора; изменение сбрасывает выбор продукта; доступ: Создатель и участник компании. |
 | `PATCH /selection-profiles/{id}` | Форма подбора; изменение сбрасывает выбор продукта; доступ: Создатель OWNER/EDITOR. |
 | `POST /applications` | DRAFT из выбранного профиля, отдельно preliminaryContext; доступ: OWNER/EDITOR. |
@@ -252,7 +254,7 @@ UNKNOWN-категория или непроверенное доказател�
 | `POST /applications/{id}/offers/accept` | OFFER_ACCEPTED; доступ: OWNER. |
 | `POST /applications/{id}/contract/sign` | SIGNED, условный договор; доступ: OWNER. |
 | `POST /bank/applications/{id}/disburse` | DISBURSED, одна синтетическая запись; доступ: Назначенный BANK_APPROVER. |
-| `GET /forms/preliminary` | 19 полей; 7 conditionalFields; доступ: Любой пользователь. |
+| `GET /forms/preliminary` | 15 полей; 5 requiredForSelection; доступ: Любой пользователь. |
 | `POST /selection-profiles/{id}/eligibility` | runId, profileVersion, причины; порядок по применимости/коду, personalRatingAvailable=false; доступ: OWNER/EDITOR. |
 | `GET /selection-profiles/{id}/recommendations/{runId}` | Сохраненный результат; current=false после изменения формы; доступ: Участник компании. |
 | `PUT /selection-profiles/{id}/selected-product` | Выбран продукт; rowVersion+1; старый run →409, INELIGIBLE →422; доступ: OWNER/EDITOR. |
@@ -288,3 +290,6 @@ UNKNOWN-категория или непроверенное доказател�
 
 Маршруты подготовлены для ручной проверки. Автоматический прогон не называется
 прогоном Postman: фактические результаты приведены в validation.md.
+
+
+Новый сценарий ручного обмена и форма 2.0: [Query/Passage MVP — реализация](ranking-exchange.md).

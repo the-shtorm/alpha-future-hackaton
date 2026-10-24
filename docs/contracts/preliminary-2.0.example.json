@@ -1,0 +1,27 @@
+{
+  "registration": {
+    "borrowerKind": "LLC"
+  },
+  "business": {
+    "sector": "IT",
+    "actualStartedOn": "2020-01-01",
+    "taxRegime": "USN",
+    "mspRegistry": true
+  },
+  "financial": {
+    "revenue": "24000000.00",
+    "periodFrom": "2025-10-01",
+    "periodTo": "2026-09-30"
+  },
+  "request": {
+    "purpose": "WORKING_CAPITAL",
+    "amount": "1000000.00",
+    "termMonths": 12,
+    "usageMode": "ONE_TIME",
+    "description": "Расширяем команду разработки"
+  },
+  "security": {
+    "collateralReady": "NO",
+    "guarantorReady": "YES"
+  }
+}

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /** Проверяет применимость продукта по предварительной форме, не принимает кредитных решений. */
 @Component
 class Eligibility {
-    static final String VERSION = "eligibility-2.1";
+    static final String VERSION = "eligibility-3.0";
 
     enum Status {
         ELIGIBLE,
@@ -76,22 +76,18 @@ class Eligibility {
                 product.borrowerKinds(),
                 "BORROWER_KIND_NOT_SUPPORTED",
                 "Форма бизнеса должна поддерживаться продуктом");
-        if (rules.path("country").isTextual())
-            equal(
+        String usage = FormPolicy.text(answers, "request.usageMode");
+        if (usage != null && !usage.equals("UNKNOWN"))
+            add(
                     checks,
-                    answers,
-                    "registration.country",
-                    rules.path("country").asText(),
-                    "COUNTRY_NOT_SUPPORTED",
-                    "Страна регистрации не соответствует продукту");
-        if (rules.path("regions").isArray())
-            allowed(
-                    checks,
-                    answers,
-                    "business.region",
-                    rules.path("regions"),
-                    "REGION_NOT_SUPPORTED",
-                    "Регион должен входить в список продукта");
+                    "USAGE_MODE_NOT_SUPPORTED",
+                    "request.usageMode",
+                    product.usageModes().isEmpty()
+                            ? Outcome.UNKNOWN
+                            : product.usageModes().contains(usage) ? Outcome.PASS : Outcome.FAIL,
+                    "Проверка способа использования средств",
+                    usage,
+                    product.usageModes());
         var excluded = product.policy().path("common_policy").path("excluded_sectors");
         String sector = FormPolicy.text(answers, "business.sector");
         add(
@@ -113,32 +109,22 @@ class Eligibility {
                     "TAX_REGIME_NOT_SUPPORTED",
                     "Налоговый режим должен поддерживаться продуктом");
         long minAge = rules.path("min_business_age_months").asLong();
-        for (String field : List.of("registration.registeredOn", "business.actualStartedOn")) {
-            LocalDate date = FormPolicy.date(answers, field);
-            Long months =
-                    date == null
-                            ? null
-                            : ChronoUnit.MONTHS.between(
-                                    date, asOf.atZone(ZoneOffset.UTC).toLocalDate());
-            add(
-                    checks,
-                    "BUSINESS_AGE_TOO_SHORT",
-                    field,
-                    months == null
-                            ? Outcome.UNKNOWN
-                            : months < minAge ? Outcome.FAIL : Outcome.PASS,
-                    "Проверка минимального стажа",
-                    months,
-                    minAge);
-        }
-        if ("IP".equals(FormPolicy.text(answers, "registration.borrowerKind")))
-            minimum(
-                    checks,
-                    answers,
-                    "business.ipAgeYears",
-                    rules.path("min_ip_age_years").decimalValue(),
-                    "IP_AGE_TOO_LOW",
-                    "Недостаточный возраст ИП");
+        LocalDate started = FormPolicy.date(answers, "business.actualStartedOn");
+        Long operatingMonths =
+                started == null
+                        ? null
+                        : ChronoUnit.MONTHS.between(
+                                started, asOf.atZone(ZoneOffset.UTC).toLocalDate());
+        add(
+                checks,
+                "BUSINESS_AGE_TOO_SHORT",
+                "business.actualStartedOn",
+                operatingMonths == null
+                        ? Outcome.UNKNOWN
+                        : operatingMonths < minAge ? Outcome.FAIL : Outcome.PASS,
+                "Проверка минимального стажа",
+                operatingMonths,
+                minAge);
         Long months = periodMonths(answers);
         BigDecimal revenue = FormPolicy.money(answers, "financial.revenue");
         BigDecimal average =
@@ -185,22 +171,15 @@ class Eligibility {
                     "Нужна готовность привлечь поручителя");
         for (var extra : rules.path("extra_conditions"))
             switch (extra.asText()) {
-                case "DEMO_BANK_ACCOUNT_6_MONTHS" ->
-                        minimum(
+                case "DEMO_BANK_ACCOUNT_6_MONTHS", "MARKETPLACE_6_MONTHS" ->
+                        add(
                                 checks,
-                                answers,
-                                "business.bankAccountMonths",
-                                new BigDecimal("6"),
-                                "BANK_ACCOUNT_TOO_YOUNG",
-                                "Нужен счет со стажем не меньше 6 месяцев");
-                case "MARKETPLACE_6_MONTHS" ->
-                        minimum(
-                                checks,
-                                answers,
-                                "business.marketplaceMonths",
-                                new BigDecimal("6"),
-                                "MARKETPLACE_HISTORY_TOO_SHORT",
-                                "Нужно не меньше 6 месяцев продаж");
+                                "ADDITIONAL_CONDITION_REQUIRES_REVIEW",
+                                "product.additionalConditions",
+                                Outcome.REVIEW,
+                                "Дополнительное условие продукта проверяется отдельно",
+                                null,
+                                extra.asText());
                 case "MSP_REGISTRY" ->
                         ready(
                                 checks,
@@ -283,26 +262,6 @@ class Eligibility {
                 Map.of("min", min, "max", max));
     }
 
-    private void minimum(
-            List<Reason> list,
-            JsonNode answers,
-            String field,
-            BigDecimal min,
-            String code,
-            String text) {
-        BigDecimal actual = FormPolicy.money(answers, field);
-        add(
-                list,
-                code,
-                field,
-                actual == null
-                        ? Outcome.UNKNOWN
-                        : actual.compareTo(min) < 0 ? Outcome.FAIL : Outcome.PASS,
-                text,
-                actual,
-                min);
-    }
-
     private void equal(
             List<Reason> list,
             JsonNode answers,
@@ -350,11 +309,16 @@ class Eligibility {
                 list,
                 code,
                 field,
-                !actual.isBoolean()
-                        ? Outcome.UNKNOWN
-                        : actual.asBoolean() ? Outcome.PASS : Outcome.FAIL,
+                actual.isBoolean()
+                        ? actual.asBoolean() ? Outcome.PASS : Outcome.FAIL
+                        : switch (actual.asText()) {
+                            case "YES" -> Outcome.PASS;
+                            case "NO" -> Outcome.FAIL;
+                            case "DISCUSS" -> Outcome.REVIEW;
+                            default -> Outcome.UNKNOWN;
+                        },
                 text,
-                actual.isBoolean() ? actual.asBoolean() : null,
-                true);
+                actual.isMissingNode() || actual.isNull() ? null : actual,
+                field.equals("business.mspRegistry") ? true : "YES");
     }
 }

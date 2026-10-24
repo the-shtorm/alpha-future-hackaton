@@ -80,15 +80,13 @@ class CabinetController {
                 FormPolicy.PRELIMINARY_VERSION,
                 "fields",
                 FormPolicy.fields(FormPolicy.Stage.PRELIMINARY),
-                "conditionalFields",
+                "requiredForSelection",
                 List.of(
-                        "registration.country",
-                        "business.region",
-                        "business.ipAgeYears",
-                        "security.collateralReady",
-                        "security.guarantorReady",
-                        "business.marketplaceMonths",
-                        "business.bankAccountMonths"));
+                        "registration.borrowerKind",
+                        "request.purpose",
+                        "request.amount",
+                        "request.termMonths",
+                        "request.usageMode"));
     }
 
     @PostMapping("/applications/{id}/refresh-preliminary")

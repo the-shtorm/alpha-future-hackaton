@@ -220,7 +220,7 @@ class BackendIntegrationTest {
     }
 
     @Test
-    void onlyElevenFieldsTransferAndSelectionNeverReceivesFinalData() throws Exception {
+    void onlyThirteenFieldsTransferAndSelectionNeverReceivesFinalData() throws Exception {
         var p = select(profile(TestData.preliminary()));
         var app =
                 post(
@@ -234,7 +234,7 @@ class BackendIntegrationTest {
                                 "answers",
                                 Map.of()));
         assertThat(app.path("answers").path("registration").has("country")).isFalse();
-        assertThat(app.path("answers").path("business").has("sector")).isFalse();
+        assertThat(app.path("answers").path("business").path("sector").asText()).isEqualTo("TRADE");
         assertThat(app.path("answers").path("financial").has("overdue")).isFalse();
         assertThat(
                         app.path("preliminaryContext")
@@ -272,7 +272,7 @@ class BackendIntegrationTest {
                         "expectedProfileVersion",
                         p.path("rowVersion").asLong(),
                         "answers",
-                        Map.of("business", Map.of("sector", "TRADE"))),
+                        Map.of("request", Map.of("usageMode", "ONE_TIME"))),
                 400);
     }
 
@@ -322,13 +322,22 @@ class BackendIntegrationTest {
     @Test
     void preliminaryFormCanBePartialAndNoProductsIsNotCreditDecline() throws Exception {
         var p = profile((ObjectNode) mapper.readTree("{}"));
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/selection-profiles/" + p.path("id").asText() + "/eligibility"),
+                owner,
+                Map.of(),
+                400);
+        var partial = TestData.preliminary();
+        partial.remove("financial");
+        p = profile(partial);
         var run =
                 post(
                         "/selection-profiles/" + p.path("id").asText() + "/eligibility",
                         owner,
                         Map.of());
         assertThat(run.path("items"))
-                .allSatisfy(
+                .anySatisfy(
                         item -> assertThat(item.path("status").asText()).isEqualTo("CONDITIONAL"));
         var a = TestData.preliminary();
         ((ObjectNode) a.path("request")).put("amount", "99999999999999.00");
@@ -678,13 +687,15 @@ class BackendIntegrationTest {
     void refreshingPreliminaryContextDoesNotRewriteSubmittedRevisionOrFinalAnswers()
             throws Exception {
         var pre = TestData.preliminary();
-        ((ObjectNode) pre.path("registration")).remove("country");
-        var app = ready(pre, TestData.additions());
+        ((ObjectNode) pre.path("request")).put("usageMode", "UNKNOWN");
+        var incomplete = TestData.additions();
+        ((ObjectNode) incomplete.path("financial")).remove("overdue");
+        var app = ready(pre, incomplete);
         String id = app.path("id").asText();
         var first = submit(app, UUID.randomUUID().toString());
         var result = process(app);
         assertThat(result.path("decision").path("conditions").path("missingFields").toString())
-                .contains("preliminary.registration.country");
+                .contains("financial.overdue");
         var p = get("/selection-profiles/" + app.path("profileId").asText(), owner);
         p =
                 send(
@@ -694,7 +705,7 @@ class BackendIntegrationTest {
                                 "expectedVersion",
                                 p.path("rowVersion").asLong(),
                                 "answers",
-                                Map.of("registration", Map.of("country", "RU"))),
+                                Map.of("request", Map.of("usageMode", "ONE_TIME"))),
                         200);
         p = select(p);
         var refreshed =
@@ -707,6 +718,16 @@ class BackendIntegrationTest {
                                 "expectedProfileVersion",
                                 p.path("rowVersion").asLong()));
         assertThat(refreshed.path("answers")).isEqualTo(app.path("answers"));
+        refreshed =
+                send(
+                        patch("/applications/" + id),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                refreshed.path("rowVersion").asLong(),
+                                "answers",
+                                Map.of("financial", Map.of("overdue", 0))),
+                        200);
         submit(refreshed, UUID.randomUUID().toString());
         assertThat(process(refreshed).path("application").path("status").asText())
                 .isEqualTo("APPROVED");
@@ -720,9 +741,10 @@ class BackendIntegrationTest {
                                 .path("snapshot")
                                 .path("preliminaryContext")
                                 .path("answers")
-                                .path("registration")
-                                .has("country"))
-                .isFalse();
+                                .path("request")
+                                .path("usageMode")
+                                .asText())
+                .isEqualTo("UNKNOWN");
     }
 
     @Test
@@ -812,9 +834,16 @@ class BackendIntegrationTest {
 
     @Test
     void publicSchemasDemoCasesAndOriginalSqlInvariantsRemainValid() throws Exception {
-        assertThat(get("/forms/preliminary", owner).path("fields")).hasSize(19);
-        assertThat(get("/forms/application", owner).path("fields")).hasSize(15);
-        assertThat(get("/demo/scenarios", owner).path("items")).hasSize(8);
+        assertThat(get("/forms/preliminary", owner).path("fields")).hasSize(15);
+        assertThat(get("/forms/application", owner).path("fields")).hasSize(17);
+        var scenarios = get("/demo/scenarios", owner).path("items");
+        assertThat(scenarios).hasSize(8);
+        for (var scenario : scenarios) {
+            var preliminary = scenario.path("preliminaryAnswers");
+            assertThat(preliminary.path("request").path("usageMode").asText())
+                    .isEqualTo("ONE_TIME");
+            new FormPolicy().validatePreliminary(preliminary);
+        }
         assertThat(get("/products", null).path("totalElements").asInt()).isEqualTo(15);
         assertThat(
                         get("/v3/api-docs", owner)
@@ -853,5 +882,372 @@ class BackendIntegrationTest {
                                     .readAllBytes(),
                             java.nio.charset.StandardCharsets.UTF_8));
         }
+    }
+
+    ObjectNode rankingReply(JsonNode packet) {
+        var reply = mapper.createObjectNode();
+        reply.set("requestId", packet.path("requestId"));
+        var metadata = reply.putObject("metadata");
+        metadata.put("model", "TEST_FIXTURE_NOT_MODEL");
+        metadata.put("modelVersion", "test-revision");
+        metadata.put("queryTemplateVersion", "query-1");
+        metadata.put("passageTemplateVersion", "passage-1");
+        var results = reply.putArray("results");
+        int rank = 1;
+        for (var candidate : packet.path("candidates")) {
+            var item = results.addObject();
+            item.set("productId", candidate.path("productId"));
+            item.set("productVersion", candidate.path("productVersion"));
+            item.put("rank", rank);
+            item.put("similarityScore", new java.math.BigDecimal("0.700000000123"));
+            item.put("isRecommended", rank++ <= packet.path("topK").asInt());
+            item.set("eligibilityStatus", candidate.path("eligibilityStatus"));
+            item.set("pendingConditions", candidate.path("pendingConditions"));
+        }
+        return reply;
+    }
+
+    @Test
+    void manualRankingPreservesConditionsAndReturnsAllCandidatesWithTopThreeHighlighted()
+            throws Exception {
+        var answers = TestData.preliminary();
+        ((ObjectNode) answers.path("security")).put("guarantorReady", "DISCUSS");
+        var profile = profile(answers);
+        String base = "/selection-profiles/" + profile.path("id").asText();
+        var run = post(base + "/eligibility", owner, Map.of());
+        String route = base + "/recommendations/" + run.path("runId").asText();
+        var packet = get(route + "/ranking-export", owner);
+        assertThat(packet.path("candidates").size()).isGreaterThan(3);
+        assertThat(packet.path("queryFields").path("request").has("amount")).isFalse();
+        assertThat(packet.path("queryFields").path("security").path("guarantorReady").asText())
+                .isEqualTo("DISCUSS");
+        for (var candidate : packet.path("candidates"))
+            assertThat(candidate.path("eligibilityStatus").asText()).isNotEqualTo("INELIGIBLE");
+        var reply = rankingReply(packet);
+        var imported = post(route + "/ranking-result", owner, reply);
+        assertThat(imported.path("scoreMeaning").asText()).contains("NOT_APPROVAL");
+        assertThat(imported.path("results")).hasSize(packet.path("candidates").size());
+        for (int i = 0; i < imported.path("results").size(); i++) {
+            var item = imported.path("results").get(i);
+            var candidate = packet.path("candidates").get(i);
+            assertThat(item.path("pendingConditions"))
+                    .isEqualTo(candidate.path("pendingConditions"));
+            assertThat(item.path("eligibilityStatus"))
+                    .isEqualTo(candidate.path("eligibilityStatus"));
+            assertThat(item.path("isRecommended").asBoolean()).isEqualTo(i < 3);
+            assertThat(item.path("similarityScore").decimalValue())
+                    .isEqualByComparingTo("0.700000000123");
+        }
+        assertThat(imported.path("results").get(0).path("pendingConditions")).isNotEmpty();
+        assertThat(post(route + "/ranking-result", owner, reply)).isEqualTo(imported);
+        ((ObjectNode) reply.path("results").get(0))
+                .put("similarityScore", new java.math.BigDecimal("0.9"));
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        route + "/ranking-result"),
+                owner,
+                reply,
+                409);
+        var selected =
+                send(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                                base + "/selected-product"),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                profile.path("rowVersion").asLong(),
+                                "runId",
+                                run.path("runId").asText(),
+                                "productVersionId",
+                                packet.path("candidates").get(0).path("productVersion").asText()),
+                        200);
+        assertThat(get(route + "/ranking-result", owner).path("current").asBoolean()).isTrue();
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch(base),
+                owner,
+                Map.of(
+                        "expectedVersion",
+                        selected.path("rowVersion").asLong(),
+                        "answers",
+                        Map.of("request", Map.of("description", "Новая потребность"))),
+                200);
+        assertThat(get(route + "/ranking-result", owner).path("current").asBoolean()).isFalse();
+        request(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                route + "/ranking-export")
+                        .header("Authorization", "Bearer " + owner),
+                409);
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        route + "/ranking-result"),
+                owner,
+                reply,
+                409);
+        request(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                        route + "/ranking-result"),
+                401);
+        request(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                route + "/ranking-result")
+                        .header("Authorization", "Bearer " + bank),
+                404);
+    }
+
+    @Test
+    void rankingRejectsInvalidIdentityOrderScoreFlagsAndChangedApplicability() throws Exception {
+        var a = TestData.preliminary();
+        ((ObjectNode) a.path("security")).put("guarantorReady", "DISCUSS");
+        var profile = profile(a);
+        String base = "/selection-profiles/" + profile.path("id").asText();
+        var run = post(base + "/eligibility", owner, Map.of());
+        String route = base + "/recommendations/" + run.path("runId").asText();
+        var packet = get(route + "/ranking-export", owner);
+        var reply = rankingReply(packet);
+        String path = route + "/ranking-result";
+        var variants = new ArrayList<ObjectNode>();
+        var bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0))
+                .put("productVersion", UUID.randomUUID().toString());
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("rank", 2);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ArrayNode) bad.path("results")).remove(0);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("similarityScore", 1.1);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("similarityScore", -1.1);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        bad.put("requestId", UUID.randomUUID().toString());
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("rank", 1.5);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("similarityScore", "0.5");
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("isRecommended", "true");
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("isRecommended", false);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(3)).put("isRecommended", true);
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("eligibilityStatus", "ELIGIBLE");
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).putArray("pendingConditions");
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("comment", "Not part of this contract");
+        variants.add(bad);
+        bad = reply.deepCopy();
+        ((ObjectNode) bad.path("results").get(0)).put("similarityScore", -1);
+        variants.add(bad); // Non-monotonic order.
+        for (var variant : variants)
+            send(
+                    org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(path),
+                    owner,
+                    variant,
+                    400);
+        assertThat(get(route + "/ranking-export", owner)).isEqualTo(packet);
+    }
+
+    @Test
+    void emptyCandidateSetAcceptsEmptyRecsysResult() throws Exception {
+        var answers = TestData.preliminary();
+        ((ObjectNode) answers.path("request")).put("amount", "999999999999.00");
+        var profile = profile(answers);
+        String base = "/selection-profiles/" + profile.path("id").asText();
+        var run = post(base + "/eligibility", owner, Map.of());
+        String route = base + "/recommendations/" + run.path("runId").asText();
+        var packet = get(route + "/ranking-export", owner);
+        assertThat(packet.path("candidates")).isEmpty();
+        var result = post(route + "/ranking-result", owner, rankingReply(packet));
+        assertThat(result.path("results")).isEmpty();
+        assertThat(result.path("requestId")).isEqualTo(packet.path("requestId"));
+    }
+
+    @Test
+    void rankingRequiresUsageAnswerAndChecksNewEnumsAndDescription() throws Exception {
+        var a = TestData.preliminary();
+        ((ObjectNode) a.path("request")).remove("usageMode");
+        var p = profile(a);
+        String base = "/selection-profiles/" + p.path("id").asText();
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        base + "/eligibility"),
+                owner,
+                Map.of(),
+                400);
+        a = TestData.preliminary();
+        ((ObjectNode) a.path("security")).put("collateralReady", true);
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/selection-profiles"),
+                owner,
+                Map.of("partyId", party, "answers", a),
+                400);
+        a = TestData.preliminary();
+        ((ObjectNode) a.path("request")).put("description", "<b>HTML</b>");
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/selection-profiles"),
+                owner,
+                Map.of("partyId", party, "answers", a),
+                400);
+        a = TestData.preliminary();
+        ((ObjectNode) a.path("request")).put("description", "x".repeat(501));
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/selection-profiles"),
+                owner,
+                Map.of("partyId", party, "answers", a),
+                400);
+        a = TestData.preliminary();
+        ((ObjectNode) a.path("request")).put("usageMode", "UNKNOWN");
+        ((ObjectNode) a.path("business")).putNull("sector");
+        profile(a);
+    }
+
+    @Test
+    void schemaEndpointsAndProductsExposeTheNewFieldContract() throws Exception {
+        var preliminary = get("/forms/preliminary", owner);
+        var application = get("/forms/application", owner);
+        assertThat(preliminary.path("formVersion").asText()).isEqualTo("preliminary-2.0");
+        assertThat(preliminary.path("fields").size()).isEqualTo(15);
+        assertThat(application.path("formVersion").asText()).isEqualTo("application-3.0");
+        assertThat(application.path("fields").size()).isEqualTo(17);
+        assertThat(application.path("transferredFields").size()).isEqualTo(13);
+        assertThat(application.path("fields").has("registration.registeredOn")).isFalse();
+        var dictionaries = get("/forms/preliminary/dictionaries", owner);
+        assertThat(dictionaries.path("sectors").size()).isEqualTo(7);
+        assertThat(dictionaries.path("sectors").has("IT")).isTrue();
+        assertThat(dictionaries.path("sectors").has("LOGISTICS")).isTrue();
+        var p = get("/products/" + product, null);
+        assertThat(p.path("type").asText()).isEqualTo("TERM_LOAN");
+        assertThat(p.path("interestRateType").asText()).isEqualTo("FIXED");
+        assertThat(p.path("usageModes").toString()).isEqualTo("[\"ONE_TIME\"]");
+        assertThat(p.path("annualRatePct").isTextual()).isTrue();
+        var catalog = get("/products?page=0&size=50", null).path("content");
+        assertThat(catalog).hasSize(15);
+        for (var item : catalog) {
+            for (var purpose : item.path("purposes"))
+                assertThat(RankingVocabulary.PURPOSES).containsKey(purpose.asText());
+            if (Set.of("P10", "P15").contains(item.path("code").asText()))
+                assertThat(item.path("purposes").toString())
+                        .contains("DEVELOPMENT")
+                        .doesNotContain("INVESTMENT");
+        }
+        assertThat(
+                        db.sql(
+                                        "SELECT count(*) FROM credit.credit_product_version WHERE allowed_purposes @> '[\"INVESTMENT\"]'::jsonb")
+                                .query(Long.class)
+                                .single())
+                .isEqualTo(2L);
+    }
+
+    @Test
+    void legacyProfileNeedsExplicitUpgradeAndOldRunRemainsUnchanged() throws Exception {
+        var p = profile(TestData.preliminary());
+        String base = "/selection-profiles/" + p.path("id").asText();
+        var run = post(base + "/eligibility", owner, Map.of());
+        var before = get(base + "/recommendations/" + run.path("runId").asText(), owner);
+        db.sql(
+                        "UPDATE credit.preliminary_profile SET form_version='preliminary-1.1',answers=jsonb_set(answers,'{registration,registeredOn}','\"2020-01-01\"'::jsonb) WHERE id=:id")
+                .param("id", UUID.fromString(p.path("id").asText()))
+                .update();
+        var error =
+                send(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                base + "/eligibility"),
+                        owner,
+                        Map.of(),
+                        409);
+        assertThat(error.path("code").asText()).isEqualTo("FORM_UPGRADE_REQUIRED");
+        p =
+                send(
+                        patch(base),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                p.path("rowVersion").asLong(),
+                                "answers",
+                                Map.of()),
+                        200);
+        assertThat(p.path("formVersion").asText()).isEqualTo("preliminary-2.0");
+        assertThat(p.path("answers").path("registration").has("registeredOn")).isFalse();
+        assertThat(p.path("rowVersion").asLong()).isEqualTo(1);
+        var after = get(base + "/recommendations/" + run.path("runId").asText(), owner);
+        assertThat(after.path("items")).isEqualTo(before.path("items"));
+        assertThat(after.path("current").asBoolean()).isFalse();
+        post(base + "/eligibility", owner, Map.of());
+    }
+
+    @Test
+    void legacyEditableApplicationUpgradesButExplicitUnknownSurvivesFurtherEdits()
+            throws Exception {
+        var app = ready(TestData.preliminary(), TestData.additions());
+        String id = app.path("id").asText();
+        var legacy = (ObjectNode) app.path("answers").deepCopy();
+        ((ObjectNode) legacy.path("registration")).put("registeredOn", "2020-01-01");
+        ((ObjectNode) legacy.path("business")).remove("sector");
+        ((ObjectNode) legacy.path("security")).remove(List.of("collateralReady", "guarantorReady"));
+        db.sql(
+                        "UPDATE credit.loan_application SET form_version='application-2.1',draft_answers=CAST(:answers AS jsonb) WHERE id=:id")
+                .param("id", UUID.fromString(id))
+                .param("answers", mapper.writeValueAsString(legacy))
+                .update();
+        app =
+                send(
+                        patch("/applications/" + id),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                app.path("rowVersion").asLong(),
+                                "answers",
+                                Map.of()),
+                        200);
+        assertThat(app.path("answers").path("business").path("sector").asText()).isEqualTo("TRADE");
+        assertThat(app.path("answers").path("security").path("guarantorReady").asText())
+                .isEqualTo("YES");
+        assertThat(app.path("answers").path("registration").has("registeredOn")).isFalse();
+        var clear = mapper.readTree("{\"business\":{\"sector\":null}}");
+        app =
+                send(
+                        patch("/applications/" + id),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                app.path("rowVersion").asLong(),
+                                "answers",
+                                clear),
+                        200);
+        app =
+                send(
+                        patch("/applications/" + id),
+                        owner,
+                        Map.of(
+                                "expectedVersion",
+                                app.path("rowVersion").asLong(),
+                                "answers",
+                                Map.of()),
+                        200);
+        assertThat(
+                        app.path("answers").path("business").path("sector").isMissingNode()
+                                || app.path("answers").path("business").path("sector").isNull())
+                .isTrue();
+        var validation = post("/applications/" + id + "/validate", owner, Map.of());
+        assertThat(validation.path("value_status").path("business.sector").asText())
+                .isEqualTo("UNKNOWN");
+        assertThat(validation.path("review").path("kind").asText()).isEqualTo("REQUEST_INFO");
     }
 }

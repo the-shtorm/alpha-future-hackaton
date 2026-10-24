@@ -71,7 +71,9 @@ class DataPolicy {
         var required = new TreeSet<>(FormPolicy.TRANSFER_FIELDS);
         required.addAll(List.of("financial.monthlyDebtPayment", "financial.overdue"));
         var collateral = product.policy().path("collateral");
-        if (collateral.path("required").asBoolean()) required.add("security.collateralValue");
+        if (collateral.path("required").asBoolean()
+                || "YES".equals(FormPolicy.text(answers, "security.collateralReady")))
+            required.add("security.collateralValue");
         if (collateral.path("min_own_contribution_pct").decimalValue().signum() > 0)
             required.add("project.ownContributionPct");
         var missing =
@@ -127,11 +129,6 @@ class DataPolicy {
         conditions.put("amountToMonthlyRevenue", amountRatio);
         conditions.put("newLoanPaymentBudget", budget.toPlainString());
         conditions.put("overdue", overdue);
-        conditions.put(
-                "registeredAgeMonths",
-                ChronoUnit.MONTHS.between(
-                        FormPolicy.date(answers, "registration.registeredOn"),
-                        asOf.atZone(ZoneOffset.UTC).toLocalDate()));
         conditions.put("operatingAgeMonths", age);
         BigDecimal own = FormPolicy.money(answers, "project.ownContributionPct");
         if (own != null)
@@ -147,7 +144,9 @@ class DataPolicy {
                     null);
         BigDecimal maxPrincipal = new BigDecimal(product.maxAmount());
         BigDecimal value = FormPolicy.money(answers, "security.collateralValue");
-        if (collateral.path("required").asBoolean() && (value == null || value.signum() <= 0))
+        if ((collateral.path("required").asBoolean()
+                        || "YES".equals(FormPolicy.text(answers, "security.collateralReady")))
+                && (value == null || value.signum() <= 0))
             return result(
                     Kind.REQUEST_INFO,
                     "COLLATERAL_VALUE_REQUIRED",

@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 
-/** Точные схемы 19/15, платежи и воспроизводимые DEMO-решения по Data Policy 2.1. */
+/** Точные схемы 15/17, платежи и воспроизводимые DEMO-решения по Data Policy 2.1. */
 class DataPolicyTest {
     final FormPolicy form = new FormPolicy();
     final Payments payments = new Payments();
@@ -34,11 +34,11 @@ class DataPolicyTest {
     }
 
     @Test
-    void separateSchemasContainNineteenAndFifteenFieldsAndExactlyElevenShared() {
-        assertThat(FormPolicy.PRELIMINARY_FIELDS).hasSize(19);
-        assertThat(FormPolicy.APPLICATION_FIELDS).hasSize(15);
-        assertThat(FormPolicy.TRANSFER_FIELDS).hasSize(11);
-        assertThat(FormPolicy.FIELDS).hasSize(23);
+    void separateSchemasContainFifteenAndSeventeenFieldsAndExactlyThirteenShared() {
+        assertThat(FormPolicy.PRELIMINARY_FIELDS).hasSize(15);
+        assertThat(FormPolicy.APPLICATION_FIELDS).hasSize(17);
+        assertThat(FormPolicy.TRANSFER_FIELDS).hasSize(13);
+        assertThat(FormPolicy.FIELDS).hasSize(19);
         form.validatePreliminary(TestData.preliminary());
         form.validate(TestData.application());
         assertThatThrownBy(() -> form.validate(TestData.preliminary()))
@@ -213,11 +213,11 @@ class DataPolicyTest {
     }
 
     @Test
-    void transferProjectionExcludesEightSelectionOnlyFieldsAndPreservesMoney() {
+    void transferProjectionExcludesOnlyTwoSemanticFieldsAndPreservesMoney() {
         var preliminary = TestData.preliminary();
         ((ObjectNode) preliminary.path("request")).put("amount", "1000000.01");
         var transferred = FormPolicy.project(preliminary, FormPolicy.TRANSFER_FIELDS);
-        assertThat(transferred.path("business").has("sector")).isFalse();
+        assertThat(transferred.path("business").path("sector").asText()).isEqualTo("TRADE");
         assertThat(transferred.path("registration").has("country")).isFalse();
         assertThat(FormPolicy.money(transferred, "request.amount"))
                 .isEqualByComparingTo("1000000.01");
@@ -231,7 +231,8 @@ class DataPolicyTest {
         ((ObjectNode) a.path("project")).put("ownContributionPct", "20.00");
         var c = review(a).conditions();
         assertThat(c.get("ownContributionShare")).isEqualTo("0.2000");
-        assertThat(c.get("registeredAgeMonths")).isEqualTo(81L);
+        assertThat(c).doesNotContainKey("registeredAgeMonths");
+        assertThat(c.get("operatingAgeMonths")).isEqualTo(81L);
         assertThat(TestData.JSON.canonical(TestData.JSON.read("{\"b\":1,\"a\":2}")))
                 .isEqualTo("{\"a\":2,\"b\":1}");
     }

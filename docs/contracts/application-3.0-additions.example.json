@@ -1,0 +1,12 @@
+{
+  "financial": {
+    "monthlyDebtPayment": "0.00",
+    "overdue": 0
+  },
+  "security": {
+    "collateralValue": "0.00"
+  },
+  "project": {
+    "ownContributionPct": "0.00"
+  }
+}

@@ -1,4 +1,23 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+    image: alpha-future-frontend:local
+    ports:
+      - '127.0.0.1:${FRONTEND_PORT:-3000}:8080'
+    depends_on:
+      backend:
+        condition: service_started
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -15,6 +34,9 @@ services:
       DEMO_BANK_PASSWORD: ${DEMO_BANK_PASSWORD:-}
       DEMO_ASSESSMENT_ENABLED: ${DEMO_ASSESSMENT_ENABLED:-false}
       DOCUMENTS_PATH: /app/documents
+      RECSYS_URL: ${RECSYS_URL:-}
+      RECSYS_API_KEY: ${RECSYS_API_KEY:-}
+      RECSYS_TIMEOUT_MS: ${RECSYS_TIMEOUT_MS:-5000}
     ports:
       - '127.0.0.1:${BACKEND_PORT:-8080}:8080'
     volumes:

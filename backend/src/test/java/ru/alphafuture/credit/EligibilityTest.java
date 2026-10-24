@@ -60,25 +60,39 @@ class EligibilityTest {
     }
 
     @Test
-    void ipAgeAndExtraMarketplaceRequirementsAreAppliedOnlyWhenRelevant() {
+    void removedCountersDoNotBecomeMissingFormFieldsButSpecialConditionsNeedReview() {
         var p = TestData.product();
         ((ObjectNode) p.policy().path("eligibility"))
                 .putArray("extra_conditions")
                 .add("MARKETPLACE_6_MONTHS");
-        var a = TestData.preliminary();
-        ((ObjectNode) a.path("registration")).put("borrowerKind", "IP");
-        ((ObjectNode) a.path("business")).put("ipAgeYears", 17).put("marketplaceMonths", 5);
-        assertThat(engine.evaluate(p, a, asOf).status()).isEqualTo(Eligibility.Status.INELIGIBLE);
+        var result = engine.evaluate(p, TestData.preliminary(), asOf);
+        assertThat(result.status()).isEqualTo(Eligibility.Status.CONDITIONAL);
+        assertThat(result.missingFields()).isEmpty();
+        assertThat(result.reasons())
+                .anyMatch(r -> r.code().equals("ADDITIONAL_CONDITION_REQUIRES_REVIEW"));
     }
 
     @Test
-    void shortHistoryRequiresReviewAndGeographyAndSectorAreChecked() {
+    void unknownUsageSkipsCheckButIncompatibleUsageExcludesProduct() {
+        var answers = TestData.preliminary();
+        ((ObjectNode) answers.path("request")).put("usageMode", "UNKNOWN");
+        assertThat(engine.evaluate(TestData.product(), answers, asOf).status())
+                .isEqualTo(Eligibility.Status.ELIGIBLE);
+        ((ObjectNode) answers.path("request")).put("usageMode", "ACCOUNT_RESERVE");
+        assertThat(engine.evaluate(TestData.product(), answers, asOf).reasons())
+                .anyMatch(
+                        r ->
+                                r.code().equals("USAGE_MODE_NOT_SUPPORTED")
+                                        && r.result() == Eligibility.Outcome.FAIL);
+    }
+
+    @Test
+    void shortHistoryRequiresReviewAndExcludedSectorIsChecked() {
         var p = TestData.product();
         var a = TestData.preliminary();
         ((ObjectNode) a.path("financial")).put("periodFrom", "2026-04-01");
         assertThat(engine.evaluate(p, a, asOf).status()).isEqualTo(Eligibility.Status.CONDITIONAL);
         ((ObjectNode) a.path("business")).put("sector", "GAMBLING");
-        ((ObjectNode) a.path("registration")).put("country", "XX");
         assertThat(engine.evaluate(p, a, asOf).status()).isEqualTo(Eligibility.Status.INELIGIBLE);
     }
 }
