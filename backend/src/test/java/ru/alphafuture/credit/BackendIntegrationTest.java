@@ -1279,4 +1279,118 @@ class BackendIntegrationTest {
         assertThat(retried.path("rankingStatus").asText()).isEqualTo("NOT_CONFIGURED");
         assertThat(retried.path("results")).isEqualTo(selection.path("results"));
     }
+
+    @Test
+    void lowRevenueAndAbsurdAmountsNeverReturnCandidatesIncludingDirectApiCalls() throws Exception {
+        for (String amount : List.of("1000000.00", "12121212121200000.00")) {
+            var a = TestData.preliminary();
+            ((ObjectNode) a.path("request")).put("amount", amount);
+            ((ObjectNode) a.path("financial")).put("revenue", "10.00");
+            var p = profile(a);
+            String base = "/selection-profiles/" + p.path("id").asText();
+            var result = post(base + "/automatic-selection", owner, Map.of());
+            assertThat(result.path("results")).isEmpty();
+            assertThat(result.path("rankingStatus").asText()).isEqualTo("EMPTY");
+            assertThat(result.path("excluded")).hasSize(15);
+            for (var excluded : result.path("excluded"))
+                assertThat(excluded.path("reasons"))
+                        .anySatisfy(
+                                reason -> {
+                                    assertThat(reason.path("code").asText())
+                                            .isEqualTo("REVENUE_BELOW_MINIMUM");
+                                    assertThat(reason.path("result").asText()).isEqualTo("FAIL");
+                                });
+            var choice =
+                    send(
+                            put(base + "/selected-product"),
+                            owner,
+                            Map.of(
+                                    "expectedVersion",
+                                    p.path("rowVersion").asLong(),
+                                    "runId",
+                                    result.path("runId").asText(),
+                                    "productVersionId",
+                                    product),
+                            422);
+            assertThat(choice.path("code").asText()).isEqualTo("PRODUCT_INELIGIBLE");
+        }
+    }
+
+    @Test
+    void suppliedRevenueNeedsAFullPeriodBeforeEligibilityButPartialDraftCanBeSaved()
+            throws Exception {
+        for (String field : List.of("periodFrom", "periodTo")) {
+            var a = TestData.preliminary();
+            ((ObjectNode) a.path("financial")).remove(field);
+            var p = profile(a);
+            var result =
+                    send(
+                            org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                    .post(
+                                            "/selection-profiles/"
+                                                    + p.path("id").asText()
+                                                    + "/automatic-selection"),
+                            owner,
+                            Map.of(),
+                            400);
+            assertThat(result.path("fields").toString()).contains("financial." + field);
+        }
+        var a = TestData.preliminary();
+        ((ObjectNode) a.path("financial")).put("periodFrom", "2025-10-02");
+        var p = profile(a);
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/selection-profiles/" + p.path("id").asText() + "/eligibility"),
+                owner,
+                Map.of(),
+                400);
+    }
+
+    @Test
+    void previousPolicyRunIsHistoricalAndCannotBeUsedToChooseExportOrCreateApplication()
+            throws Exception {
+        var p = select(profile(TestData.preliminary()));
+        UUID previous = UUID.randomUUID();
+        db.sql(
+                        "INSERT INTO credit.recommendation_run(id,profile_id,profile_snapshot,model_version,policy_version) SELECT :id,profile_id,profile_snapshot,model_version,'eligibility-3.0' FROM credit.recommendation_run WHERE id=:source")
+                .param("id", previous)
+                .param("source", UUID.fromString(p.path("selectedRunId").asText()))
+                .update();
+        String base = "/selection-profiles/" + p.path("id").asText();
+        assertThat(get(base + "/recommendations/" + previous, owner).path("current").asBoolean())
+                .isFalse();
+        send(
+                put(base + "/selected-product"),
+                owner,
+                Map.of(
+                        "expectedVersion",
+                        p.path("rowVersion").asLong(),
+                        "runId",
+                        previous,
+                        "productVersionId",
+                        product),
+                409);
+        request(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                base + "/recommendations/" + previous + "/ranking-export")
+                        .header("Authorization", "Bearer " + owner),
+                409);
+        db.sql(
+                        "UPDATE credit.preliminary_profile SET selected_recommendation_run_id=:run WHERE id=:id")
+                .param("run", previous)
+                .param("id", UUID.fromString(p.path("id").asText()))
+                .update();
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/applications"),
+                owner,
+                Map.of(
+                        "profileId",
+                        p.path("id").asText(),
+                        "expectedProfileVersion",
+                        p.path("rowVersion").asLong(),
+                        "answers",
+                        Map.of()),
+                409);
+    }
 }

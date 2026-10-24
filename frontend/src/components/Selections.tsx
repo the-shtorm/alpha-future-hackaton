@@ -18,6 +18,21 @@ export function SelectionResults({
   onEdit: () => void;
   busy: boolean;
 }) {
+  const allFail = (code: string) =>
+    selection.excluded.length > 0 &&
+    selection.excluded.every((item) =>
+      item.reasons.some((reason) => reason.code === code && reason.result === 'FAIL'),
+    );
+  const emptyReasons = [
+    allFail('AMOUNT_OUT_OF_RANGE')
+      ? 'Запрошенная сумма выходит за диапазоны всех продуктов каталога.'
+      : '',
+    allFail('REVENUE_BELOW_MINIMUM')
+      ? 'Среднемесячная выручка ниже минимальных требований продуктов каталога.'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
     <section className="results-page">
       <div className="section-heading">
@@ -35,9 +50,7 @@ export function SelectionResults({
         </Button>
       </div>
       {!selection.current ? (
-        <Banner>
-          Вы изменили данные компании. Обновите подбор, чтобы увидеть актуальные условия.
-        </Banner>
+        <Banner>Подбор устарел. Обновите его, чтобы учесть текущие данные и правила.</Banner>
       ) : selection.results.length > 0 && selection.rankingStatus !== 'READY' ? (
         <Banner>
           <strong>Условия продуктов проверены</strong>
@@ -108,8 +121,8 @@ export function SelectionResults({
             </Button>
           }
         >
-          Возможно, стоит скорректировать сумму, срок или цель. Причины проверки можно посмотреть
-          ниже.
+          {emptyReasons || 'Попробуйте скорректировать сумму, срок или цель.'} Причины проверки
+          каждого продукта можно посмотреть ниже.
         </Empty>
       )}
       {selection.excluded.length > 0 && (
@@ -157,9 +170,8 @@ export function SavedSelections({
           <h1>Мои подборы</h1>
           <p>Сохранённые ответы и предложения — можно вернуться к ним в любое время.</p>
         </div>
-        <Button view="accent" onClick={onStart}>
+        <Button view="accent" onClick={onStart} rightAddons={<Icon name="arrow" size={18} />}>
           Новый подбор
-          <Icon name="arrow" size={18} />
         </Button>
       </div>
       {items.length ? (
@@ -180,9 +192,14 @@ export function SavedSelections({
                 {money(String(item.answers.request?.amount ?? ''))}
                 <small>{String(item.answers.request?.termMonths ?? '')} мес.</small>
               </strong>
-              <Button view="secondary" size={40} disabled={busy} onClick={() => onOpen(item)}>
+              <Button
+                view="secondary"
+                size={40}
+                disabled={busy}
+                rightAddons={<Icon name="arrow" size={17} />}
+                onClick={() => onOpen(item)}
+              >
                 {item.run_id ? 'Посмотреть' : 'Продолжить'}
-                <Icon name="arrow" size={17} />
               </Button>
             </article>
           ))}

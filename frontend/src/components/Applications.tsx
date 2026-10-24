@@ -168,9 +168,8 @@ export function ApplicationsPage({
           </p>
         </div>
         {!applicationId && (
-          <Button view="accent" onClick={onStart}>
+          <Button view="accent" onClick={onStart} rightAddons={<Icon name="arrow" size={18} />}>
             Подобрать кредит
-            <Icon name="arrow" size={18} />
           </Button>
         )}
       </div>
@@ -205,9 +204,13 @@ export function ApplicationsPage({
                   </h3>
                   <span className="pill">{statusNames[item.status] ?? 'На рассмотрении'}</span>
                 </div>
-                <Button view="secondary" size={40} onClick={() => onOpen(item.id)}>
+                <Button
+                  view="secondary"
+                  size={40}
+                  rightAddons={<Icon name="arrow" size={17} />}
+                  onClick={() => onOpen(item.id)}
+                >
                   Открыть
-                  <Icon name="arrow" size={17} />
                 </Button>
               </article>
             ))}
@@ -229,7 +232,7 @@ export function ApplicationsPage({
         )
       ) : (
         journey && (
-          <div className="application-layout">
+          <div className="application-layout" key={applicationId}>
             <div className="application-main">
               <div className="application-overview">
                 <span className="pill">

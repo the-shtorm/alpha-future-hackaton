@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyAnswers, normalizeAnswers, exampleAnswers } from '../src/form.ts';
 import { rate, matchesAmount } from '../src/presentation.ts';
+import { validatePreliminary } from '../src/validation.ts';
 
 test('preliminary payload has fifteen fields and preserves explicit false and unknowns', () => {
   const input = structuredClone(emptyAnswers);
@@ -92,4 +93,51 @@ test('catalog amount filtering includes exact boundaries without floating-point 
   assert.equal(matchesAmount(product, '9007199254740992.03'), false);
   assert.equal(matchesAmount(product, 'invalid'), false);
   assert.equal(matchesAmount(product, ''), true);
+});
+
+const catalogBounds = [{ minAmount: '100000.00', maxAmount: '30000000.00' }];
+test('form rejects amounts beyond real catalog limits including very large values', () => {
+  const a = exampleAnswers();
+  a.request.amount = '12121212121200000';
+  assert.match(validatePreliminary(a, catalogBounds, 1)['request.amount'], /30.?000.?000/);
+  a.request.amount = '99999.99';
+  assert.ok(validatePreliminary(a, catalogBounds, 1)['request.amount']);
+  a.request.amount = '30000000.00';
+  assert.equal(validatePreliminary(a, catalogBounds, 1)['request.amount'], undefined);
+});
+test('known revenue cannot be submitted without complete full-calendar-month dates', () => {
+  const a = exampleAnswers();
+  a.financial.revenue = '10';
+  a.financial.periodFrom = '';
+  a.financial.periodTo = '';
+  let errors = validatePreliminary(a, catalogBounds, 2);
+  assert.ok(errors['financial.periodFrom']);
+  assert.ok(errors['financial.periodTo']);
+  a.financial.periodFrom = '2025-10-02';
+  a.financial.periodTo = '2026-09-29';
+  errors = validatePreliminary(a, catalogBounds, 2);
+  assert.ok(errors['financial.periodFrom']);
+  assert.ok(errors['financial.periodTo']);
+  a.financial.periodFrom = '2025-10-01';
+  a.financial.periodTo = '2026-09-30';
+  assert.deepEqual(validatePreliminary(a, catalogBounds, 2), {}); // Low revenue is a valid fact; server eligibility excludes it.
+});
+test('unknown revenue remains allowed and known zero still requires a period', () => {
+  const a = structuredClone(emptyAnswers);
+  a.request.amount = '1000000';
+  assert.deepEqual(validatePreliminary(a, catalogBounds, 2), {});
+  a.financial.revenue = '0.00';
+  assert.ok(validatePreliminary(a, catalogBounds, 2)['financial.periodFrom']);
+});
+test('final form validation catches invalid dates, periods and earlier amount edits', () => {
+  const a = exampleAnswers();
+  a.business.actualStartedOn = '2025-02-30';
+  assert.ok(validatePreliminary(a, catalogBounds, 2)['business.actualStartedOn']);
+  a.business.actualStartedOn = '2020-01-01';
+  a.request.amount = '999999999999.99';
+  assert.ok(validatePreliminary(a, catalogBounds, 2)['request.amount']);
+  a.request.amount = '1000000.00';
+  a.financial.periodFrom = '2026-09-01';
+  a.financial.periodTo = '2025-10-31';
+  assert.ok(validatePreliminary(a, catalogBounds, 2)['financial.periodTo']);
 });

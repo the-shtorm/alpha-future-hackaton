@@ -59,6 +59,11 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 
 ## Переход от формы к заявке
 
+При известной выручке перед подбором нужны обе даты полного периода (первое и
+последнее число месяца); иначе 400 INVALID_INPUT. Запуски до eligibility-3.1
+сохраняются в истории, но требуют повторного подбора перед выбором продукта,
+обменом ранжированием и созданием заявки (409 SELECTION_STALE).
+
 1. POST /selection-profiles с partyId и 15-польной формой.
 2. POST /selection-profiles/{id}/eligibility: сохранить runId.
 3. PUT /selection-profiles/{id}/selected-product с текущей expectedVersion и выбранной версией.

@@ -177,6 +177,22 @@ class FormPolicy {
                         "request.usageMode"))
             if (text(answers, path) == null)
                 throw ApiFailure.invalid(path, "Обязательное поле для подбора");
+        if (money(answers, "financial.revenue") != null) {
+            LocalDate from = date(answers, "financial.periodFrom"),
+                    to = date(answers, "financial.periodTo");
+            if (from == null)
+                throw ApiFailure.invalid("financial.periodFrom", "Укажите начало периода выручки");
+            if (to == null)
+                throw ApiFailure.invalid("financial.periodTo", "Укажите конец периода выручки");
+            if (from.getDayOfMonth() != 1)
+                throw ApiFailure.invalid(
+                        "financial.periodFrom",
+                        "Период выручки должен начинаться с первого числа месяца");
+            if (to.getDayOfMonth() != to.lengthOfMonth())
+                throw ApiFailure.invalid(
+                        "financial.periodTo",
+                        "Период выручки должен заканчиваться последним днём месяца");
+        }
     }
 
     private void checkCode(JsonNode answers, String field, Set<String> codes) {
