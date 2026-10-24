@@ -34,15 +34,20 @@ services:
       DEMO_BANK_PASSWORD: ${DEMO_BANK_PASSWORD:-}
       DEMO_ASSESSMENT_ENABLED: ${DEMO_ASSESSMENT_ENABLED:-false}
       DOCUMENTS_PATH: /app/documents
-      RECSYS_URL: ${RECSYS_URL:-}
-      RECSYS_API_KEY: ${RECSYS_API_KEY:-}
-      RECSYS_TIMEOUT_MS: ${RECSYS_TIMEOUT_MS:-5000}
+      RECSYS_URL: ${RECSYS_URL:-http://fastapi:8000/api/v1/recommendations/rank-java}
+      RECSYS_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
+      RECSYS_TIMEOUT_MS: ${RECSYS_TIMEOUT_MS:-10000}
+    networks:
+      - default
+      - recsys_internal
     ports:
       - '127.0.0.1:${BACKEND_PORT:-8080}:8080'
     volumes:
       - documents_data:/app/documents
     depends_on:
       postgres:
+        condition: service_healthy
+      fastapi:
         condition: service_healthy
     init: true
     read_only: true
@@ -59,8 +64,15 @@ services:
       context: ./fastapi
       dockerfile: Dockerfile
     image: alpha-future-fastapi:local
-    ports:
-      - '127.0.0.1:${FASTAPI_PORT:-8000}:8000'
+    environment:
+      ML_INTERNAL_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
+      MODEL_LOCAL_PATH: /models/multilingual-e5-small
+      MODEL_REVISION: ${MODEL_REVISION:-614241f622f53c4eeff9890bdc4f31cfecc418b3}
+    volumes:
+      - ./fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro
+    networks:
+      - recsys_internal
+    mem_limit: 2g
     init: true
     read_only: true
     tmpfs:
@@ -70,14 +82,10 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test:
-        - CMD
-        - python
-        - -c
-        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).close()"
+      test: ["CMD", "python", "-m", "app.healthcheck"]
       interval: 10s
       timeout: 3s
-      start_period: 10s
+      start_period: 90s
       retries: 3
     restart: unless-stopped
 
@@ -121,3 +129,7 @@ volumes:
   postgres_data:
   pgadmin_data:
   documents_data:
+
+networks:
+  recsys_internal:
+    internal: true

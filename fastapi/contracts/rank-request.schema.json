@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alfa-ml:rank-request:v2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "business": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sector": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "TRADE",
+                    "MANUFACTURING",
+                    "SERVICES",
+                    "AGRICULTURE",
+                    "CONSTRUCTION",
+                    "TRANSPORT",
+                    "IT",
+                    "HOSPITALITY",
+                    "OTHER",
+                    "UNKNOWN"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "sector"
+          ]
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "enum": [
+                "WORKING_CAPITAL",
+                "CASH_GAP",
+                "EQUIPMENT",
+                "TRANSPORT",
+                "COMMERCIAL_PROPERTY",
+                "CONTRACT_EXECUTION",
+                "REFINANCING",
+                "DEVELOPMENT"
+              ]
+            },
+            "usageMode": {
+              "type": "string",
+              "enum": [
+                "ONE_TIME",
+                "IN_PARTS",
+                "ACCOUNT_RESERVE",
+                "UNKNOWN"
+              ]
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "purpose",
+            "usageMode"
+          ]
+        },
+        "security": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "collateralReady": {
+              "type": "string",
+              "enum": [
+                "YES",
+                "NO",
+                "DISCUSS",
+                "UNKNOWN"
+              ]
+            },
+            "guarantorReady": {
+              "type": "string",
+              "enum": [
+                "YES",
+                "NO",
+                "DISCUSS",
+                "UNKNOWN"
+              ]
+            }
+          },
+          "required": [
+            "collateralReady",
+            "guarantorReady"
+          ]
+        }
+      },
+      "required": [
+        "business",
+        "request",
+        "security"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "product": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "TERM_LOAN",
+                  "REVOLVING_CREDIT_LINE",
+                  "NON_REVOLVING_CREDIT_LINE",
+                  "OVERDRAFT"
+                ]
+              },
+              "purposes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "WORKING_CAPITAL",
+                    "CASH_GAP",
+                    "EQUIPMENT",
+                    "TRANSPORT",
+                    "COMMERCIAL_PROPERTY",
+                    "CONTRACT_EXECUTION",
+                    "REFINANCING",
+                    "DEVELOPMENT"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "usageModes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ONE_TIME",
+                    "IN_PARTS",
+                    "ACCOUNT_RESERVE"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 3,
+                "uniqueItems": true
+              },
+              "targetScenario": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "targetSectors": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "TRADE",
+                    "MANUFACTURING",
+                    "SERVICES",
+                    "AGRICULTURE",
+                    "CONSTRUCTION",
+                    "TRANSPORT",
+                    "IT",
+                    "HOSPITALITY"
+                  ]
+                },
+                "minItems": 0,
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "specialization": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "collateralRequirement": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "REQUIRED",
+                  "CONDITIONAL"
+                ]
+              },
+              "guarantorRequirement": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "REQUIRED",
+                  "CONDITIONAL"
+                ]
+              },
+              "securityNote": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "version",
+              "name",
+              "type",
+              "purposes",
+              "usageModes",
+              "targetScenario",
+              "collateralRequirement",
+              "guarantorRequirement"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "collateralRequirement": {
+                          "const": "CONDITIONAL"
+                        }
+                      },
+                      "required": [
+                        "collateralRequirement"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "guarantorRequirement": {
+                          "const": "CONDITIONAL"
+                        }
+                      },
+                      "required": [
+                        "guarantorRequirement"
+                      ]
+                    }
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "securityNote"
+                  ],
+                  "properties": {
+                    "securityNote": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "pattern": "\\S"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ]
+          },
+          "pendingConditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 20,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "product",
+          "eligibilityStatus",
+          "pendingConditions"
+        ]
+      }
+    },
+    "topK": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "default": 3
+    }
+  },
+  "required": [
+    "requestId",
+    "profile",
+    "candidates"
+  ]
+}

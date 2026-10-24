@@ -1,0 +1,116 @@
+{
+  "requestId": "demo-v2-conditional",
+  "profile": {
+    "business": {
+      "sector": "TRADE"
+    },
+    "request": {
+      "purpose": "WORKING_CAPITAL",
+      "usageMode": "IN_PARTS",
+      "description": "Закупаем товар небольшими партиями перед сезоном."
+    },
+    "security": {
+      "collateralReady": "DISCUSS",
+      "guarantorReady": "YES"
+    }
+  },
+  "candidates": [
+    {
+      "product": {
+        "id": "demo-term",
+        "version": "demo-2",
+        "name": "ДЕМО: разовый оборотный кредит",
+        "type": "TERM_LOAN",
+        "purposes": [
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "ONE_TIME"
+        ],
+        "targetScenario": "Одна крупная закупка товаров или сырья для текущей деятельности.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null
+      },
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "product": {
+        "id": "demo-line",
+        "version": "demo-2",
+        "name": "ДЕМО: возобновляемая линия",
+        "type": "REVOLVING_CREDIT_LINE",
+        "purposes": [
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "IN_PARTS"
+        ],
+        "targetScenario": "Повторяющиеся закупки товаров небольшими партиями по мере необходимости.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null
+      },
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "product": {
+        "id": "demo-overdraft",
+        "version": "demo-2",
+        "name": "ДЕМО: овердрафт",
+        "type": "OVERDRAFT",
+        "purposes": [
+          "CASH_GAP",
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "ACCOUNT_RESERVE"
+        ],
+        "targetScenario": "Кратковременная нехватка средств на расчётном счёте при задержке оплаты от покупателей.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null
+      },
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "product": {
+        "id": "demo-marketplace",
+        "version": "demo-2",
+        "name": "ДЕМО: линия для маркетплейсов",
+        "type": "REVOLVING_CREDIT_LINE",
+        "purposes": [
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "IN_PARTS"
+        ],
+        "targetScenario": "Регулярное пополнение товарных запасов для продаж на маркетплейсах.",
+        "targetSectors": [
+          "TRADE"
+        ],
+        "specialization": "Финансирование продавцов маркетплейсов.",
+        "collateralRequirement": "CONDITIONAL",
+        "guarantorRequirement": "NONE",
+        "securityNote": "Необходимость имущественного залога определяется выбранной конфигурацией сделки."
+      },
+      "eligibilityStatus": "CONDITIONAL",
+      "pendingConditions": [
+        {
+          "code": "COLLATERAL_CONFIRMATION",
+          "message": "Условия обеспечения требуют уточнения."
+        }
+      ]
+    }
+  ],
+  "topK": 3
+}

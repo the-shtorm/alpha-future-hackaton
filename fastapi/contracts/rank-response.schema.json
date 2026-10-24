@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:alfa-ml:rank-response:v2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "results": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "productVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "similarityScore": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "isRecommended": {
+            "type": "boolean"
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ]
+          },
+          "pendingConditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 20,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "productId",
+          "productVersion",
+          "rank",
+          "similarityScore",
+          "isRecommended",
+          "eligibilityStatus",
+          "pendingConditions"
+        ]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modelId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "modelRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "queryTemplateVersion": {
+          "const": "query-v2"
+        },
+        "passageTemplateVersion": {
+          "const": "passage-v2"
+        },
+        "labelsVersion": {
+          "const": "ru-v2"
+        },
+        "contractVersion": {
+          "const": "rank-v2"
+        },
+        "rankingMode": {
+          "const": "semantic_only"
+        },
+        "scoreType": {
+          "const": "cosine_similarity"
+        },
+        "selectionPolicy": {
+          "const": "top_k_relative_no_quality_threshold"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "required": [
+        "modelId",
+        "modelRevision",
+        "queryTemplateVersion",
+        "passageTemplateVersion",
+        "labelsVersion",
+        "contractVersion",
+        "rankingMode",
+        "scoreType",
+        "selectionPolicy",
+        "warnings"
+      ]
+    }
+  },
+  "required": [
+    "requestId",
+    "results",
+    "metadata"
+  ]
+}

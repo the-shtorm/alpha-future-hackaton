@@ -1,0 +1,25 @@
+{
+  "queryProfileFields": [
+    "business.sector",
+    "request.purpose",
+    "request.usageMode",
+    "request.description",
+    "security.collateralReady",
+    "security.guarantorReady"
+  ],
+  "productFields": [
+    "id",
+    "version",
+    "name",
+    "type",
+    "purposes",
+    "usageModes",
+    "targetScenario",
+    "targetSectors",
+    "specialization",
+    "collateralRequirement",
+    "guarantorRequirement",
+    "securityNote"
+  ],
+  "explanation": "Все поля query/passage исходного query_passage_mvp.md сохранены. Служебные id/version/name не обязательно входят в текст. Необязательные поля остаются в схеме и могут отсутствовать в экземпляре."
+}

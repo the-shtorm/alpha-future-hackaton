@@ -1,0 +1,9 @@
+services:
+  fastapi:
+    networks:
+      - default
+      - recsys_internal
+    ports:
+      - "127.0.0.1:${FASTAPI_PORT:-8000}:8000"
+    environment:
+      DOCS_ENABLED: "true"

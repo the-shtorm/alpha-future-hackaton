@@ -1,0 +1,1627 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Credit Cabinet Semantic Ranking",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Live",
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Live Health Live Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Ready Health Ready Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations/rank": {
+      "post": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Rank",
+        "description": "Rank all Java-filtered candidates by cosine; mark relative top-K without a quality threshold.",
+        "operationId": "rank_api_v1_recommendations_rank_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RankRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recommendations/rank-java": {
+      "post": {
+        "tags": [
+          "java-exchange"
+        ],
+        "summary": "Rank Java",
+        "description": "Java automatic-selection envelope; full applicability conditions echoed unchanged. Up to 100 candidates.",
+        "operationId": "rank_java_api_v1_recommendations_rank_java_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JavaRankRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JavaRankResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/model-info": {
+      "get": {
+        "tags": [
+          "model"
+        ],
+        "summary": "Model Info",
+        "operationId": "model_info_api_v1_model_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Business": {
+        "properties": {
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TRADE",
+                  "MANUFACTURING",
+                  "SERVICES",
+                  "AGRICULTURE",
+                  "CONSTRUCTION",
+                  "TRANSPORT",
+                  "IT",
+                  "HOSPITALITY",
+                  "OTHER",
+                  "UNKNOWN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sector"
+        ],
+        "title": "Business"
+      },
+      "Candidate": {
+        "properties": {
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ],
+            "title": "Eligibilitystatus"
+          },
+          "pendingConditions": {
+            "items": {
+              "$ref": "#/components/schemas/PendingCondition"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "uniqueItems": true,
+            "title": "Pendingconditions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "product",
+          "eligibilityStatus",
+          "pendingConditions"
+        ],
+        "title": "Candidate"
+      },
+      "Condition": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "REVIEW"
+            ],
+            "title": "Result"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "actual": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "expected": {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "field",
+          "result",
+          "message",
+          "actual",
+          "expected"
+        ],
+        "title": "Condition"
+      },
+      "Dictionaries": {
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "query-passage-mvp-2",
+            "title": "Version"
+          },
+          "purposes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Purposes"
+          },
+          "sectors": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Sectors"
+          },
+          "usageModes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Usagemodes"
+          },
+          "readiness": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Readiness"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version",
+          "purposes",
+          "sectors",
+          "usageModes",
+          "readiness"
+        ],
+        "title": "Dictionaries"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "details": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Details"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          },
+          "requestId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requestid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "title": "ErrorResponse"
+      },
+      "FundingRequest": {
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "WORKING_CAPITAL",
+              "CASH_GAP",
+              "EQUIPMENT",
+              "TRANSPORT",
+              "COMMERCIAL_PROPERTY",
+              "CONTRACT_EXECUTION",
+              "REFINANCING",
+              "DEVELOPMENT"
+            ],
+            "title": "Purpose"
+          },
+          "usageMode": {
+            "type": "string",
+            "enum": [
+              "ONE_TIME",
+              "IN_PARTS",
+              "ACCOUNT_RESERVE",
+              "UNKNOWN"
+            ],
+            "title": "Usagemode"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "purpose",
+          "usageMode"
+        ],
+        "title": "FundingRequest"
+      },
+      "JavaBusiness": {
+        "properties": {
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TRADE",
+                  "MANUFACTURING",
+                  "SERVICES",
+                  "IT",
+                  "CONSTRUCTION",
+                  "AGRICULTURE",
+                  "LOGISTICS",
+                  "UNKNOWN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "JavaBusiness"
+      },
+      "JavaCandidate": {
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Productid"
+          },
+          "productVersion": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Productversion"
+          },
+          "product": {
+            "$ref": "#/components/schemas/JavaProduct"
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ],
+            "title": "Eligibilitystatus"
+          },
+          "pendingConditions": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array",
+            "title": "Pendingconditions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "productId",
+          "productVersion",
+          "product",
+          "eligibilityStatus",
+          "pendingConditions"
+        ],
+        "title": "JavaCandidate"
+      },
+      "JavaMetadata": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Model"
+          },
+          "modelVersion": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Modelversion"
+          },
+          "queryTemplateVersion": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Querytemplateversion"
+          },
+          "passageTemplateVersion": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Passagetemplateversion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "model",
+          "modelVersion",
+          "queryTemplateVersion",
+          "passageTemplateVersion"
+        ],
+        "title": "JavaMetadata"
+      },
+      "JavaProduct": {
+        "allOf": [
+          {
+            "if": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "collateralRequirement": {
+                      "const": "CONDITIONAL"
+                    }
+                  },
+                  "required": [
+                    "collateralRequirement"
+                  ]
+                },
+                {
+                  "properties": {
+                    "guarantorRequirement": {
+                      "const": "CONDITIONAL"
+                    }
+                  },
+                  "required": [
+                    "guarantorRequirement"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "securityNote": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              },
+              "required": [
+                "securityNote"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Version"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TERM_LOAN",
+              "REVOLVING_CREDIT_LINE",
+              "NON_REVOLVING_CREDIT_LINE",
+              "OVERDRAFT"
+            ],
+            "title": "Type"
+          },
+          "purposes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "WORKING_CAPITAL",
+                "CASH_GAP",
+                "EQUIPMENT",
+                "TRANSPORT",
+                "COMMERCIAL_PROPERTY",
+                "CONTRACT_EXECUTION",
+                "REFINANCING",
+                "DEVELOPMENT"
+              ]
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "uniqueItems": true,
+            "title": "Purposes"
+          },
+          "usageModes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "ONE_TIME",
+                "IN_PARTS",
+                "ACCOUNT_RESERVE"
+              ]
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "uniqueItems": true,
+            "title": "Usagemodes"
+          },
+          "targetScenario": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Targetscenario"
+          },
+          "targetSectors": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "TRADE",
+                "MANUFACTURING",
+                "SERVICES",
+                "IT",
+                "CONSTRUCTION",
+                "AGRICULTURE",
+                "LOGISTICS"
+              ]
+            },
+            "type": "array",
+            "maxItems": 7,
+            "uniqueItems": true,
+            "title": "Targetsectors"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          },
+          "collateralRequirement": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REQUIRED",
+              "CONDITIONAL"
+            ],
+            "title": "Collateralrequirement"
+          },
+          "guarantorRequirement": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REQUIRED",
+              "CONDITIONAL"
+            ],
+            "title": "Guarantorrequirement"
+          },
+          "securityNote": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Securitynote"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "title": "Synthetic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "name",
+          "type",
+          "purposes",
+          "usageModes",
+          "targetScenario",
+          "collateralRequirement",
+          "guarantorRequirement",
+          "code",
+          "synthetic"
+        ],
+        "title": "JavaProduct"
+      },
+      "JavaRankRequest": {
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "const": "query-passage-mvp-2",
+            "title": "Schemaversion"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Requestid"
+          },
+          "topK": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Topk"
+          },
+          "semanticsVersion": {
+            "type": "string",
+            "const": "synthetic-semantics-1",
+            "title": "Semanticsversion"
+          },
+          "queryFields": {
+            "$ref": "#/components/schemas/QueryFields"
+          },
+          "dictionaries": {
+            "$ref": "#/components/schemas/Dictionaries"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/JavaCandidate"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Candidates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "requestId",
+          "topK",
+          "semanticsVersion",
+          "queryFields",
+          "dictionaries",
+          "candidates"
+        ],
+        "title": "JavaRankRequest"
+      },
+      "JavaRankResponse": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Requestid"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/JavaMetadata"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/JavaRankedProduct"
+            },
+            "type": "array",
+            "maxItems": 1000,
+            "title": "Results"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requestId",
+          "metadata",
+          "results"
+        ],
+        "title": "JavaRankResponse"
+      },
+      "JavaRankedProduct": {
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Productid"
+          },
+          "productVersion": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Productversion"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "similarityScore": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Similarityscore"
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "title": "Isrecommended"
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ],
+            "title": "Eligibilitystatus"
+          },
+          "pendingConditions": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array",
+            "title": "Pendingconditions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "productId",
+          "productVersion",
+          "rank",
+          "similarityScore",
+          "isRecommended",
+          "eligibilityStatus",
+          "pendingConditions"
+        ],
+        "title": "JavaRankedProduct"
+      },
+      "JavaSecurity": {
+        "properties": {
+          "collateralReady": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "YES",
+                  "NO",
+                  "DISCUSS",
+                  "UNKNOWN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collateralready"
+          },
+          "guarantorReady": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "YES",
+                  "NO",
+                  "DISCUSS",
+                  "UNKNOWN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guarantorready"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "JavaSecurity"
+      },
+      "JsonValue": {},
+      "Metadata": {
+        "properties": {
+          "modelId": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Modelid"
+          },
+          "modelRevision": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Modelrevision"
+          },
+          "queryTemplateVersion": {
+            "type": "string",
+            "const": "query-v2",
+            "title": "Querytemplateversion",
+            "default": "query-v2"
+          },
+          "passageTemplateVersion": {
+            "type": "string",
+            "const": "passage-v2",
+            "title": "Passagetemplateversion",
+            "default": "passage-v2"
+          },
+          "labelsVersion": {
+            "type": "string",
+            "const": "ru-v2",
+            "title": "Labelsversion",
+            "default": "ru-v2"
+          },
+          "contractVersion": {
+            "type": "string",
+            "const": "rank-v2",
+            "title": "Contractversion",
+            "default": "rank-v2"
+          },
+          "rankingMode": {
+            "type": "string",
+            "const": "semantic_only",
+            "title": "Rankingmode",
+            "default": "semantic_only"
+          },
+          "scoreType": {
+            "type": "string",
+            "const": "cosine_similarity",
+            "title": "Scoretype",
+            "default": "cosine_similarity"
+          },
+          "selectionPolicy": {
+            "type": "string",
+            "const": "top_k_relative_no_quality_threshold",
+            "title": "Selectionpolicy",
+            "default": "top_k_relative_no_quality_threshold"
+          },
+          "warnings": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "modelId",
+          "modelRevision"
+        ],
+        "title": "Metadata"
+      },
+      "ModelInfo": {
+        "properties": {
+          "modelId": {
+            "type": "string",
+            "title": "Modelid"
+          },
+          "modelRevision": {
+            "type": "string",
+            "title": "Modelrevision"
+          },
+          "dimension": {
+            "type": "integer",
+            "const": 384,
+            "title": "Dimension"
+          },
+          "maxSeqLength": {
+            "type": "integer",
+            "const": 512,
+            "title": "Maxseqlength"
+          },
+          "device": {
+            "type": "string",
+            "const": "cpu",
+            "title": "Device"
+          },
+          "queryTemplateVersion": {
+            "type": "string",
+            "const": "query-v2",
+            "title": "Querytemplateversion"
+          },
+          "passageTemplateVersion": {
+            "type": "string",
+            "const": "passage-v2",
+            "title": "Passagetemplateversion"
+          },
+          "labelsVersion": {
+            "type": "string",
+            "const": "ru-v2",
+            "title": "Labelsversion"
+          },
+          "contractVersion": {
+            "type": "string",
+            "const": "rank-v2",
+            "title": "Contractversion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "modelId",
+          "modelRevision",
+          "dimension",
+          "maxSeqLength",
+          "device",
+          "queryTemplateVersion",
+          "passageTemplateVersion",
+          "labelsVersion",
+          "contractVersion"
+        ],
+        "title": "ModelInfo"
+      },
+      "PendingCondition": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "PendingCondition"
+      },
+      "Product": {
+        "allOf": [
+          {
+            "if": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "collateralRequirement": {
+                      "const": "CONDITIONAL"
+                    }
+                  },
+                  "required": [
+                    "collateralRequirement"
+                  ]
+                },
+                {
+                  "properties": {
+                    "guarantorRequirement": {
+                      "const": "CONDITIONAL"
+                    }
+                  },
+                  "required": [
+                    "guarantorRequirement"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "securityNote": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              },
+              "required": [
+                "securityNote"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TERM_LOAN",
+              "REVOLVING_CREDIT_LINE",
+              "NON_REVOLVING_CREDIT_LINE",
+              "OVERDRAFT"
+            ],
+            "title": "Type"
+          },
+          "purposes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "WORKING_CAPITAL",
+                "CASH_GAP",
+                "EQUIPMENT",
+                "TRANSPORT",
+                "COMMERCIAL_PROPERTY",
+                "CONTRACT_EXECUTION",
+                "REFINANCING",
+                "DEVELOPMENT"
+              ]
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "uniqueItems": true,
+            "title": "Purposes"
+          },
+          "usageModes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "ONE_TIME",
+                "IN_PARTS",
+                "ACCOUNT_RESERVE"
+              ]
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "uniqueItems": true,
+            "title": "Usagemodes"
+          },
+          "targetScenario": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Targetscenario"
+          },
+          "targetSectors": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "TRADE",
+                "MANUFACTURING",
+                "SERVICES",
+                "AGRICULTURE",
+                "CONSTRUCTION",
+                "TRANSPORT",
+                "IT",
+                "HOSPITALITY"
+              ]
+            },
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "title": "Targetsectors"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          },
+          "collateralRequirement": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REQUIRED",
+              "CONDITIONAL"
+            ],
+            "title": "Collateralrequirement"
+          },
+          "guarantorRequirement": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REQUIRED",
+              "CONDITIONAL"
+            ],
+            "title": "Guarantorrequirement"
+          },
+          "securityNote": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Securitynote"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "name",
+          "type",
+          "purposes",
+          "usageModes",
+          "targetScenario",
+          "collateralRequirement",
+          "guarantorRequirement"
+        ],
+        "title": "Product"
+      },
+      "Profile": {
+        "properties": {
+          "business": {
+            "$ref": "#/components/schemas/Business"
+          },
+          "request": {
+            "$ref": "#/components/schemas/FundingRequest"
+          },
+          "security": {
+            "$ref": "#/components/schemas/Security"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "business",
+          "request",
+          "security"
+        ],
+        "title": "Profile"
+      },
+      "QueryFields": {
+        "properties": {
+          "business": {
+            "$ref": "#/components/schemas/JavaBusiness"
+          },
+          "request": {
+            "$ref": "#/components/schemas/FundingRequest"
+          },
+          "security": {
+            "$ref": "#/components/schemas/JavaSecurity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request"
+        ],
+        "title": "QueryFields"
+      },
+      "RankRequest": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Requestid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Candidates"
+          },
+          "topK": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Topk",
+            "default": 3
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requestId",
+          "profile",
+          "candidates"
+        ],
+        "title": "RankRequest"
+      },
+      "RankResponse": {
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Requestid"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/RankedProduct"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Results"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requestId",
+          "results",
+          "metadata"
+        ],
+        "title": "RankResponse"
+      },
+      "RankedProduct": {
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Productid"
+          },
+          "productVersion": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Productversion"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "similarityScore": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Similarityscore"
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "title": "Isrecommended"
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "CONDITIONAL"
+            ],
+            "title": "Eligibilitystatus"
+          },
+          "pendingConditions": {
+            "items": {
+              "$ref": "#/components/schemas/PendingCondition"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "uniqueItems": true,
+            "title": "Pendingconditions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "productId",
+          "productVersion",
+          "rank",
+          "similarityScore",
+          "isRecommended",
+          "eligibilityStatus",
+          "pendingConditions"
+        ],
+        "title": "RankedProduct"
+      },
+      "Security": {
+        "properties": {
+          "collateralReady": {
+            "type": "string",
+            "enum": [
+              "YES",
+              "NO",
+              "DISCUSS",
+              "UNKNOWN"
+            ],
+            "title": "Collateralready"
+          },
+          "guarantorReady": {
+            "type": "string",
+            "enum": [
+              "YES",
+              "NO",
+              "DISCUSS",
+              "UNKNOWN"
+            ],
+            "title": "Guarantorready"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "collateralReady",
+          "guarantorReady"
+        ],
+        "title": "Security"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Internal-API-Key"
+      },
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Recsys response — Query/Passage MVP 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "metadata", "results"],
+  "properties": {
+    "requestId": { "type": "string", "format": "uuid" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "modelVersion", "queryTemplateVersion", "passageTemplateVersion"],
+      "properties": {
+        "model": { "$ref": "#/$defs/version" },
+        "modelVersion": { "$ref": "#/$defs/version" },
+        "queryTemplateVersion": { "$ref": "#/$defs/version" },
+        "passageTemplateVersion": { "$ref": "#/$defs/version" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productId",
+          "productVersion",
+          "rank",
+          "similarityScore",
+          "isRecommended",
+          "eligibilityStatus",
+          "pendingConditions"
+        ],
+        "properties": {
+          "productId": { "type": "string", "format": "uuid" },
+          "productVersion": { "type": "string", "format": "uuid" },
+          "rank": { "type": "integer", "minimum": 1 },
+          "similarityScore": { "type": "number", "minimum": -1, "maximum": 1 },
+          "isRecommended": { "type": "boolean" },
+          "eligibilityStatus": { "enum": ["ELIGIBLE", "CONDITIONAL"] },
+          "pendingConditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "version": { "type": "string", "minLength": 1, "maxLength": 120, "pattern": "\\S" },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "field", "result", "message", "actual", "expected"],
+      "properties": {
+        "code": { "type": "string" },
+        "field": { "type": "string" },
+        "result": { "enum": ["UNKNOWN", "REVIEW"] },
+        "message": { "type": "string" },
+        "actual": {},
+        "expected": {}
+      }
+    }
+  }
+}

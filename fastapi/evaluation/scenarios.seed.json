@@ -1,0 +1,146 @@
+{
+  "notice": "Предлагаемые semantic-сценарии, не доказательство eligibility и не подтверждённая разметка. Общий каталог здесь нужен только для проверки смыслового различения.",
+  "scenarios": [
+    {
+      "id": "regular",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "id": "once",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "id": "reserve",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "id": "equipment",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED"
+    },
+    {
+      "id": "marketplace",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED"
+    }
+  ]
+}

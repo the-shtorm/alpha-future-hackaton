@@ -1,0 +1,1168 @@
+{
+  "notice": "Synthetic proposals; all labels require human confirmation. Security variations test semantic sensitivity, never eligibility.",
+  "scenarios": [
+    {
+      "id": "regular-original",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "original"
+    },
+    {
+      "id": "regular-no_description",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS"
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_description"
+    },
+    {
+      "id": "regular-no_collateral",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_collateral"
+    },
+    {
+      "id": "regular-no_guarantor",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_guarantor"
+    },
+    {
+      "id": "regular-discuss_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "discuss_security"
+    },
+    {
+      "id": "regular-ready_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "ready_security"
+    },
+    {
+      "id": "regular-unknown_context",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Регулярно закупаем небольшие партии."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "unknown_context"
+    },
+    {
+      "id": "regular-paraphrase",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Закупаем товар понемногу каждую неделю."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "paraphrase"
+    },
+    {
+      "id": "once-original",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "original"
+    },
+    {
+      "id": "once-no_description",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME"
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_description"
+    },
+    {
+      "id": "once-no_collateral",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_collateral"
+    },
+    {
+      "id": "once-no_guarantor",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_guarantor"
+    },
+    {
+      "id": "once-discuss_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "discuss_security"
+    },
+    {
+      "id": "once-ready_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "ready_security"
+    },
+    {
+      "id": "once-unknown_context",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Одна крупная закупка товара."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "unknown_context"
+    },
+    {
+      "id": "once-paraphrase",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "ONE_TIME",
+          "description": "Планируем единовременную закупку партии товара."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-term"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "paraphrase"
+    },
+    {
+      "id": "reserve-original",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "original"
+    },
+    {
+      "id": "reserve-no_description",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE"
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_description"
+    },
+    {
+      "id": "reserve-no_collateral",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_collateral"
+    },
+    {
+      "id": "reserve-no_guarantor",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_guarantor"
+    },
+    {
+      "id": "reserve-discuss_security",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "discuss_security"
+    },
+    {
+      "id": "reserve-ready_security",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "ready_security"
+    },
+    {
+      "id": "reserve-unknown_context",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "UNKNOWN",
+          "description": "Покупатели платят позже текущих обязательных платежей."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "unknown_context"
+    },
+    {
+      "id": "reserve-paraphrase",
+      "profile": {
+        "business": {
+          "sector": "SERVICES"
+        },
+        "request": {
+          "purpose": "CASH_GAP",
+          "usageMode": "ACCOUNT_RESERVE",
+          "description": "Нужна подстраховка счёта до поступления оплаты."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-overdraft"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "paraphrase"
+    },
+    {
+      "id": "equipment-original",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "original"
+    },
+    {
+      "id": "equipment-no_description",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME"
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_description"
+    },
+    {
+      "id": "equipment-no_collateral",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_collateral"
+    },
+    {
+      "id": "equipment-no_guarantor",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_guarantor"
+    },
+    {
+      "id": "equipment-discuss_security",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "discuss_security"
+    },
+    {
+      "id": "equipment-ready_security",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "ready_security"
+    },
+    {
+      "id": "equipment-unknown_context",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "UNKNOWN",
+          "description": "Покупаем станок для цеха."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "unknown_context"
+    },
+    {
+      "id": "equipment-paraphrase",
+      "profile": {
+        "business": {
+          "sector": "MANUFACTURING"
+        },
+        "request": {
+          "purpose": "EQUIPMENT",
+          "usageMode": "ONE_TIME",
+          "description": "Нужно приобрести производственное оборудование."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-equipment"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "paraphrase"
+    },
+    {
+      "id": "marketplace-original",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "original"
+    },
+    {
+      "id": "marketplace-no_description",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS"
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_description"
+    },
+    {
+      "id": "marketplace-no_collateral",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "NO",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_collateral"
+    },
+    {
+      "id": "marketplace-no_guarantor",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "NO"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "no_guarantor"
+    },
+    {
+      "id": "marketplace-discuss_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "DISCUSS",
+          "guarantorReady": "DISCUSS"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "discuss_security"
+    },
+    {
+      "id": "marketplace-ready_security",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "YES",
+          "guarantorReady": "YES"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "ready_security"
+    },
+    {
+      "id": "marketplace-unknown_context",
+      "profile": {
+        "business": {
+          "sector": null
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "UNKNOWN",
+          "description": "Пополняем товарные запасы для маркетплейса."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "unknown_context"
+    },
+    {
+      "id": "marketplace-paraphrase",
+      "profile": {
+        "business": {
+          "sector": "TRADE"
+        },
+        "request": {
+          "purpose": "WORKING_CAPITAL",
+          "usageMode": "IN_PARTS",
+          "description": "Продаём через маркетплейс и закупаем товар партиями."
+        },
+        "security": {
+          "collateralReady": "UNKNOWN",
+          "guarantorReady": "UNKNOWN"
+        }
+      },
+      "candidateProductIds": [
+        "demo-term",
+        "demo-line",
+        "demo-overdraft",
+        "demo-equipment",
+        "demo-marketplace"
+      ],
+      "proposedRelevantProductIds": [
+        "demo-marketplace",
+        "demo-line"
+      ],
+      "labelStatus": "MANUAL_REVIEW_REQUIRED",
+      "variant": "paraphrase"
+    }
+  ]
+}

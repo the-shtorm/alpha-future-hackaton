@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "query-passage-mvp-2",
+  "requestId": "00000000-0000-4000-8000-000000000001",
+  "topK": 3,
+  "semanticsVersion": "synthetic-semantics-1",
+  "queryFields": {
+    "business": {
+      "sector": "LOGISTICS"
+    },
+    "request": {
+      "purpose": "WORKING_CAPITAL",
+      "usageMode": "IN_PARTS",
+      "description": "Закупаем товар небольшими партиями перед сезоном."
+    },
+    "security": {
+      "collateralReady": "NO",
+      "guarantorReady": null
+    }
+  },
+  "dictionaries": {
+    "version": "query-passage-mvp-2",
+    "purposes": {},
+    "sectors": {},
+    "usageModes": {},
+    "readiness": {}
+  },
+  "candidates": [
+    {
+      "productId": "e3e97406-1bd0-5b9b-b562-e5c9b3634988",
+      "productVersion": "72611422-d6d6-5387-bcea-ddc0052b64a9",
+      "product": {
+        "id": "e3e97406-1bd0-5b9b-b562-e5c9b3634988",
+        "version": "72611422-d6d6-5387-bcea-ddc0052b64a9",
+        "name": "ДЕМО: разовый оборотный кредит",
+        "type": "TERM_LOAN",
+        "purposes": [
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "ONE_TIME"
+        ],
+        "targetScenario": "Одна крупная закупка товаров или сырья для текущей деятельности.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null,
+        "code": "P01",
+        "synthetic": true
+      },
+      "eligibilityStatus": "CONDITIONAL",
+      "pendingConditions": [
+        {
+          "code": "GUARANTOR_REQUIRED",
+          "field": "security.guarantorReady",
+          "result": "UNKNOWN",
+          "message": "  Synthetic condition must remain unchanged.  ",
+          "actual": null,
+          "expected": {
+            "readiness": [
+              "YES",
+              "DISCUSS"
+            ],
+            "minimum": 0,
+            "confirmed": false
+          }
+        }
+      ]
+    },
+    {
+      "productId": "88c7705d-3857-5b0c-a224-d96f2217b5d1",
+      "productVersion": "67fe20bc-3122-563b-a1f7-7a9cce8b6523",
+      "product": {
+        "id": "88c7705d-3857-5b0c-a224-d96f2217b5d1",
+        "version": "67fe20bc-3122-563b-a1f7-7a9cce8b6523",
+        "name": "ДЕМО: возобновляемая линия",
+        "type": "REVOLVING_CREDIT_LINE",
+        "purposes": [
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "IN_PARTS"
+        ],
+        "targetScenario": "Повторяющиеся закупки товаров небольшими партиями по мере необходимости.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null,
+        "code": "P02",
+        "synthetic": true
+      },
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "productId": "953dcf86-2afa-580a-be1f-ff7c105c72a0",
+      "productVersion": "1b9a1a96-7c9f-50d7-8f5d-abc9f36dc1fe",
+      "product": {
+        "id": "953dcf86-2afa-580a-be1f-ff7c105c72a0",
+        "version": "1b9a1a96-7c9f-50d7-8f5d-abc9f36dc1fe",
+        "name": "ДЕМО: овердрафт",
+        "type": "OVERDRAFT",
+        "purposes": [
+          "CASH_GAP",
+          "WORKING_CAPITAL"
+        ],
+        "usageModes": [
+          "ACCOUNT_RESERVE"
+        ],
+        "targetScenario": "Кратковременная нехватка средств на расчётном счёте при задержке оплаты от покупателей.",
+        "targetSectors": [],
+        "specialization": null,
+        "collateralRequirement": "NONE",
+        "guarantorRequirement": "NONE",
+        "securityNote": null,
+        "code": "P03",
+        "synthetic": true
+      },
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    }
+  ]
+}

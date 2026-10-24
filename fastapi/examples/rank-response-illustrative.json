@@ -1,0 +1,46 @@
+{
+  "requestId": "demo-v2-001",
+  "results": [
+    {
+      "productId": "demo-line",
+      "productVersion": "demo-2",
+      "rank": 1,
+      "similarityScore": 0.87,
+      "isRecommended": true,
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "productId": "demo-term",
+      "productVersion": "demo-2",
+      "rank": 2,
+      "similarityScore": 0.83,
+      "isRecommended": true,
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    },
+    {
+      "productId": "demo-overdraft",
+      "productVersion": "demo-2",
+      "rank": 3,
+      "similarityScore": 0.8,
+      "isRecommended": true,
+      "eligibilityStatus": "ELIGIBLE",
+      "pendingConditions": []
+    }
+  ],
+  "metadata": {
+    "modelId": "intfloat/multilingual-e5-small",
+    "modelRevision": "ILLUSTRATIVE_NOT_A_REAL_COMMIT",
+    "queryTemplateVersion": "query-v2",
+    "passageTemplateVersion": "passage-v2",
+    "labelsVersion": "ru-v2",
+    "contractVersion": "rank-v2",
+    "rankingMode": "semantic_only",
+    "scoreType": "cosine_similarity",
+    "selectionPolicy": "top_k_relative_no_quality_threshold",
+    "warnings": [
+      "CONTRACT_EXAMPLE_NOT_MEASURED_OUTPUT"
+    ]
+  }
+}

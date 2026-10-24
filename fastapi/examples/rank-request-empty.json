@@ -1,0 +1,19 @@
+{
+  "requestId": "demo-v2-empty",
+  "profile": {
+    "business": {
+      "sector": "TRADE"
+    },
+    "request": {
+      "purpose": "WORKING_CAPITAL",
+      "usageMode": "IN_PARTS",
+      "description": "Закупаем товар небольшими партиями перед сезоном."
+    },
+    "security": {
+      "collateralReady": "NO",
+      "guarantorReady": "NO"
+    }
+  },
+  "candidates": [],
+  "topK": 3
+}

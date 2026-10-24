@@ -14,3 +14,11 @@ __pycache__/
 
 
 **/*.tsbuildinfo
+.venv/
+models/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+fastapi/reports/
