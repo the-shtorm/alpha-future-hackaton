@@ -1,16 +1,12 @@
 import type { Answers } from './types';
 
 export const emptyAnswers: Answers = {
-  registration: { borrowerKind: 'LLC', registeredOn: '', country: 'RU' },
+  registration: { borrowerKind: 'LLC' },
   business: {
-    sector: 'UNKNOWN',
+    sector: null,
     actualStartedOn: '',
     taxRegime: 'UNKNOWN',
     mspRegistry: null,
-    region: '',
-    ipAgeYears: null,
-    marketplaceMonths: null,
-    bankAccountMonths: null,
   },
   request: {
     purpose: 'WORKING_CAPITAL',
@@ -23,28 +19,42 @@ export const emptyAnswers: Answers = {
   security: { collateralReady: 'UNKNOWN', guarantorReady: 'UNKNOWN' },
 };
 
+const removedFields = new Set([
+  'registration.registeredOn',
+  'registration.country',
+  'business.region',
+  'business.ipAgeYears',
+  'business.marketplaceMonths',
+  'business.bankAccountMonths',
+]);
+const decimalFields = new Set([
+  'request.amount',
+  'financial.revenue',
+  'financial.monthlyDebtPayment',
+  'security.collateralValue',
+  'project.ownContributionPct',
+]);
+
+/** Prepares decimal strings without converting money to floating-point numbers. */
 export function normalizeAnswers(form: Answers): Answers {
   return Object.fromEntries(
     Object.entries(form).map(([section, fields]) => [
       section,
       Object.fromEntries(
         Object.entries(fields)
-          .filter(
-            ([key]) =>
-              !(
-                section === 'business' &&
-                key === 'ipAgeYears' &&
-                form.registration.borrowerKind !== 'IP'
-              ),
-          )
-          .map(([key, value]) => [
-            key,
-            typeof value === 'string'
-              ? (['amount','revenue','monthlyDebtPayment','collateralValue','ownContributionPct'].includes(key)
-                  ? value.replace(/[\s\u00a0₽]/g,'').replace(',','.')
-                  : value.trim().replace(/\s+/g,' ')) || null
-              : value,
-          ]),
+          .filter(([key]) => !removedFields.has(`${section}.${key}`))
+          .map(([key, value]) => {
+            if (typeof value !== 'string') return [key, value];
+            const path = `${section}.${key}`;
+            let text = decimalFields.has(path)
+              ? value.replace(/[\s\u00a0₽]/g, '').replace(',', '.')
+              : value.trim().replace(/\s+/g, ' ');
+            if (decimalFields.has(path) && /^(?:0|[1-9]\d{0,16})(?:\.\d{1,2})?$/.test(text)) {
+              const [whole, fraction = ''] = text.split('.');
+              text = `${whole}.${fraction.padEnd(2, '0')}`;
+            }
+            return [key, text || null];
+          }),
       ),
     ]),
   );
@@ -57,22 +67,18 @@ export function exampleAnswers(): Answers {
   const start = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - 11, 1));
   return {
     ...structuredClone(emptyAnswers),
-    registration: { borrowerKind: 'LLC', registeredOn: '2020-01-01', country: 'RU' },
     business: {
       sector: 'TRADE',
       actualStartedOn: '2020-02-01',
       taxRegime: 'USN',
       mspRegistry: true,
-      region: '77',
-      marketplaceMonths: null,
-      bankAccountMonths: 12,
     },
     request: {
       purpose: 'WORKING_CAPITAL',
       amount: '1000000.00',
       termMonths: 12,
-      usageMode: 'IN_PARTS',
-      description: 'Закупаем товар небольшими партиями перед сезоном',
+      usageMode: 'ONE_TIME',
+      description: 'Закупаем товар перед сезоном',
     },
     financial: {
       revenue: '24000000.00',

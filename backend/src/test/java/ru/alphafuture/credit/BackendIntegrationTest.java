@@ -56,6 +56,7 @@ class BackendIntegrationTest {
         r.add("cabinet.demo-bank-password", () -> PASSWORD);
         r.add("cabinet.documents-path", STORAGE::toString);
         r.add("cabinet.demo-assessment-enabled", () -> true);
+        r.add("cabinet.recsys.url", () -> "");
     }
 
     @Autowired MockMvc http;
@@ -1249,5 +1250,33 @@ class BackendIntegrationTest {
         assertThat(validation.path("value_status").path("business.sector").asText())
                 .isEqualTo("UNKNOWN");
         assertThat(validation.path("review").path("kind").asText()).isEqualTo("REQUEST_INFO");
+    }
+
+    @Test
+    void automaticSelectionWithoutRecsysKeepsCandidatesAndConditionsWithoutInventingRanking()
+            throws Exception {
+        var answers = TestData.preliminary();
+        ((ObjectNode) answers.path("security")).put("guarantorReady", "DISCUSS");
+        var p = profile(answers);
+        String base = "/selection-profiles/" + p.path("id").asText();
+        var selection = post(base + "/automatic-selection", owner, Map.of());
+        assertThat(selection.path("rankingStatus").asText()).isEqualTo("NOT_CONFIGURED");
+        assertThat(selection.path("current").asBoolean()).isTrue();
+        assertThat(selection.path("results")).isNotEmpty();
+        for (var item : selection.path("results")) {
+            assertThat(item.has("similarityScore")).isFalse();
+            assertThat(item.has("isRecommended")).isFalse();
+            assertThat(item.path("eligibilityStatus").asText()).isIn("ELIGIBLE", "CONDITIONAL");
+            assertThat(item.path("product").path("minAmount").isTextual()).isTrue();
+        }
+        assertThat(selection.path("results"))
+                .anySatisfy(item -> assertThat(item.path("pendingConditions")).isNotEmpty());
+        var retried =
+                post(
+                        base + "/recommendations/" + selection.path("runId").asText() + "/retry",
+                        owner,
+                        Map.of());
+        assertThat(retried.path("rankingStatus").asText()).isEqualTo("NOT_CONFIGURED");
+        assertThat(retried.path("results")).isEqualTo(selection.path("results"));
     }
 }
