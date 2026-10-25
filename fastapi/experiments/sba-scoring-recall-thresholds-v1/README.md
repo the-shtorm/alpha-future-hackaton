@@ -134,6 +134,8 @@ SBA-данные завершённых кредитов остаются demo-�
 Полный перебор (7 235 370 байт) находится в игнорируемом локальном
 `fastapi/scoring_training/runs/sba-recall-thresholds-2026-10-25-v1/development-exact-curve.csv`.
 SHA-256 записан в `run-provenance.json`; повторный запуск использует новый output.
+Компактные CSV при экспорте нормализованы в LF, чтобы их хеши сохранялись в Git;
+оригинальные локальные файлы запуска не изменены.
 Команда из `fastapi/` приведена в provenance и [документации CLI](../../scoring_training/README.md).
 
 Проверки: 222 теста scoring-training; Ruff; 24 точных совпадения исходных метрик

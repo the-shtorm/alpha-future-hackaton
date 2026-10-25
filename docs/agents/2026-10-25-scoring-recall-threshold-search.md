@@ -62,6 +62,7 @@
 - Verified SHA-256 of persisted threshold selection, both implementation modules, pinned manifest and every frozen model-package file; all matched.
 - Markdown conclusions use the actual experiment counts and metrics; annual rows with no positives are explicitly explained.
 - Exported file checksums, all fixed cohort thresholds and confusion-count invariants passed. `git diff --exit-code d09b65b -- fastapi/models/sba-scoring-v1 fastapi/config/scoring-model.lock.json fastapi/app backend/src/main` confirmed no task changes to package, model lock, API/runtime or backend implementation.
+- A final Git-blob check detected Git's CRLF-to-LF normalization of two exported CSVs. Their working copies were normalized to LF and export-only checksums updated, preserving the immutable threshold selection/evaluation and original ignored run files. Provenance records this packaging transformation; staged blob hashes are checked before the follow-up commit.
 
 ## Contract and migration impacts
 
@@ -77,6 +78,7 @@ Historical SBA completed-loan data is a demo proxy. Mutable loan-term availabili
 - `5004bf0` — exact recall-aware threshold metrics and 21 tests; shared index staged selectively to exclude the pre-existing upload entry.
 - `0ede558` — frozen selection, temporal evaluation CLI and documentation, after the 222-test training-suite run.
 - Final experiment artifacts and finalized report are saved in a separate local results commit accompanying this report.
+- `fe50469` — aggregate experiment artifacts and conclusions; a small follow-up export fix preserves checksum verification after Git text normalization.
 - Git writes require sandbox escalation; the first unprivileged commit attempt failed to create `.git/index.lock`, and the authorized retry succeeded.
 - Existing branch `scoring_model` retained. Unrelated upload-report/index work and `.DS_Store` remain outside task commits.
 - No push performed.

@@ -12,8 +12,8 @@
   "files": {
     "selection.json": "1064ef9254207f78760d563c8c2cea811fdff5db69eef090123efe5a0bcbf641",
     "evaluation.json": "b33ac8a6fb1574fbbc16c7698c5fa6a52d91614613d86a06bfe13690d42a61c8",
-    "comparison.csv": "7a3822587944d807acccdff309e5683f865504e95f32e11ac12b300da61ab5cc",
-    "development-grid.csv": "f6f8fb9c691ff8d2fbb21b45e4b6bcf585069f3425718c8990db80b4e3756042",
+    "comparison.csv": "3ffabd96f9c23ccac0160b450f1687e001bfa6fd2f4dec3f8bc0e601da613a0c",
+    "development-grid.csv": "45bc35942d2faa6f5f3029916b8d5c7b424ddedc6852745fdd250cbcb0bf6068",
     "threshold-tradeoffs.png": "97c9a2b548568aa762ba0b04ce6a2bb8f2c89f4c7eab26766658add3d06a7a30"
   },
   "verification": {
@@ -23,5 +23,6 @@
     "allFrozenModelFileHashesVerified": true,
     "figureVisuallyInspected": true,
     "pushPerformed": false
-  }
+  },
+  "exportNormalization": "Exported compact CSVs use LF to match Git text storage; original ignored run outputs remain unchanged."
 }
