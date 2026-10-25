@@ -29,8 +29,10 @@ def screening():
 def unique_successes(results):
     unique = {}
     for row in results:
-        if row.get("status") == "complete" and not row.get("reusedFrom"):
-            unique.setdefault(row["signature"], row)
+        if row.get("status") == "complete":
+            owner = Path(row["artifact"]).parent.name
+            if row["signature"] not in unique or row["id"] == owner:
+                unique[row["signature"]] = row
     return list(unique.values())
 
 
@@ -159,7 +161,8 @@ def execute_batch(configurations, stage, root, workers):
             expected_source.get(name) == sha256_file(Path(__file__).with_name(name))
             for name in ("campaign_fit.py", "campaign_data.py", "business_thresholds.py", "thresholds.py")
         ):
-            cached.setdefault(row["signature"], row)
+            if row["signature"] not in cached or row["id"] == Path(row["artifact"]).parent.name:
+                cached[row["signature"]] = row
     groups, results = {}, []
     for config in configurations:
         groups.setdefault(signature(config), []).append(config)
@@ -167,11 +170,15 @@ def execute_batch(configurations, stage, root, workers):
     def received(row, configs):
         for config in configs:
             result = copy.deepcopy(row)
-            if row["id"] != config["id"]:
-                result.update(id=config["id"], config=config, reusedFrom=row["id"])
-                directory = root / "trials" / config["id"]
-                directory.mkdir(parents=True, exist_ok=True)
-                write_json(directory / "result.json", result)
+            result.update(id=config["id"], config=config)
+            owner = Path(row["artifact"]).parent.name if row.get("artifact") else row["id"]
+            if owner != config["id"]:
+                result["reusedFrom"] = owner
+            else:
+                result.pop("reusedFrom", None)
+            directory = root / "trials" / config["id"]
+            directory.mkdir(parents=True, exist_ok=True)
+            write_json(directory / "result.json", result)
             results.append(result)
         good = [r for r in results if r.get("status") == "complete"]
         best = max(good, key=result_rank) if good else None
@@ -198,9 +205,25 @@ def execute_batch(configurations, stage, root, workers):
             max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
             initializer=initialize_worker, initargs=(root / "dataset.joblib", root),
         ) as pool:
-            futures = {pool.submit(run_trial, configs[0]): configs for configs in pending}
-            for future in concurrent.futures.as_completed(futures):
-                received(future.result(), futures[future])
+            remaining = iter(pending)
+            futures = {}
+            exhausted = False
+            while futures or not exhausted:
+                control = root / "concurrency.json"
+                active_limit = read_json(control).get("maxActiveFits", workers) if control.exists() else workers
+                active_limit = max(1, min(workers, int(active_limit)))
+                while len(futures) < active_limit and not exhausted:
+                    configs = next(remaining, None)
+                    if configs is None:
+                        exhausted = True
+                    else:
+                        futures[pool.submit(run_trial, configs[0])] = configs
+                if not futures:
+                    break
+                done, _ = concurrent.futures.wait(futures, timeout=10,
+                                                  return_when=concurrent.futures.FIRST_COMPLETED)
+                for future in done:
+                    received(future.result(), futures.pop(future))
     results.sort(key=lambda r: r["id"])
     write_json(stage_dir / f"{stage}-results.json", results)
     return results
@@ -210,7 +233,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("scoring_training/runs/recall90-precision60-campaign-v1"))
     parser.add_argument("--export", type=Path, default=Path("experiments/sba-scoring-campaign-v1"))
-    parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--stage", choices=["all", "screening", "refinement", "competitors", "warm", "robustness",
                                           "postprocess"], default="all")
     parser.add_argument("--limit", type=int)

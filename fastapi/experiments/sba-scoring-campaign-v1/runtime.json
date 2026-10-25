@@ -1,0 +1,21 @@
+{
+  "platform": "Darwin arm64",
+  "catboostCudaDeviceCount": 0,
+  "maxActiveFits": 2,
+  "threadsPerFit": 2,
+  "nice": 10,
+  "priorityVerifiedForDispatcherAndWorkers": true,
+  "openmp": {
+    "source": "scikit-learn bundled .dylibs/libomp.dylib",
+    "destination": "training Python base runtime lib/libomp.dylib",
+    "method": "same-filesystem hard link; no existing file overwritten",
+    "samePhysicalFile": true,
+    "sha256": "7fe04d06d824817d39e4c99ec44e837fd6b5f0f75f2cc3e77a384c298f3f1709",
+    "reason": "macOS strips DYLD_LIBRARY_PATH when executing protected nice; fallback library resolution avoids dependence on that variable."
+  },
+  "optionalCompetitors": {
+    "lightgbm": "4.6.0",
+    "xgboost": "3.0.5"
+  },
+  "favoriteAndBackupVerifiedAfterRuntimeChange": true
+}

@@ -10,8 +10,8 @@
 ## Progress
 
 1. Audit original data, temporal feasibility and favorite preservation — complete.
-2. Implement tested, restartable campaign runner and exact per-candidate reporting — screening/fitting implemented; composition/export in progress.
-3. Execute screening, refinement, robustness, warm-start, competitors and ensembles — pending.
+2. Implement tested, restartable campaign runner and exact per-candidate reporting — complete.
+3. Execute screening, refinement, robustness, warm-start, competitors and ensembles — in progress.
 4. Compare actual operating points, export aggregate artifacts and finalize local commits — pending.
 
 ## Initial audit
@@ -38,6 +38,20 @@
 - Focused campaign tests: 15 passed; Ruff passed. Checks cover leakage, temporal boundaries, all five fitted families, exact freeze/replay, 480/384 counts and feasible-F1 ranking.
 - First full-data pilot (`screen-0000`, original9, fold B) completed in 58.49 seconds. At threshold 0.04403200656380213: development precision/F1/recall = 0.108247/0.193294/0.901840; fixed FY2023 validation = **0.452911/0.520669/0.612269**. Target not reached; pilot provenance retained separately from official versioned screening IDs.
 - Report will be maintained during execution. Previous completed reports and proposals are immutable.
+- Implemented `campaign_postprocess.py`: independent calibration branches, row-aligned ensemble predictions, per-point metrics, portable CSVs, fixed future/favorite comparisons, safe-vs-original feature leaders and static figure. Added dedicated composition, alignment, byte-normalization and end-to-end export tests.
+- Full scoring-training suite: **259 passed in 24.26 seconds**, Ruff and diff whitespace check passed. Existing configured scoring/data coverage 98.76%; this percentage does not measure new campaign modules. A subsequent extra end-to-end postprocessing test is verified separately.
+- After user questioned GPU usage, verified `Darwin arm64`, no `nvidia-smi`, and CatBoost GPU count 0. Official CatBoost wheel support table confirms no macOS CUDA training: https://catboost.ai/docs/en/installation/python-installation-method-pip-install?lang=en.
+- User explicitly chose local CPU execution at lower load, then allowed 2–3 simultaneous fits. Original six-fit dispatcher was stopped; all completed results preserved. Current setting: **2 active fits, 2 threads each, nice 10**. Parent pool can host 3 workers but bounded submission and live `concurrency.json` limit active jobs to two; full search volume unchanged.
+- Last recorded screening checkpoint before this report update: 86/480 records, zero failures; closest current FY2023 validation point precision/F1/recall **0.488206/0.565090/0.670718**, threshold **0.03942395810713749**. This is not a feasible 90/60 result or a final campaign winner.
+- Resume regression tests detected alias-owner metadata cycles after a restart. The dispatcher now prefers the actual artifact owner, normalizes aliases and promotes each fitted signature once; no model metrics changed or completed fits were discarded.
+- Added bounded live concurrency and regression coverage proving that reducing two active jobs to one does not lose queued trials.
+- User requested improvement notifications even below target. Pinned `favorite-validation.json` proves identical FY2021/FY2023/FY2024 row/class counts for fair same-cohort comparisons. A 30-minute thread heartbeat named "Контроль экспериментов скоринга" was created and its automation card viewed successfully; unchanged states remain quiet.
+- First announced improvement on FY2023: `screen-v1-0021`, threshold 0.04798450147360898, precision/F1/recall **0.545997/0.587323/0.635417**, vs favorite **0.490944/0.463653/0.439236**. Later announced `screen-v1-0093`, threshold 0.04756353377209248, **0.563609/0.608626/0.661458**. Both are original9 research variants with unconfirmed historical term; neither meets 90/60.
+- User explicitly authorized keeping final top-10 and deleting other trial weights. Implemented `campaign_retention.py`: goal-first/F1 ranking of distinct improved decision vectors; all retained models must replay exact decisions before cleanup; preserve ensemble dependencies, favorite and aggregate logs. Added replay-failure, path-boundary, dependency and deduplication tests.
+- Added stage-only aggregate Git snapshots via `campaign_stage_commit.py`. Real temporary Git-repository tests prove unrelated staged content and the unrelated working shared-index addition are excluded and preserved.
+- The nice wrapper was found to be sandbox-blocked; dispatcher/workers were explicitly lowered using authorized `setpriority`, and **all four current PIDs verified nice=10**. The Mac protected nice executable also stripped DYLD_LIBRARY_PATH, exposing two optional-competitor import failures in a full test run (266 passed/2 failed). Resolved using a same-inode hard link from the already installed sklearn libomp into the training Python base runtime, with no existing file overwritten; no campaign restart needed. Direct LightGBM/XGBoost imports now work without DYLD overrides; favorite and backup integrity still pass.
+- Latest full verification after this fix: **268 passed in 5.64 seconds**; Ruff and `git diff --check` passed. Existing configured scoring/data coverage remains 98.76%; dedicated campaign tests cover the new modules.
+- Latest recorded checkpoint: **223/480 screening records**, **127 distinct completed model artifacts**, zero model failures. Background execution remains in progress; no final top-10 is claimed yet.
 
 ## Contract and migration impacts
 
@@ -45,4 +59,6 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 
 ## Git
 
-Stage commits pending. Original unrelated working-tree changes remain excluded. No push.
+- `bc9638a` — favorite preservation, audited temporal protocol, fitted-trial engine and deterministic screening/stage scheduler.
+- Composition/export and bounded CPU scheduler form the next implementation-stage commit. Original unrelated working-tree changes remain excluded. No push.
+- Final retention, background notifications and stage-only private-index commits are implemented; stage-committer deployment follows its implementation commit. No per-combination commits or push.

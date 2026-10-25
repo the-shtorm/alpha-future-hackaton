@@ -1,0 +1,65 @@
+{
+  "favoriteManifestSha256": "4e1f416090cb567bc44e53faeb92022a297384b681321fba5dde4d3c18e9efd5",
+  "sourceEvaluationSha256": "b33ac8a6fb1574fbbc16c7698c5fa6a52d91614613d86a06bfe13690d42a61c8",
+  "protocolSha256": "de996942124ff308a7810d39d7c3c8cff202017c0217715bbc84bc10d77a62a7",
+  "byFold": {
+    "A": {
+      "approvalFY": 2021,
+      "metrics": {
+        "threshold": 0.15283707537791144,
+        "rows": 20901,
+        "positives": 1265,
+        "tp": 855,
+        "fp": 1455,
+        "fn": 410,
+        "tn": 18181,
+        "precision": 0.37012987012987014,
+        "recall": 0.6758893280632411,
+        "f1": 0.4783216783216783,
+        "f2": 0.5800542740841248,
+        "falsePositiveRate": 0.07409859441841515,
+        "flaggedCount": 2310,
+        "flaggedShare": 0.11052102770202382
+      }
+    },
+    "B": {
+      "approvalFY": 2023,
+      "metrics": {
+        "threshold": 0.15283707537791144,
+        "rows": 9963,
+        "positives": 1728,
+        "tp": 759,
+        "fp": 787,
+        "fn": 969,
+        "tn": 7448,
+        "precision": 0.4909443725743855,
+        "recall": 0.4392361111111111,
+        "f1": 0.4636530238240684,
+        "f2": 0.4486876330101679,
+        "falsePositiveRate": 0.09556769884638737,
+        "flaggedCount": 1546,
+        "flaggedShare": 0.15517414433403592
+      }
+    },
+    "C": {
+      "approvalFY": 2024,
+      "metrics": {
+        "threshold": 0.15283707537791144,
+        "rows": 6094,
+        "positives": 620,
+        "tp": 172,
+        "fp": 550,
+        "fn": 448,
+        "tn": 4924,
+        "precision": 0.23822714681440443,
+        "recall": 0.27741935483870966,
+        "f1": 0.2563338301043219,
+        "f2": 0.26858213616489696,
+        "falsePositiveRate": 0.10047497259773475,
+        "flaggedCount": 722,
+        "flaggedShare": 0.11847719067935675
+      }
+    }
+  },
+  "note": "Same complete-loan cohorts and fixed favorite threshold; historical benchmark, not fresh external validation."
+}
