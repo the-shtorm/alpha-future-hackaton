@@ -14,3 +14,4 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-24 — Interface animations](2026-10-24-interface-animations.md) — completed; frontend build and 11 tests passed, Docker rebuilt, dialogs/dropdowns/step transitions verified in browser.
 - [2026-10-24 — Scoring readiness check](2026-10-24-scoring-readiness-check.md) — completed; source inspection confirms real scoring integration is still pending.
 - [2026-10-24 — Bank journey diagnostics](2026-10-24-bank-journey-diagnostics.md) — completed; 24 backend integration tests passed; bank UI absent and refresh loses frontend token; live login blocked by stopped local containers.
+- [2026-10-25 — Credit scoring implementation plan: Markdown export](2026-10-25-credit-scoring-plan-export.md) — completed; full agreed plan saved, Markdown structure and local links verified; no training or application changes.
