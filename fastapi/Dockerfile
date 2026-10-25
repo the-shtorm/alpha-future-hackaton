@@ -31,6 +31,10 @@ COPY --chown=10001:10001 scripts ./scripts
 COPY --chown=10001:10001 examples ./examples
 COPY --chown=10001:10001 evaluation ./evaluation
 
+ENV HF_CACHE_DIR=/model-cache \
+    HF_HOME=/model-cache/hf-home \
+    HF_XET_CACHE=/model-cache/xet
+
 FROM base AS test
 RUN uv sync --frozen --no-install-project --no-cache
 COPY tests ./tests

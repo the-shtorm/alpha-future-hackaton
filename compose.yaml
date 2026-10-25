@@ -69,6 +69,8 @@ services:
       MODEL_VARIANT: ${RECSYS_MODEL_VARIANT:-finetuned}
       MODEL_PATH: ${MODEL_PATH:-/models/e5-credit-finetune-v1/final}
       HF_CACHE_DIR: /model-cache
+      HF_HOME: /model-cache/hf-home
+      HF_XET_CACHE: /model-cache/xet
       HF_LOCAL_FILES_ONLY: ${HF_LOCAL_FILES_ONLY:-false}
       HF_TOKEN: ${HF_TOKEN:-}
       S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
