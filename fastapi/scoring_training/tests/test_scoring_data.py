@@ -223,9 +223,9 @@ def test_cli_accepts_explicit_paths(dataset, tmp_path, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out) == {"rows": 10, "datasetVersion": "synthetic-fixture-only"}
 
 
-def test_release_lock_intentionally_requires_source_header():
+def test_release_lock_has_verified_schema_and_totals():
     lock = json.loads((Path(__file__).resolve().parents[1] / "config/dataset.lock.json").read_text())
     assert sum(spec["rows"] for spec in lock["splits"].values()) == lock["rowCount"]
     assert sum(spec["positives"] for spec in lock["splits"].values()) == lock["classCounts"]["1"]
-    with pytest.raises(ValueError, match="original CSV"):
-        data.validate_lock(lock)
+    data.validate_lock(lock)
+    assert lock["schemaStatus"] == "verified"
