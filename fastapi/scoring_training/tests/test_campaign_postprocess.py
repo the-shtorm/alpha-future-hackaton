@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pytest
 from scoring_training import campaign_fit, campaign_postprocess
-from scoring_training.campaign_postprocess import blend_candidates, save_composition, write_csv
+from scoring_training.campaign_postprocess import blend_candidates, export_tables, save_composition, write_csv
 from scoring_training.tests.test_campaign_data import sample
 from scoring_training.train import write_json
 from sklearn.metrics import f1_score, precision_score, recall_score
@@ -54,7 +54,16 @@ def test_export_csv_has_portable_lf_bytes(tmp_path):
     assert b"\r" not in path.read_bytes()
 
 
-def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(tmp_path, monkeypatch):
+def test_failed_only_stage_exports_explicit_failure_without_fabricated_metrics(tmp_path):
+    export_tables(tmp_path, [{"id": "failed", "config": config("failed"), "status": "failed",
+                             "error": "test fixture failure"}])
+    assert "test fixture failure" in (tmp_path / "trials.csv").read_text()
+    assert "precision,f1,recall" in (tmp_path / "operating-points.csv").read_text()
+    assert len((tmp_path / "operating-points.csv").read_text().splitlines()) == 1
+
+
+@pytest.mark.parametrize("enable_mixed", [False, True])
+def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(tmp_path, monkeypatch, enable_mixed):
     root, export = tmp_path / "run", tmp_path / "export"
     root.mkdir()
     (root / "stages").mkdir()
@@ -71,11 +80,21 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(tmp_path
                                          "parameters": {"iterations": 5}})
         assert parent["status"] == "complete", parent
         parents.append(parent)
+    if enable_mixed:
+        from scoring_training import campaign_mixed
+
+        write_json(root / "mixed-policy.json", {"enabled": True})
+        extra = {**parents[1], "id": "mixed-fixture", "config": {
+            **parents[1]["config"], "id": "mixed-fixture", "stage": "mixed",
+            "splitStrategy": "random_rows", "splitSeed": 42
+        }}
+        monkeypatch.setattr(campaign_mixed, "run_mixed_stage", lambda *args: [extra])
     monkeypatch.setattr(campaign_postprocess, "future_diagnostics", lambda *args: {})
     monkeypatch.setattr(campaign_postprocess, "plot_results", lambda *args: None)
     campaign_postprocess.postprocess(root, export, parents, parents)
     summary = json.loads((export / "summary.json").read_text())
-    assert summary["recordCount"] == 11  # 2 base fits +4 calibrations +5 B-only blends.
+    assert summary["recordCount"] == 11 + int(enable_mixed)
+    assert summary["mixedSplitRecords"] == int(enable_mixed)
     assert summary["distinctBaseModelArtifacts"] == 2
     assert summary["metricsAreAveraged"] is False
     assert summary["favoriteRetained"] is True

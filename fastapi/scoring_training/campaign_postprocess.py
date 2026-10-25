@@ -157,16 +157,22 @@ def future_diagnostics(root, winner, safe_winner, export, top_candidates=None):
     return results
 
 
-def write_csv(path, rows):
+def write_csv(path, rows, fieldnames=None):
+    fieldnames = list(rows[0]) if rows else fieldnames
+    if not fieldnames:
+        raise ValueError("Empty CSV export requires explicit columns")
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
+        writer = csv.DictWriter(stream, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
 
 def brief(row):
-    return {key: row[key] for key in ("id", "config", "status", "primaryPolicy", "selectionPoint", "selection",
-                                     "validation", "validationTargetPassed", "artifact", "modelSha256")}
+    result = {key: row[key] for key in ("id", "config", "status", "primaryPolicy", "selectionPoint", "selection",
+                                      "validation", "validationTargetPassed", "artifact", "modelSha256")}
+    if "historicalRandomTest" in row:
+        result["historicalRandomTest"] = row["historicalRandomTest"]
+    return result
 
 
 def export_tables(export, results):
@@ -175,11 +181,13 @@ def export_tables(export, results):
         config = result["config"]
         base = {"trial": result["id"], "stage": config["stage"], "family": config["family"],
                 "bundle": config["bundle"], "fold": config["fold"], "seed": config["seed"],
+                "splitStrategy": config.get("splitStrategy", "chronological"), "splitSeed": config.get("splitSeed"),
                 "window": config.get("window"), "halfLife": config.get("halfLife"),
                 "balance": config.get("balance"), "status": result["status"]}
         row = {**base, "selectionStatus": None, "policy": None, "threshold": None,
                "selectionPrecision": None, "selectionF1": None, "selectionRecall": None,
                "validationPrecision": None, "validationF1": None, "validationRecall": None,
+               "historicalTestPrecision": None, "historicalTestF1": None, "historicalTestRecall": None,
                "validationTargetPassed": False, "TP": None, "FP": None, "FN": None,
                "fitSeconds": result.get("fitSeconds"), "reusedFrom": result.get("reusedFrom"),
                "modelSha256": result.get("modelSha256"), "error": result.get("error")}
@@ -191,10 +199,18 @@ def export_tables(export, results):
                        validationPrecision=validation["precision"], validationF1=validation["f1"],
                        validationRecall=validation["recall"], validationTargetPassed=result["validationTargetPassed"],
                        TP=validation["tp"], FP=validation["fp"], FN=validation["fn"])
+            historical = result.get("historicalRandomTest", {}).get("policies", {})
+            if historical:
+                iid = historical[result["primaryPolicy"]]
+                row.update(historicalTestPrecision=iid["precision"], historicalTestF1=iid["f1"],
+                           historicalTestRecall=iid["recall"])
             for policy in ("optimal", "bestRecallAtPrecisionFloor", "bestPrecisionAtRecallFloor",
                            "unconstrainedMaximumF1"):
                 point = result["selection"][policy]
-                for split, metrics in (("selection", point), ("validation", result["validation"].get(policy))):
+                splits = [("selection", point), ("validation", result["validation"].get(policy))]
+                if historical:
+                    splits.append(("historicalTest", historical.get(policy)))
+                for split, metrics in splits:
                     points.append({**base, "policy": policy, "split": split,
                                    "threshold": metrics["threshold"] if metrics else None,
                                    "precision": metrics["precision"] if metrics else None,
@@ -205,7 +221,8 @@ def export_tables(export, results):
                                    "FN": metrics["fn"] if metrics else None})
         summary.append(row)
     write_csv(export / "trials.csv", summary)
-    write_csv(export / "operating-points.csv", points)
+    write_csv(export / "operating-points.csv", points,
+              [*base, "policy", "split", "threshold", "precision", "f1", "recall", "TP", "FP", "FN"])
 
 
 def plot_results(export, candidates, winner, safe_winner, diagnostics):
@@ -242,11 +259,18 @@ def plot_results(export, candidates, winner, safe_winner, diagnostics):
 
 
 def postprocess(root, export, results, parents):
+    mixed = []
+    mixed_policy = root / "mixed-policy.json"
+    if mixed_policy.exists() and read_json(mixed_policy).get("enabled") is True:
+        from scoring_training.campaign_mixed import run_mixed_stage
+
+        mixed = run_mixed_stage(root, export)
+        results = results + mixed
     robust = [r for r in results if r["config"]["stage"] == "robustness"]
     variants = calibration_variants(root, parents)
     blends = blend_candidates(root, parents, robust)
     results = results + variants + blends
-    write_json(root / "stages" / "postprocess-results.json", variants + blends)
+    write_json(root / "stages" / "postprocess-results.json", mixed + variants + blends)
     eligible = [r for r in results if r.get("status") == "complete" and r["config"]["fold"] == "B"
                 and r["config"]["seed"] == 42]
     ranked = sorted(eligible, key=result_rank, reverse=True)
@@ -273,6 +297,8 @@ def postprocess(root, export, results, parents):
         point = row["validation"][row["primaryPolicy"]]
         top_rows.append({"rank": rank, "id": row["id"], "family": row["config"]["family"],
                          "bundle": row["config"]["bundle"], "validationFY": 2023,
+                         "splitStrategy": row["config"].get("splitStrategy", "chronological"),
+                         "splitSeed": row["config"].get("splitSeed"),
                          "threshold": point["threshold"], "precision": point["precision"],
                          "f1": point["f1"], "recall": point["recall"], "TP": point["tp"], "FP": point["fp"],
                          "FN": point["fn"], "goalPassed": row["validationTargetPassed"],
@@ -308,6 +334,7 @@ def postprocess(root, export, results, parents):
         "failedRecords": [{"id": r["id"], "error": r["error"]} for r in results if r["status"] != "complete"],
         "metricsAreAveraged": False, "favoriteRetained": True, "deploymentChanged": False,
         "improvedRecordCount": improved_count, "top10Count": len(top10),
+        "mixedSplitRecords": len(mixed),
         "retentionCompleted": bool(retention and retention["cleanupComplete"]),
         "bestId": winner["id"], "bestWithoutTermId": safe_winner["id"],
         "protocolSha256": sha256_file(export / "protocol.json"),
