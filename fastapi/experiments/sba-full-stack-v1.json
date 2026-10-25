@@ -1,0 +1,144 @@
+{
+  "passed": true,
+  "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
+  "cases": [
+    {
+      "decision": "APPROVED",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.14941877595200465,
+      "finalRiskScore": 0.14941877595200465,
+      "pti": 0.0144759,
+      "selectedVariant": "ORIGINAL",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "COUNTEROFFERED",
+      "rankingStatus": "READY",
+      "assessmentCount": 2,
+      "probability": 0.14941877595200465,
+      "finalRiskScore": 0.14941877595200465,
+      "pti": 0.4,
+      "selectedVariant": "ALTERNATIVE",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "DECLINED",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.5082428120964425,
+      "finalRiskScore": 0.5082428120964425,
+      "pti": 0.0270809,
+      "selectedVariant": "ORIGINAL"
+    },
+    {
+      "decision": "REQUEST_INFO",
+      "rankingStatus": "READY",
+      "assessmentCount": 0
+    }
+  ],
+  "audit": {
+    "assessments": 4,
+    "linkedDecisions": 3,
+    "models": [
+      "sba-scoring-v1"
+    ]
+  },
+  "scoringInfo": {
+    "modelVersion": "sba-scoring-v1",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v1-sigmoid-fy2017",
+    "isDemo": true,
+    "positiveClass": 1,
+    "outcome": "CHGOFF",
+    "naicsMode": "full",
+    "runtime": {
+      "inferenceThreads": 1,
+      "maxInflightRequests": 4,
+      "inflightRequests": 0,
+      "completedRequests": 224,
+      "failedRequests": 0,
+      "busyRequests": 0
+    }
+  },
+  "containerStats": {
+    "frontend": {
+      "currentBytes": 11665408,
+      "peakBytes": 13099008,
+      "limitBytes": 134217728
+    },
+    "backend": {
+      "currentBytes": 254795776,
+      "peakBytes": 256081920,
+      "limitBytes": 805306368
+    },
+    "fastapi": {
+      "currentBytes": 1063911424,
+      "peakBytes": 1084841984,
+      "limitBytes": 2147483648
+    },
+    "postgres": {
+      "currentBytes": 108388352,
+      "peakBytes": 112484352,
+      "limitBytes": 536870912
+    }
+  },
+  "memoryBudget": {
+    "budgetBytes": 6442450944,
+    "osReserveBytes": 2147483648,
+    "sumContainerLimitsBytes": 3623878656,
+    "sumObservedPeaksBytes": 1466507264,
+    "osReserveIsMeasured": false
+  },
+  "httpBenchmark": {
+    "scoring": {
+      "modelVersion": "sba-scoring-v1",
+      "featureVersion": "sba-features-1",
+      "calibrationVersion": "sba-scoring-v1-sigmoid-fy2017",
+      "isDemo": true,
+      "positiveClass": 1,
+      "outcome": "CHGOFF",
+      "naicsMode": "full",
+      "runtime": {
+        "inferenceThreads": 1,
+        "maxInflightRequests": 4,
+        "inflightRequests": 0,
+        "completedRequests": 4,
+        "failedRequests": 0,
+        "busyRequests": 0
+      }
+    },
+    "single": {
+      "requests": 50,
+      "p50Ms": 6.716708652675152,
+      "p95Ms": 10.078139393590387,
+      "p99Ms": 13.234833376482127,
+      "maxMs": 13.719709124416113
+    },
+    "concurrent": {
+      "requests": 100,
+      "p50Ms": 20.96002083271742,
+      "p95Ms": 32.910335110500455,
+      "p99Ms": 35.63108352012933,
+      "maxMs": 37.08316618576646
+    },
+    "withE5": {
+      "requests": 60,
+      "p50Ms": 23.103854153305292,
+      "p95Ms": 31.989675201475617,
+      "p99Ms": 34.25416059792041,
+      "maxMs": 35.77700024470687
+    },
+    "scoringConcurrency": 4,
+    "mixedConcurrency": "four scoring requests plus one E5 request",
+    "rankingUnchanged": true,
+    "rankingMetadata": {
+      "model": "local/e5-credit-finetune-v1",
+      "modelVersion": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+      "queryTemplateVersion": "query-v2",
+      "passageTemplateVersion": "passage-v2"
+    },
+    "isDemo": true
+  },
+  "isDemo": true
+}

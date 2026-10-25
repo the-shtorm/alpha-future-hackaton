@@ -1,0 +1,50 @@
+{
+  "scoring": {
+    "modelVersion": "sba-scoring-v1",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v1-sigmoid-fy2017",
+    "isDemo": true,
+    "positiveClass": 1,
+    "outcome": "CHGOFF",
+    "naicsMode": "full",
+    "runtime": {
+      "inferenceThreads": 1,
+      "maxInflightRequests": 4,
+      "inflightRequests": 0,
+      "completedRequests": 4,
+      "failedRequests": 0,
+      "busyRequests": 0
+    }
+  },
+  "single": {
+    "requests": 50,
+    "p50Ms": 6.716708652675152,
+    "p95Ms": 10.078139393590387,
+    "p99Ms": 13.234833376482127,
+    "maxMs": 13.719709124416113
+  },
+  "concurrent": {
+    "requests": 100,
+    "p50Ms": 20.96002083271742,
+    "p95Ms": 32.910335110500455,
+    "p99Ms": 35.63108352012933,
+    "maxMs": 37.08316618576646
+  },
+  "withE5": {
+    "requests": 60,
+    "p50Ms": 23.103854153305292,
+    "p95Ms": 31.989675201475617,
+    "p99Ms": 34.25416059792041,
+    "maxMs": 35.77700024470687
+  },
+  "scoringConcurrency": 4,
+  "mixedConcurrency": "four scoring requests plus one E5 request",
+  "rankingUnchanged": true,
+  "rankingMetadata": {
+    "model": "local/e5-credit-finetune-v1",
+    "modelVersion": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "queryTemplateVersion": "query-v2",
+    "passageTemplateVersion": "passage-v2"
+  },
+  "isDemo": true
+}
