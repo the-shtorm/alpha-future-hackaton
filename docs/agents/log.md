@@ -1,5 +1,7 @@
 # Task reports
 
+- [2026-10-25 — Smooth catalog anchor navigation](2026-10-25-catalog-smooth-scroll.md) — completed; frontend build and Docker rebuild passed, smooth anchor transition verified in browser.
+
 Each task has its own report. Reports cover every area of work and are never combined
 or overwritten. Historical backend reports remain available in their original location.
 
