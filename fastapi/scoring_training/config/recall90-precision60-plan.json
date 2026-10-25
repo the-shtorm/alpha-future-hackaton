@@ -1,0 +1,384 @@
+{
+  "schemaVersion": "sba-retraining-proposal-1",
+  "status": "proposed_not_executed",
+  "modelTrainingStarted": false,
+  "trainingRunnerImplemented": false,
+  "thresholdSelector": "scoring_training.business_thresholds.business_operating_points",
+  "goal": {
+    "minRecall": 0.9,
+    "minPrecision": 0.6,
+    "primaryObjective": "maximize F1 among thresholds satisfying both floors",
+    "tieBreak": [
+      "recall",
+      "precision",
+      "threshold"
+    ],
+    "positiveClass": 1,
+    "comparison": "probability >= threshold",
+    "reportMetricsAtSameThreshold": true,
+    "averageMetrics": false,
+    "evaluationUsesNaturalUnweightedPrevalence": true
+  },
+  "screening": {
+    "primaryHistoricalFold": "B",
+    "seed": 42,
+    "baseModel": {
+      "family": "catboost",
+      "loss_function": "Logloss",
+      "eval_metric": "PRAUC:type=Classic;use_weights=False",
+      "depth": 6,
+      "learning_rate": 0.06,
+      "l2_leaf_reg": 10,
+      "iterations": 3000,
+      "early_stopping_rounds": 150,
+      "thread_count": 4,
+      "task_type": "CPU"
+    },
+    "axes": {
+      "trainingWindowYears": [
+        null,
+        10,
+        7,
+        5,
+        3
+      ],
+      "recencyHalfLifeYears": [
+        null,
+        1,
+        3,
+        5
+      ],
+      "classBalanceMode": [
+        1,
+        1.5,
+        2,
+        3,
+        5,
+        8,
+        "SqrtBalanced",
+        "Balanced"
+      ],
+      "featureBundle": [
+        "original9_diagnostic_term_unconfirmed",
+        "safe8_without_term",
+        "engineered_safe8"
+      ]
+    },
+    "combinationCount": 480,
+    "recencyFormula": "2 ** (-age_at_training_cutoff_years / half_life_years)",
+    "weightNormalization": "normalize training sample weights to mean 1; record class weighting separately",
+    "constraints": [
+      "one class-weighting mechanism per trial",
+      "auto class weights cannot combine with explicit class_weights or scale_pos_weight",
+      "weights and sampling apply only to train",
+      "original9 is research-only until point-in-time term availability is proven"
+    ]
+  },
+  "hyperparameterRefinement": {
+    "survivingParentConfigs": 12,
+    "trialsPerParent": 30,
+    "additionalFitBudget": 360,
+    "search": "seeded conditional random/Optuna search; exact threshold enumeration for every fitted trial",
+    "space": {
+      "depth": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "learning_rate": [
+        0.015,
+        0.03,
+        0.06,
+        0.1
+      ],
+      "l2_leaf_reg": [
+        1,
+        3,
+        10,
+        30,
+        100
+      ],
+      "random_strength": [
+        0,
+        0.5,
+        1,
+        2,
+        5
+      ],
+      "rsm": [
+        0.6,
+        0.8,
+        1.0
+      ],
+      "border_count": [
+        64,
+        128,
+        254
+      ],
+      "boosting_type": [
+        "Plain",
+        "Ordered"
+      ],
+      "bootstrap": {
+        "Bayesian": {
+          "bagging_temperature": [
+            0,
+            0.5,
+            1,
+            3
+          ]
+        },
+        "Bernoulli": {
+          "subsample": [
+            0.6,
+            0.8,
+            1.0
+          ]
+        },
+        "MVS": {
+          "subsample": [
+            0.6,
+            0.8,
+            1.0
+          ]
+        }
+      },
+      "grow_policy": {
+        "SymmetricTree": {},
+        "Depthwise": {
+          "min_data_in_leaf": [
+            20,
+            100,
+            500
+          ]
+        },
+        "Lossguide": {
+          "min_data_in_leaf": [
+            20,
+            100,
+            500
+          ],
+          "max_leaves": [
+            16,
+            32,
+            64
+          ]
+        }
+      },
+      "has_time": [
+        false,
+        true
+      ]
+    },
+    "constraints": [
+      "has_time=True requires actual approval-date ordering",
+      "min_data_in_leaf only for Depthwise/Lossguide",
+      "max_leaves only for Lossguide",
+      "check installed-version compatibility before creating trial",
+      "PRAUC selects iterations; joint-constraint operating point selects model; no fixed-0.5 F1 objective"
+    ]
+  },
+  "temporalRobustness": {
+    "topCandidates": 10,
+    "seeds": [
+      42,
+      137,
+      2026
+    ],
+    "folds": [
+      "A",
+      "B",
+      "C"
+    ],
+    "additionalFitBudget": 90,
+    "reporting": "one complete optimum and fixed-evaluation row per trial/fold; no mean metric or mean threshold"
+  },
+  "historicalFolds": {
+    "A": {
+      "fitThroughFY": 2015,
+      "earlyStopFY": 2016,
+      "calibrationFY": 2017,
+      "thresholdFY": 2018,
+      "validationFY": 2019
+    },
+    "B": {
+      "fitThroughFY": 2017,
+      "earlyStopFY": 2018,
+      "calibrationFY": 2019,
+      "thresholdFY": 2020,
+      "validationFY": 2021
+    },
+    "C": {
+      "fitThroughFY": 2019,
+      "earlyStopFY": 2020,
+      "calibrationFY": 2021,
+      "thresholdFY": 2022,
+      "validationFY": 2023
+    }
+  },
+  "pointInTimeRules": [
+    "enforce outcome-known dates at each simulated fitting/calibration/threshold-selection deadline",
+    "report exclusions and cohort composition; completed-loan-only selection bias remains",
+    "FY2024-2026 are previously inspected immature diagnostics, not a fresh final holdout",
+    "a truly untouched production assessment needs new external/later fully observed data",
+    "keep fixed-horizon targets as separate versioned tasks; never relabel unresolved loans as repaid"
+  ],
+  "warmStart": {
+    "optional": true,
+    "fitBudget": 24,
+    "axes": {
+      "recentWindowYears": [
+        3,
+        5
+      ],
+      "oldDataReplayFraction": [
+        0.25,
+        0.5
+      ],
+      "learning_rate": [
+        0.01,
+        0.03,
+        0.06
+      ],
+      "additionalIterations": [
+        100,
+        300
+      ]
+    },
+    "constraints": [
+      "CPU init_model with compatible feature schema and binary objective",
+      "starting checkpoint must precede simulated cutoff and use no future labels",
+      "old model cannot remove its original trees; compare with cold refit",
+      "safe8 cannot warm-start original9 model"
+    ]
+  },
+  "optionalModelFamilies": {
+    "lightgbm": {
+      "fitBudget": 60,
+      "newDependencyAndServingAdapterRequired": true
+    },
+    "xgboost": {
+      "fitBudget": 60,
+      "newDependencyAndServingAdapterRequired": true
+    },
+    "logistic": {
+      "fitBudget": 24,
+      "axes": {
+        "C": [
+          0.01,
+          0.1,
+          1,
+          10
+        ],
+        "positiveWeight": [
+          1,
+          3,
+          8
+        ],
+        "featureBundle": [
+          "safe8_without_term",
+          "engineered_safe8"
+        ]
+      }
+    },
+    "randomForest": {
+      "fitBudget": 24,
+      "newServingAdapterRequired": true,
+      "axes": {
+        "max_depth": [
+          6,
+          12,
+          null
+        ],
+        "min_samples_leaf": [
+          10,
+          50
+        ],
+        "max_features": [
+          0.7,
+          1.0
+        ],
+        "class_weight": [
+          null,
+          "balanced_subsample"
+        ]
+      }
+    }
+  },
+  "baseModelFitBudget": 1122,
+  "calibrationAndEnsembling": {
+    "calibration": [
+      "none_diagnostic",
+      "sigmoid",
+      "isotonic_finalists_only"
+    ],
+    "calibrationIsNotAssumedToImproveRanking": true,
+    "calibratorDataDisjointFromFitAndThreshold": true,
+    "candidatePairCount": 5,
+    "blendWeights": [
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      0.9
+    ],
+    "blendCandidates": 25,
+    "ensembleHasOwnThreshold": true,
+    "probabilityAveragingIsAllowedButReportedMetricAveragingIsNot": true,
+    "stacking": "optional later extension using chronological out-of-fold predictions only; not included in base budget"
+  },
+  "requiredTrialReportColumns": [
+    "trialId",
+    "configHash",
+    "parentTrialId",
+    "modelFamily",
+    "seed",
+    "fold",
+    "featureVersion",
+    "trainingWindow",
+    "classBalanceMode",
+    "recencyHalfLife",
+    "status",
+    "selectionSplit",
+    "threshold",
+    "selectionPrecision",
+    "selectionF1",
+    "selectionRecall",
+    "validationPrecision",
+    "validationF1",
+    "validationRecall",
+    "validationTargetPassed",
+    "tp",
+    "fp",
+    "fn",
+    "tn",
+    "flaggedShare",
+    "rows",
+    "positives",
+    "fitSeconds",
+    "modelSha256",
+    "selectionSha256",
+    "limitations"
+  ],
+  "infeasibleReporting": [
+    "optimal=null and status=infeasible",
+    "bestRecallAtPrecisionFloor: precision, F1, recall and threshold from that same point",
+    "bestPrecisionAtRecallFloor: precision, F1, recall and threshold from that same point",
+    "never relax target floors silently",
+    "never choose evaluation thresholds after inspecting evaluation labels"
+  ],
+  "sources": [
+    "https://catboost.ai/docs/en/concepts/parameter-tuning",
+    "https://catboost.ai/docs/en/references/training-parameters/common",
+    "https://catboost.ai/docs/en/concepts/python-reference_catboostclassifier_fit",
+    "https://catboost.ai/docs/en/concepts/loss-functions-classification",
+    "https://scikit-learn.org/stable/modules/classification_threshold.html",
+    "https://scikit-learn.org/stable/modules/calibration",
+    "https://lightgbm.readthedocs.io/en/stable/Parameters.html",
+    "https://xgboost.readthedocs.io/en/stable/parameter.html",
+    "https://imbalanced-learn.org/stable/over_sampling.html"
+  ]
+}

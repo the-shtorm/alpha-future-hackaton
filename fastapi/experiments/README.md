@@ -1,5 +1,10 @@
 # Сохранённые ML-эксперименты
 
+**Новая цель recall >=90%, precision >=60%: [план дообучения](../../docs/scoring-retraining-recall90-precision60-plan.md).**
+Предложены 480 комбинаций основной сетки и до 1 122 обучений с уточнениями и
+альтернативными моделями; они ещё не запускались. Текущий baseline под оба
+ограничения: `sba-scoring-retraining-plan-v1/current-model-business-targets.json`.
+
 **SBA-скоринг: [перебор порогов с акцентом на recall](sba-scoring-recall-thresholds-v1/README.md).**
 41 892 точных порога; F1/F2 и ограничения recall на FY2017, затем фиксированная
 оценка на FY2018–2019/FY2020–2026. Кандидат 0.054874 даёт recall 92,29%/65,97%;
