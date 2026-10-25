@@ -1,0 +1,21 @@
+{
+  "outcomes" : [ {
+    "decision" : "APPROVED",
+    "probability" : 0.14941877595200465,
+    "assessmentCount" : 1,
+    "finalStatus" : "DISBURSED"
+  }, {
+    "decision" : "COUNTEROFFERED",
+    "probability" : 0.14941877595200465,
+    "assessmentCount" : 2,
+    "finalStatus" : "DISBURSED"
+  }, {
+    "decision" : "DECLINED",
+    "probability" : 0.5082428120964425,
+    "assessmentCount" : 1
+  }, {
+    "decision" : "REQUEST_INFO",
+    "assessmentCount" : 0
+  } ],
+  "modelVersion" : "sba-scoring-v1"
+}

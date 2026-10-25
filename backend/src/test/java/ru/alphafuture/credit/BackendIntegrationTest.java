@@ -11,6 +11,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.*;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.*;
@@ -32,6 +34,8 @@ class BackendIntegrationTest {
     static final PostgreSQLContainer<?> POSTGRES =
             new PostgreSQLContainer<>("postgres:17-bookworm")
                     .withInitScript("db/api_test_roles.sql");
+
+    static final ScoringStub SCORING = new ScoringStub();
 
     static final String PASSWORD = "local-integration-password";
     static final Path STORAGE;
@@ -57,16 +61,20 @@ class BackendIntegrationTest {
         r.add("cabinet.documents-path", STORAGE::toString);
         r.add("cabinet.demo-assessment-enabled", () -> true);
         r.add("cabinet.recsys.url", () -> "");
+        r.add("cabinet.scoring.url", SCORING::url);
+        r.add("cabinet.scoring.api-key", () -> "fixture-key");
     }
 
     @Autowired MockMvc http;
     @Autowired ObjectMapper mapper;
     @Autowired JdbcClient db;
+    @MockitoSpyBean ScoringGateway scoringGateway;
     static String owner, bank;
     UUID party, product;
 
     @BeforeEach
     void setup() throws Exception {
+        SCORING.reset();
         if (owner == null) owner = login("demo-owner");
         if (bank == null) bank = login("demo-bank");
         for (var p : get("/me", owner).path("parties"))
@@ -409,13 +417,8 @@ class BackendIntegrationTest {
         submit(app, UUID.randomUUID().toString());
         var journey = process(app);
         assertThat(journey.path("application").path("status").asText()).isEqualTo("APPROVED");
-        assertThat(
-                        journey.path("decision")
-                                .path("conditions")
-                                .path("assessment")
-                                .path("mode")
-                                .asText())
-                .isEqualTo("DEMO");
+        assertThat(journey.path("decision").path("conditions").path("mode").asText())
+                .isEqualTo("SBA_DEMO");
         post(
                 "/applications/" + id + "/offers/accept",
                 owner,
@@ -1419,5 +1422,257 @@ class BackendIntegrationTest {
                         "answers",
                         Map.of()),
                 409);
+    }
+
+    @Test
+    void scoringAuditLinksTheSelectedCounterofferAndKeepsBothInputs() throws Exception {
+        SCORING.alternativeProbability = "0.12";
+        var pre = TestData.preliminary();
+        ((ObjectNode) pre.path("request")).put("amount", "2800000.00");
+        ((ObjectNode) pre.path("financial")).put("revenue", "6000000.00");
+        var additions = TestData.additions();
+        ((ObjectNode) additions.path("financial")).put("monthlyDebtPayment", "130000.00");
+        var app = ready(pre, additions);
+        UUID id = UUID.fromString(app.path("id").asText());
+        submit(app, UUID.randomUUID().toString());
+        var result = process(app);
+        assertThat(result.path("decision").path("kind").asText()).isEqualTo("COUNTEROFFERED");
+        var assessments =
+                db.sql(
+                                "SELECT * FROM credit.assessment_run WHERE application_id=:app ORDER BY created_at,id")
+                        .param("app", id)
+                        .query()
+                        .listOfRows();
+        assertThat(assessments).hasSize(2);
+        var selected =
+                db.sql(
+                                "SELECT r.output,r.input_manifest FROM credit.credit_decision d JOIN credit.assessment_run r ON r.id=d.assessment_id WHERE d.application_id=:app")
+                        .param("app", id)
+                        .query()
+                        .singleRow();
+        var selectedOutput = mapper.readTree(selected.get("output").toString());
+        assertThat(selectedOutput.path("sbaDefaultProbability").decimalValue())
+                .isEqualByComparingTo("0.12");
+        assertThat(
+                        result.path("decision")
+                                .path("conditions")
+                                .path("sbaDefaultProbability")
+                                .decimalValue())
+                .isEqualByComparingTo("0.12");
+        assertThat(selectedOutput.path("warnings"))
+                .isEqualTo(result.path("decision").path("conditions").path("warnings"));
+        var selectedInput = mapper.readTree(selected.get("input_manifest").toString());
+        assertThat(new java.math.BigDecimal(selectedInput.path("loanAmountUsd").asText()))
+                .isEqualByComparingTo(
+                        new java.math.BigDecimal(
+                                        result.path("counteroffer")
+                                                .path("alternative_terms")
+                                                .path("amount")
+                                                .asText())
+                                .divide(ScoringExchange.FX, 2, java.math.RoundingMode.HALF_UP));
+        for (var assessment : assessments) {
+            var input = (ObjectNode) mapper.readTree(assessment.get("input_manifest").toString());
+            input.remove("requestId");
+            assertThat(assessment.get("input_sha256"))
+                    .isEqualTo(Json.hash(TestData.JSON.canonical(input)));
+        }
+        assertThat(SCORING.calls.get()).isEqualTo(2);
+    }
+
+    @Test
+    void historicalPolicyRevisionKeepsItsCheckVersionThroughDisbursement() throws Exception {
+        var source = ready(TestData.preliminary(), TestData.additions());
+        var sourceRevision = submit(source, UUID.randomUUID().toString());
+        var row =
+                db.sql("SELECT * FROM credit.application_revision WHERE id=:id")
+                        .param("id", UUID.fromString(sourceRevision.path("revisionId").asText()))
+                        .query()
+                        .singleRow();
+        var app = ready(TestData.preliminary(), TestData.additions());
+        UUID id = UUID.fromString(app.path("id").asText()), revision = UUID.randomUUID();
+        var snapshot = (ObjectNode) mapper.readTree(row.get("snapshot").toString());
+        snapshot.put("policyVersion", LegacyDataPolicy.VERSION);
+        var files =
+                db.sql(
+                                "SELECT id,sha256,type_code FROM credit.document_version WHERE application_id=:app ORDER BY id")
+                        .param("app", id)
+                        .query()
+                        .listOfRows();
+        snapshot.set("documents", mapper.valueToTree(files));
+        String canonical = TestData.JSON.canonical(snapshot);
+        db.sql(
+                        "INSERT INTO credit.application_revision(id,application_id,revision_no,submitted_by,form_version,product_version_id,snapshot,snapshot_sha256,submission_evidence,submitted_at) VALUES (:id,:app,1,:user,:form,:product,CAST(:snapshot AS jsonb),:hash,CAST(:evidence AS jsonb),:at)")
+                .param("id", revision)
+                .param("app", id)
+                .param("user", row.get("submitted_by"))
+                .param("form", row.get("form_version"))
+                .param("product", row.get("product_version_id"))
+                .param("snapshot", canonical)
+                .param("hash", Json.hash(canonical))
+                .param("evidence", row.get("submission_evidence").toString())
+                .param("at", row.get("submitted_at"))
+                .update();
+        for (var file : files)
+            db.sql(
+                            "INSERT INTO credit.revision_document(application_id,revision_id,document_version_id) VALUES (:app,:revision,:file)")
+                    .param("app", id)
+                    .param("revision", revision)
+                    .param("file", file.get("id"))
+                    .update();
+        for (String gate : List.of("DECISION", "DISBURSEMENT"))
+            db.sql(
+                            "INSERT INTO credit.application_check_requirement(application_id,revision_id,check_code,rule_version,is_legal_gate,required_before,reason) VALUES (:app,:revision,:code,:version,false,:gate,'Historical fixture')")
+                    .param("app", id)
+                    .param("revision", revision)
+                    .param("code", "DATA_POLICY_" + gate)
+                    .param("version", LegacyDataPolicy.VERSION)
+                    .param("gate", gate)
+                    .update();
+        db.sql(
+                        "UPDATE credit.loan_application SET active_revision_id=:revision,status='SUBMITTED',last_changed_by=:user,last_change_reason='Historical fixture',row_version=row_version+1 WHERE id=:app")
+                .param("revision", revision)
+                .param("user", row.get("submitted_by"))
+                .param("app", id)
+                .update();
+        var result = process(app);
+        assertThat(result.path("decision").path("kind").asText()).isEqualTo("APPROVED");
+        assertThat(result.path("decision").path("conditions").path("policyVersion").asText())
+                .isEqualTo(LegacyDataPolicy.VERSION);
+        post(
+                "/applications/" + id + "/offers/accept",
+                owner,
+                Map.of("offerId", result.path("offer").path("id").asText(), "confirmed", true));
+        post("/applications/" + id + "/contract/sign", owner, Map.of("confirmed", true));
+        assertThat(
+                        post(
+                                        "/bank/applications/" + id + "/disburse",
+                                        bank,
+                                        Map.of("confirmed", true))
+                                .path("application")
+                                .path("status")
+                                .asText())
+                .isEqualTo("DISBURSED");
+        assertThat(
+                        db.sql(
+                                        "SELECT DISTINCT rule_version FROM credit.check_run WHERE application_id=:app")
+                                .param("app", id)
+                                .query(String.class)
+                                .list())
+                .containsExactly(LegacyDataPolicy.VERSION);
+        assertThat(
+                        db.sql(
+                                        "SELECT snapshot_sha256 FROM credit.application_revision WHERE id=:id")
+                                .param("id", revision)
+                                .query(String.class)
+                                .single())
+                .isEqualTo(Json.hash(canonical));
+        assertThat(SCORING.calls.get()).isZero();
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "RUN_REAL_SCORING_TESTS", matches = "1")
+    void realScoringCompletesFourDecisionJourneys() throws Exception {
+        var real =
+                new ScoringGateway(
+                        System.getenv("SCORING_ACCEPTANCE_URL"),
+                        System.getenv("SCORING_ACCEPTANCE_KEY"),
+                        TestData.JSON);
+        org.mockito.Mockito.doAnswer(call -> real.evaluate(call.getArgument(0)))
+                .when(scoringGateway)
+                .evaluate(org.mockito.ArgumentMatchers.any());
+        var outcomes = new ArrayList<Map<String, Object>>();
+        try {
+            for (String scenario :
+                    List.of("APPROVED", "COUNTEROFFERED", "DECLINED", "REQUEST_INFO")) {
+                var pre = TestData.preliminary();
+                var additions = TestData.additions();
+                ((ObjectNode) pre.path("request"))
+                        .put(
+                                "amount",
+                                scenario.equals("COUNTEROFFERED") ? "1000000.00" : "300000.00");
+                if (scenario.equals("DECLINED"))
+                    ((ObjectNode) pre.path("request")).put("termMonths", 6);
+                if (scenario.equals("COUNTEROFFERED")) {
+                    ((ObjectNode) pre.path("financial")).put("revenue", "6000000.00");
+                    ((ObjectNode) additions.path("financial"))
+                            .put("monthlyDebtPayment", "170000.00");
+                }
+                if (scenario.equals("REQUEST_INFO"))
+                    ((ObjectNode) additions.path("financial")).remove("monthlyDebtPayment");
+                var app = ready(pre, additions);
+                String id = app.path("id").asText();
+                submit(app, UUID.randomUUID().toString());
+                var result = process(app);
+                assertThat(result.path("decision").path("kind").asText()).isEqualTo(scenario);
+                var conditions = result.path("decision").path("conditions");
+                if (!scenario.equals("REQUEST_INFO")) {
+                    assertThat(conditions.path("modelVersion").asText())
+                            .isEqualTo("sba-scoring-v1");
+                    assertThat(conditions.path("warnings").toString())
+                            .contains("RATE_OUT_OF_RANGE", "TERM_HISTORY_UNCONFIRMED");
+                }
+                var entry = new LinkedHashMap<String, Object>();
+                entry.put("decision", scenario);
+                if (conditions.has("sbaDefaultProbability"))
+                    entry.put(
+                            "probability", conditions.path("sbaDefaultProbability").decimalValue());
+                entry.put(
+                        "assessmentCount",
+                        db.sql(
+                                        "SELECT count(*) FROM credit.assessment_run WHERE application_id=:app")
+                                .param("app", UUID.fromString(id))
+                                .query(Integer.class)
+                                .single());
+                if (Set.of("APPROVED", "COUNTEROFFERED").contains(scenario)) {
+                    if (scenario.equals("COUNTEROFFERED")) {
+                        var offer = result.path("counteroffer");
+                        result =
+                                post(
+                                        "/applications/" + id + "/counteroffers/accept",
+                                        owner,
+                                        Map.of(
+                                                "proposalId",
+                                                offer.path("id").asText(),
+                                                "termsSha256",
+                                                offer.path("termsSha256").asText(),
+                                                "confirmed",
+                                                true));
+                    } else
+                        result =
+                                post(
+                                        "/applications/" + id + "/offers/accept",
+                                        owner,
+                                        Map.of(
+                                                "offerId",
+                                                result.path("offer").path("id").asText(),
+                                                "confirmed",
+                                                true));
+                    post(
+                            "/applications/" + id + "/contract/sign",
+                            owner,
+                            Map.of("confirmed", true));
+                    result =
+                            post(
+                                    "/bank/applications/" + id + "/disburse",
+                                    bank,
+                                    Map.of("confirmed", true));
+                    assertThat(result.path("application").path("status").asText())
+                            .isEqualTo("DISBURSED");
+                    entry.put("finalStatus", "DISBURSED");
+                }
+                outcomes.add(entry);
+            }
+            Files.writeString(
+                    Path.of("target/real-scoring-acceptance.json"),
+                    mapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(
+                                    Map.of(
+                                            "modelVersion",
+                                            "sba-scoring-v1",
+                                            "outcomes",
+                                            outcomes)));
+        } finally {
+            org.mockito.Mockito.reset(scoringGateway);
+        }
     }
 }
