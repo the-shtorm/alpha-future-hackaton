@@ -80,6 +80,8 @@ def test_real_mixed_fit_scores_both_holdouts_at_one_frozen_threshold(tmp_path, m
     config["parameters"] = {"iterations": 5}
     result = run_mixed_trial(config)
     assert result["status"] == "complete", result
+    assert result["selection"]["constraints"] == {"minPrecision": .55, "minRecall": .85}
+    assert result["primaryPolicy"] == "bestPrecisionAtRecallFloor"
     assert campaign_fit.cohort_frames is previous
     roles, _ = mixed_cohorts(source, strategy, config["splitSeed"])
     policy = result["primaryPolicy"]

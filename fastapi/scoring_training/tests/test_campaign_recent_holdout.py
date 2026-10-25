@@ -108,6 +108,8 @@ def test_real_fit_replays_years_pooled_and_common_validation_at_one_threshold(tm
     config = tiny_config(tmp_path, strategy)
     row = recent.run_recent_trial(config)
     assert row["status"] == "complete", row
+    assert row["selection"]["constraints"] == {"minPrecision": .55, "minRecall": .85}
+    assert row["primaryPolicy"] == "bestPrecisionAtRecallFloor"
     assert campaign_fit.cohort_frames is previous and campaign_fit.write_json is writer
     assert row["audit"]["historicalValidation"]["approvalFiscalYears"] != [2023]
     assert row["audit"]["validation"]["approvalFiscalYears"] == [2023]
@@ -175,7 +177,7 @@ def test_historical_finalists_do_not_depend_on_future_scores():
     assert sorted([first, second], key=recent.historical_rank) == before
 
 
-def test_source_and_historical_shortlists_filter_recall90_then_maximize_precision():
+def test_source_and_historical_shortlists_prioritize_current_objective():
     high_f1, high_recall, higher_precision = parent(1), parent(2), parent(3)
     high_f1["validation"] = {"optimal": {"precision": 1., "recall": .6, "f1": .75}}
     high_recall["validation"] = {"optimal": {"precision": .3, "recall": .95, "f1": .456}}

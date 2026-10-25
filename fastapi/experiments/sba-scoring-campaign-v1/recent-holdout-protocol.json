@@ -21,13 +21,13 @@
     2026
   ],
   "sourceCacheSha256": "43834820e524cf4445c2df2881d895249cb38a7f534dfd4726ab47fd8004ff58",
-  "implementationSha256": "f05cdec6c6fa562aed79ab681c4a70dd7c3e351b05b5c3912a448eba4be95447",
+  "implementationSha256": "a291c08a07be5b008b8c91a5bd9908945bc4aca027755552199fd57d48a95df5",
   "minimumPerClassPerDevelopmentRole": 100,
   "wholeYearMinimumSupportUsesOnlyHistoricalLabels": true,
   "fitWindowAppliedOnlyToAssignedTrainingRows": true,
   "sourceShortlistUsesPreviouslyInspectedFY2023": true,
   "isUntouchedExternalTest": false,
-  "sourceParentRank": "recall >=0.90 filter, then maximum precision; ties recall then F1; frozen thresholds only",
+  "sourceParentRank": "source recall>=0.85 then max precision; final candidates require recall>=0.85 AND precision>=0.55",
   "audits": {
     "random_rows": {
       "None": {
@@ -732,5 +732,10 @@
       "positives": 0
     }
   },
-  "rankingImplementationSha256": "5ec86fe10f82cdf8b54c297ebabe634734d899eafe9c9969fda812fdadffb54e"
+  "rankingImplementationSha256": "37944b67d00bfd4bf0ecbe1087455a98ae2757e69e646b09cc828f7fc25aded0",
+  "activeTarget": {
+    "minRecall": 0.85,
+    "minPrecision": 0.55
+  },
+  "targetDefinitionSha256": "575fa23fc9063857605d7579024976ad6fb3fb189b0f90ec6cf726e9429189d3"
 }

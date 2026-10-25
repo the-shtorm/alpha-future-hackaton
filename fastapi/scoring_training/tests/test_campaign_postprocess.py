@@ -64,8 +64,9 @@ def test_failed_only_stage_exports_explicit_failure_without_fabricated_metrics(t
 
 @pytest.mark.parametrize("enable_mixed", [False, True])
 @pytest.mark.parametrize("enable_recent", [False, True])
+@pytest.mark.parametrize("feasible", [False, True])
 def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
-    tmp_path, monkeypatch, enable_mixed, enable_recent
+    tmp_path, monkeypatch, enable_mixed, enable_recent, feasible
 ):
     root, export = tmp_path / "run", tmp_path / "export"
     root.mkdir()
@@ -75,7 +76,10 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
     write_json(export / "favorite-validation.json", {"byFold": {"B": {"metrics": {
         "precision": 0.4, "f1": 0.4, "recall": 0.4
     }}}})
-    monkeypatch.setattr(campaign_fit, "_FRAME", sample())
+    source = sample()
+    if feasible:
+        source = source.assign(GrossApproval=lambda frame: 10000 + frame.LoanStatus * 100000)
+    monkeypatch.setattr(campaign_fit, "_FRAME", source)
     monkeypatch.setattr(campaign_fit, "_ROOT", root)
     parents = []
     for name, bundle in (("original", "original9_diagnostic_term_unconfirmed"), ("safe", "safe8_without_term")):
@@ -111,9 +115,19 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
     assert summary["distinctBaseModelArtifacts"] == 2
     assert summary["metricsAreAveraged"] is False
     assert summary["favoriteRetained"] is True
-    assert "recall >=0.90 filter, then maximum precision" in summary["ranking"]
+    assert "recall >=0.85 AND precision >=0.55" in summary["ranking"]
     leaders = json.loads((export / "leaders.json").read_text())
     assert "top20ByRecallPriority" in leaders
-    assert "recall >=0.90 filter, then maximum precision" in json.loads((export / "top10.json").read_text())["ranking"]
-    assert leaders["bestWithoutTerm"]["config"]["bundle"] == "safe8_without_term"
+    assert "recall >=0.85 AND precision >=0.55" in json.loads((export / "top10.json").read_text())["ranking"]
+    if feasible:
+        assert leaders["bestWithoutTerm"]["config"]["bundle"] == "safe8_without_term"
+        assert summary["activeTargetPassed"] is True
+    else:
+        assert summary["status"] == "complete_no_feasible"
+        assert leaders["bestOverall"] is None
+        assert json.loads((export / "top10.json").read_text())["candidates"] == []
+        retention = json.loads((export / "retention.json").read_text())
+        assert retention["allTrialWeightsPreserved"] and not retention["cleanupComplete"]
+        assert retention["deletedFiles"] == 0
+        assert all((root / parent["artifact"]).exists() for parent in parents)
     assert b"\r" not in (export / "trials.csv").read_bytes()

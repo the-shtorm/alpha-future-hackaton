@@ -36,7 +36,7 @@ def test_top_models_prioritize_goals_and_deduplicate_identical_binary_decisions(
     assert [row["id"] for row in chosen] == ["goal"]
 
 
-def test_recall90_is_a_filter_then_precision_is_maximized_without_a_precision_gate(tmp_path):
+def test_both_recall85_and_precision55_are_filters_then_precision_is_maximized(tmp_path):
     labels = np.r_[np.ones(10, dtype=int), np.zeros(10, dtype=int)]
     rows = []
     for name, tp, fp in (("higher_f1", 6, 0), ("higher_recall", 8, 5),
@@ -55,12 +55,12 @@ def test_recall90_is_a_filter_then_precision_is_maximized_without_a_precision_ga
     assert rows[-1]["selectionPoint"]["f1"] < favorite["f1"]
     assert rows[-1]["selectionPoint"]["precision"] < .6
     chosen, count = select_top_models(tmp_path, rows, favorite)
-    assert count == 3
-    assert [r["id"] for r in chosen] == ["both_goals", "below_precision", "highest_recall_low_f1"]
+    assert count == 2
+    assert [r["id"] for r in chosen] == ["both_goals", "below_precision"]
     assert all(r["selectionPoint"]["threshold"] == .5 for r in chosen)
 
 
-def test_no_recall90_candidate_is_not_silently_replaced_with_a_lower_recall_winner(tmp_path):
+def test_no_jointly_eligible_candidate_is_not_silently_replaced_with_a_fallback(tmp_path):
     lower = candidate(tmp_path, "lower", np.array([.9, .1, .8, .1, .1, .1]))
     assert select_top_models(tmp_path, [lower], {"precision": .4, "recall": .4, "f1": .4}) == ([], 0)
 

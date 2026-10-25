@@ -11,7 +11,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from scoring_training import campaign_fit
-from scoring_training.campaign_priority import RANKING, passes_recall_floor, recall_rank, recall_rank_values
+from scoring_training.campaign_priority import (
+    RANKING,
+    passes_recall_floor,
+    passes_target,
+    recall_rank,
+    recall_rank_values,
+)
+from scoring_training.campaign_target import new_fit_target
 from scoring_training.data import sha256_file
 from scoring_training.train import read_json, write_json
 
@@ -137,6 +144,7 @@ def frozen_configurations(root, results, count):
                             "splitStrategy": strategy, "parent": parent["sourceId"],
                             "minimumPerClass": 100, "historicalFitThroughFY": 2019,
                             "holdoutImplementationSha256": implementation})
+            configs[-1]["targetDefinitionSha256"] = sha256_file(Path(__file__).with_name("campaign_target.py"))
     return configs
 
 
@@ -165,6 +173,8 @@ def run_recent_trial(config):
 def _run_recent_trial(config):
     if config["holdoutImplementationSha256"] != sha256_file(Path(__file__)):
         raise ValueError("Recent-holdout implementation changed")
+    if config["targetDefinitionSha256"] != sha256_file(Path(__file__).with_name("campaign_target.py")):
+        raise ValueError("Recent-holdout target changed")
     cohorts, audit = historical_cohorts(campaign_fit._FRAME, config["splitStrategy"], config.get("window"),
                                        config["splitSeed"], config["minimumPerClass"])
     previous = campaign_fit.cohort_frames
@@ -180,7 +190,8 @@ def _run_recent_trial(config):
     campaign_fit.cohort_frames = lambda *args: (cohorts, audit)
     campaign_fit.write_json = pending_writer
     try:
-        result = campaign_fit.run_trial(config)
+        with new_fit_target():
+            result = campaign_fit.run_trial(config)
     finally:
         campaign_fit.cohort_frames = previous
         campaign_fit.write_json = previous_writer
@@ -211,7 +222,7 @@ def _run_recent_trial(config):
     result["futureHoldout"] = tests
     result["validation"] = tests["2023"]
     point = result["validation"][result["primaryPolicy"]]
-    result["validationTargetPassed"] = point["precision"] >= .6 and point["recall"] >= .9
+    result["validationTargetPassed"] = passes_target(point)
     result["audit"]["historicalValidation"] = result["audit"]["validation"]
     result["audit"]["validation"] = {"rows": int(common.sum()),
                                          "positives": int(future.loc[common, "LoanStatus"].sum()),
@@ -255,7 +266,7 @@ def run_recent_stage(root, export, source_results):
                          ("operating-points.csv", "recent-holdout-operating-points.csv")):
         (export / name).write_bytes((root / "stages" / source).read_bytes())
     good = [r for r in results if r["status"] == "complete"]
-    development_eligible = [r for r in good if passes_recall_floor(r["historicalValidation"][r["primaryPolicy"]])]
+    development_eligible = [r for r in good if passes_target(r["historicalValidation"][r["primaryPolicy"]])]
     development_top = [r["id"] for r in sorted(development_eligible, key=historical_rank, reverse=True)[:10]]
     write_json(export / "recent-holdout-results.json", {
         "records": len(results), "parentCount": policy["parentCount"],

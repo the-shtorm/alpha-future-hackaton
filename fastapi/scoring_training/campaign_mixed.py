@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 
 from scoring_training import campaign_fit
 from scoring_training.campaign_data import BUNDLES
+from scoring_training.campaign_priority import passes_target
+from scoring_training.campaign_target import new_fit_target
 from scoring_training.data import sha256_file
 from scoring_training.train import read_json, write_json
 
@@ -87,6 +89,7 @@ def mixed_configurations():
             "fold": "B", "seed": 42, "window": None, "halfLife": None, "balance": balance,
             "bundle": bundle, "parameters": {}, "splitStrategy": strategy, "splitSeed": split_seed,
             "splitterSha256": splitter_hash,
+            "targetDefinitionSha256": sha256_file(Path(__file__).with_name("campaign_target.py")),
         })
     return configurations
 
@@ -94,6 +97,8 @@ def mixed_configurations():
 def run_mixed_trial(config):
     if config["splitterSha256"] != sha256_file(Path(__file__)):
         raise ValueError("Mixed split implementation changed after configuration freeze")
+    if config["targetDefinitionSha256"] != sha256_file(Path(__file__).with_name("campaign_target.py")):
+        raise ValueError("Mixed fit target changed after configuration freeze")
     cohorts, audit = mixed_cohorts(campaign_fit._FRAME, config["splitStrategy"], config["splitSeed"])
     previous = campaign_fit.cohort_frames
 
@@ -104,7 +109,8 @@ def run_mixed_trial(config):
 
     campaign_fit.cohort_frames = fixed_cohorts
     try:
-        result = campaign_fit.run_trial(config)
+        with new_fit_target():
+            result = campaign_fit.run_trial(config)
     finally:
         campaign_fit.cohort_frames = previous
     if result["status"] != "complete":
@@ -123,9 +129,8 @@ def run_mixed_trial(config):
         "note": "Randomized historical holdout only; future quality is measured separately on FY2023.",
     }
     iid_point = result["historicalRandomTest"]["policies"][result["primaryPolicy"]]
-    result["historicalRandomTest"]["targetPassedAtPrimaryPoint"] = (
-        iid_point["precision"] >= 0.6 and iid_point["recall"] >= 0.9
-    )
+    result["historicalRandomTest"]["targetPassedAtPrimaryPoint"] = passes_target(iid_point)
+    result["validationTargetPassed"] = passes_target(result["validation"][result["primaryPolicy"]])
     result["splitImplementationSha256"] = config["splitterSha256"]
     path = root / result["predictions"]
     with np.load(path) as stored:

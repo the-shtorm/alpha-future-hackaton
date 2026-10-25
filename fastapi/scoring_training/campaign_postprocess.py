@@ -11,16 +11,15 @@ from app.scoring.package import ScoringPackage
 from scipy.special import expit
 from sklearn.isotonic import IsotonicRegression
 
-from scoring_training.business_thresholds import business_operating_points
 from scoring_training.campaign_fit import (
     evaluate_points,
-    primary_point,
     raw_prediction,
     result_rank,
     signature,
 )
-from scoring_training.campaign_priority import RANKING, recall_rank
+from scoring_training.campaign_priority import MIN_PRECISION, MIN_RECALL, RANKING, passes_target, recall_rank
 from scoring_training.campaign_retention import retain_top_models, select_top_models
+from scoring_training.campaign_target import choose_operating_point, select_thresholds
 from scoring_training.data import sha256_file
 from scoring_training.thresholds import threshold_table
 from scoring_training.train import read_json, write_json
@@ -30,10 +29,10 @@ def save_composition(root, config, threshold_labels, threshold_probability, vali
                      validation_probability, artifact, *, threshold_indices=None, validation_indices=None):
     directory = root / "trials" / config["id"]
     directory.mkdir(parents=True, exist_ok=True)
-    selection = business_operating_points(threshold_labels, threshold_probability)
+    selection = select_thresholds(threshold_labels, threshold_probability)
     write_json(directory / "selection.json", selection)
     frozen = sha256_file(directory / "selection.json")
-    policy, point = primary_point(selection)
+    policy, point = choose_operating_point(selection)
     evaluation = evaluate_points(selection, validation_labels, validation_probability)
     joblib.dump(artifact, directory / "model.joblib")
     np.savez_compressed(directory / "predictions.npz", thresholdLabels=threshold_labels,
@@ -45,7 +44,7 @@ def save_composition(root, config, threshold_labels, threshold_probability, vali
         "id": config["id"], "status": "complete", "config": config, "signature": signature(config),
         "selection": selection, "selectionPoint": point, "primaryPolicy": policy,
         "selectionSha256": frozen, "validation": evaluation,
-        "validationTargetPassed": row["precision"] >= 0.6 and row["recall"] >= 0.9,
+        "validationTargetPassed": passes_target(row),
         "artifact": str((directory / "model.joblib").relative_to(root)),
         "modelSha256": sha256_file(directory / "model.joblib"),
         "predictions": str((directory / "predictions.npz").relative_to(root)),
@@ -138,8 +137,8 @@ def future_diagnostics(root, winner, safe_winner, export, top_candidates=None):
     favorite = read_json(export / "favorite.json")
     original = ScoringPackage(root / "favorite-package", favorite["manifestSha256"])
     results = {}
-    candidates = {"bestOverall": winner, "bestWithoutTerm": safe_winner,
-                  **{row["id"]: row for row in top_candidates or []}}
+    candidates = {name: row for name, row in {"bestOverall": winner, "bestWithoutTerm": safe_winner,
+                  **{row["id"]: row for row in top_candidates or []}}.items() if row is not None}
     for year in (2023, 2024, 2025, 2026):
         cohort = frame.loc[frame.ApprovalFY.eq(year)]
         rows = {"favorite": metrics_for_frame(cohort, original.predict_frame(cohort[list(FEATURES)]),
@@ -169,11 +168,14 @@ def write_csv(path, rows, fieldnames=None):
 
 
 def brief(row):
+    if row is None:
+        return None
     result = {key: row[key] for key in ("id", "config", "status", "primaryPolicy", "selectionPoint", "selection",
                                       "validation", "validationTargetPassed", "artifact", "modelSha256")}
     for key in ("historicalRandomTest", "historicalValidation", "futureHoldout"):
         if key in row:
             result[key] = row[key]
+    result["activeTargetPassed"] = passes_target(row["validation"][row["primaryPolicy"]])
     return result
 
 
@@ -199,7 +201,7 @@ def export_tables(export, results):
                        threshold=selection["threshold"], selectionPrecision=selection["precision"],
                        selectionF1=selection["f1"], selectionRecall=selection["recall"],
                        validationPrecision=validation["precision"], validationF1=validation["f1"],
-                       validationRecall=validation["recall"], validationTargetPassed=result["validationTargetPassed"],
+                       validationRecall=validation["recall"], validationTargetPassed=passes_target(validation),
                        TP=validation["tp"], FP=validation["fp"], FN=validation["fn"])
             historical = result.get("historicalRandomTest", {}).get("policies", {})
             if historical:
@@ -240,15 +242,20 @@ def plot_results(export, candidates, winner, safe_winner, diagnostics):
         rows = [row["validation"][row["primaryPolicy"]] for row in candidates if row["config"]["bundle"] == bundle]
         axes[0].scatter([r["precision"] for r in rows], [r["recall"] for r in rows],
                         s=12, alpha=0.45, color=color, label=bundle.split("_")[0])
-    axes[0].add_patch(Rectangle((0.6, 0.9), 0.4, 0.1, color="green", alpha=0.15))
+    axes[0].add_patch(Rectangle((MIN_PRECISION, MIN_RECALL), 1 - MIN_PRECISION, 1 - MIN_RECALL,
+                               color="green", alpha=0.15))
     axes[0].set(title="FY2023: each candidate at its frozen threshold", xlabel="Precision", ylabel="Recall")
     for name, color, candidate in (("best", "black", winner), ("safe", "blue", safe_winner)):
+        if candidate is None:
+            continue
         row = candidate["validation"][candidate["primaryPolicy"]]
         axes[0].scatter([row["precision"]], [row["recall"]], marker="*", s=120, color=color, label=name)
     for name, marker in (("favorite", "o"), ("bestOverall", "s"), ("bestWithoutTerm", "^")):
-        years = [int(y) for y, rows in diagnostics.items() if rows[name]["recallDefined"]]
+        years = [int(y) for y, rows in diagnostics.items() if name in rows and rows[name]["recallDefined"]]
+        if not years:
+            continue
         axes[1].plot(years, [diagnostics[str(y)][name]["recall"] for y in years], marker=marker, label=name)
-    axes[1].axhline(0.9, color="gray", linestyle="--")
+    axes[1].axhline(MIN_RECALL, color="gray", linestyle="--")
     axes[1].set(title="Fixed-threshold recall; completed-loan population", xlabel="Approval FY", ylabel="Recall")
     for axis in axes:
         axis.set_ylim(0, 1.02)
@@ -286,23 +293,28 @@ def postprocess(root, export, results, parents):
     proximity_ranked = sorted(eligible, key=result_rank, reverse=True)
     favorite = read_json(export / "favorite-validation.json")["byFold"]["B"]["metrics"]
     top10, improved_count = select_top_models(root, eligible, favorite)
-    if not top10:
-        raise ValueError("No candidate satisfies recall>=0.90; final selection and cleanup are forbidden")
-    winner = top10[0]
+    winner = top10[0] if top10 else None
     safe = [r for r in ranked if r["config"]["bundle"] != "original9_diagnostic_term_unconfirmed"]
     # A mixed ensemble is safe only when both components were safe.
     safe = [r for r in safe if r["config"]["family"] != "blend"
             or all(next(p for p in parents if p["id"] == source)["config"]["bundle"] !=
                    "original9_diagnostic_term_unconfirmed" for source in r["config"]["parent"])]
     safe_selected, _ = select_top_models(root, safe, favorite, limit=1)
-    safe_winner = safe_selected[0]
+    safe_winner = safe_selected[0] if safe_selected else None
     export_tables(export, results)
     diagnostics = future_diagnostics(root, winner, safe_winner, export, top10)
     plot_results(export, eligible, winner, safe_winner, diagnostics)
     retention_policy = read_json(root / "retention-policy.json") if (root / "retention-policy.json").exists() else {}
     retention = None
-    if retention_policy.get("deleteOtherWeights") is True:
+    if top10 and retention_policy.get("deleteOtherWeights") is True:
         retention = retain_top_models(root, top10, lambda path, frame: artifact_probability(root, path, frame))
+        write_json(export / "retention.json", retention)
+    elif not top10:
+        retention = {"cleanupComplete": False, "favoriteUntouched": True, "allTrialWeightsPreserved": True,
+                     "reason": "No candidate meets both active target constraints; no fallback winner or cleanup.",
+                     "topIds": [], "verification": [], "retainedModelFiles": {},
+                     "deletedFiles": 0, "freedBytes": 0}
+        write_json(root / "retention.json", retention)
         write_json(export / "retention.json", retention)
     top_rows = []
     for rank, row in enumerate(top10, 1):
@@ -313,8 +325,8 @@ def postprocess(root, export, results, parents):
                          "splitSeed": row["config"].get("splitSeed"),
                          "threshold": point["threshold"], "precision": point["precision"],
                          "f1": point["f1"], "recall": point["recall"], "TP": point["tp"], "FP": point["fp"],
-                         "FN": point["fn"], "goalPassed": row["validationTargetPassed"],
-                         "precisionFloorPassed": point["precision"] >= .6,
+                         "FN": point["fn"], "goalPassed": passes_target(point),
+                         "precisionFloorPassed": point["precision"] >= MIN_PRECISION,
                          "dominatesFavorite": all(point[k] >= favorite[k] for k in ("precision", "recall", "f1")),
                          "tradeoffAgainstFavorite": any(point[k] < favorite[k] for k in ("precision", "recall", "f1")),
                          "deltaPrecision": point["precision"] - favorite["precision"],
@@ -322,7 +334,11 @@ def postprocess(root, export, results, parents):
                          "deltaRecall": point["recall"] - favorite["recall"],
                          "primaryPolicy": row["primaryPolicy"], "artifact": row["artifact"],
                          "modelSha256": row["modelSha256"]})
-    write_csv(export / "top10.csv", top_rows)
+    write_csv(export / "top10.csv", top_rows, [
+        "rank", "id", "family", "bundle", "validationFY", "splitStrategy", "splitSeed", "threshold",
+        "precision", "f1", "recall", "TP", "FP", "FN", "goalPassed", "precisionFloorPassed",
+        "dominatesFavorite", "tradeoffAgainstFavorite", "deltaPrecision", "deltaF1", "deltaRecall",
+        "primaryPolicy", "artifact", "modelSha256"])
     write_json(export / "top10.json", {"favorite": favorite, "sameCohort": True,
                                        "distinctValidationDecisions": True,
                                        "ranking": RANKING + "; only improvements if any",
@@ -336,7 +352,9 @@ def postprocess(root, export, results, parents):
         for row in [leaders["bestOverall"], leaders["bestWithoutTerm"], leaders["closestToBothFloors"],
                     leaders["maximumMeasuredF1"], *leaders["top20ByConstraintProximity"],
                     *leaders["top20ByRecallPriority"]]:
-            row["artifactRetained"] = row["artifact"] in retention["retainedModelFiles"]
+            if row is not None:
+                row["artifactRetained"] = (retention.get("allTrialWeightsPreserved", False)
+                                           or row["artifact"] in retention["retainedModelFiles"])
     write_json(export / "leaders.json", leaders)
     family_counts = {}
     for result in results:
@@ -345,7 +363,8 @@ def postprocess(root, export, results, parents):
         counts["records"] += 1
         counts["complete" if result["status"] == "complete" else "failed"] += 1
     summary = {
-        "status": "complete_with_failures" if any(r["status"] != "complete" for r in results) else "complete",
+        "status": ("complete_no_feasible" if not top10 else
+                   "complete_with_failures" if any(r["status"] != "complete" for r in results) else "complete"),
         "recordCount": len(results), "familyCounts": family_counts,
         "distinctBaseModelArtifacts": len({r["artifact"] for r in results
                                             if r.get("status") == "complete" and r["config"]["stage"] not in
@@ -353,11 +372,14 @@ def postprocess(root, export, results, parents):
         "failedRecords": [{"id": r["id"], "error": r["error"]} for r in results if r["status"] != "complete"],
         "metricsAreAveraged": False, "favoriteRetained": True, "deploymentChanged": False,
         "ranking": RANKING,
+        "activeTarget": {"minRecall": MIN_RECALL, "minPrecision": MIN_PRECISION},
+        "activeTargetPassed": bool(top10),
         "improvedRecordCount": improved_count, "top10Count": len(top10),
         "mixedSplitRecords": len(mixed),
         "recentHoldoutRecords": len(recent),
         "retentionCompleted": bool(retention and retention["cleanupComplete"]),
-        "bestId": winner["id"], "bestWithoutTermId": safe_winner["id"],
+        "bestId": winner["id"] if winner else None,
+        "bestWithoutTermId": safe_winner["id"] if safe_winner else None,
         "protocolSha256": sha256_file(export / "protocol.json"),
         "limitations": ["Completed-loan selection bias remains.", "Original term history is unconfirmed.",
                         "Validation cohorts were historically inspected; this is not a fresh external test.",
@@ -368,4 +390,4 @@ def postprocess(root, export, results, parents):
     write_json(export / "artifact-hashes.json", {p.name: sha256_file(p) for p in export.iterdir()
                                                  if p.is_file() and p.name != "artifact-hashes.json"})
     write_json(root / "progress.json", {"stage": "complete", "summary": summary})
-    print(f"CAMPAIGN COMPLETE: {winner['id']} / {safe_winner['id']}", flush=True)
+    print(f"CAMPAIGN COMPLETE: {summary['status']} / {summary['bestId']}", flush=True)

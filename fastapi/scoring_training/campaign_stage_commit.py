@@ -120,7 +120,10 @@ def snapshot_stage(repo, root, export, stage, rows):
 def finalize_report(repo, export):
     summary = read_json(export / "summary.json")
     retention = read_json(export / "retention.json")
-    if not retention["cleanupComplete"] or not retention["favoriteUntouched"]:
+    no_feasible = (summary["status"] == "complete_no_feasible" and summary["top10Count"] == 0
+                   and retention.get("allTrialWeightsPreserved") is True
+                   and retention["deletedFiles"] == 0 and retention["freedBytes"] == 0)
+    if not retention["favoriteUntouched"] or not (retention["cleanupComplete"] or no_feasible):
         raise ValueError("Retention/favorite verification is incomplete")
     top = read_json(export / "top10.json")
     report = repo / REPORT
@@ -130,9 +133,13 @@ def finalize_report(repo, export):
         text += f"\n{heading}\n\n"
         text += (f"- {summary['recordCount']} measured records, {summary['distinctBaseModelArtifacts']} "
                  f"distinct base-model artifacts, {len(summary['failedRecords'])} failed records.\n")
-        text += (f"- Retained {summary['top10Count']} distinct top candidates and required inference dependencies; "
-                 f"replay passed before deleting {retention['deletedFiles']} trial weight/prediction files "
-                 f"({retention['freedBytes']} bytes). Favorite and all aggregate metrics/configs retained.\n")
+        if no_feasible:
+            text += (f"- No candidate meets both active constraints {summary['activeTarget']}; "
+                     "no fallback winner, no cleanup, all trial weights and favorite preserved.\n")
+        else:
+            text += (f"- Retained {summary['top10Count']} distinct top candidates and required inference dependencies; "
+                     f"replay passed before deleting {retention['deletedFiles']} trial weight/prediction files "
+                     f"({retention['freedBytes']} bytes). Favorite and all aggregate metrics/configs retained.\n")
         text += "- Final metrics refer to historical FY2023 validation; no fresh independent test or deployment is claimed.\n"
         for rank, candidate in enumerate(top["candidates"], 1):
             point = candidate["validation"][candidate["primaryPolicy"]]
@@ -149,6 +156,8 @@ def finalize_report(repo, export):
                                     "**Программа завершена; фактические результаты в top10.csv/json и summary.json.**")
     if "## Итоговые топ-10" not in body:
         body += "\n## Итоговые топ-10\n\n[Таблица](top10.csv), [конфигурации и метрики](top10.json), [сохранённые веса и очистка](retention.json).\n"
+        if no_feasible:
+            body += "\nНи один вариант не выполнил оба текущих ограничения. Топ-10 пуст; все веса сохранены, очистки не было.\n"
         body += "\n| Место | Вариант | Порог | Precision | F1 | Recall |\n|---|---|---:|---:|---:|---:|\n"
         for rank, candidate in enumerate(top["candidates"], 1):
             row = candidate["validation"][candidate["primaryPolicy"]]
@@ -159,7 +168,9 @@ def finalize_report(repo, export):
                                                  if path.is_file() and path.name != "artifact-hashes.json"})
     line = next(line for line in (repo / INDEX).read_text().splitlines()
                 if "2026-10-25-scoring-experiment-campaign.md" in line)
-    new = line.split(") — ", 1)[0] + ") — completed; full campaign, verified top-10, favorite preserved, other weights pruned; local commits only."
+    outcome = ("full campaign, no jointly feasible candidate, all weights/favorite preserved" if no_feasible else
+               "full campaign, verified top-10, favorite preserved, other weights pruned")
+    new = line.split(") — ", 1)[0] + f") — completed; {outcome}; local commits only."
     paths = [REPORT, *[str(path.relative_to(repo)) for path in export.iterdir() if path.is_file()]]
     return paths, (line, new)
 
