@@ -32,15 +32,16 @@ def test_top_models_prioritize_goals_and_deduplicate_identical_binary_decisions(
     duplicate["config"]["calibrationMethod"] = "none"
     chosen, improvements = select_top_models(tmp_path, [lower, goal, duplicate],
                                              {"precision": 0.4, "recall": 0.4, "f1": 0.4})
-    assert improvements == 3
-    assert [row["id"] for row in chosen] == ["goal", "lower"]
+    assert improvements == 2
+    assert [row["id"] for row in chosen] == ["goal"]
 
 
-def test_recall_outweighs_f1_above_precision_floor_and_below_floor_is_separate(tmp_path):
+def test_recall90_is_a_filter_then_precision_is_maximized_without_a_precision_gate(tmp_path):
     labels = np.r_[np.ones(10, dtype=int), np.zeros(10, dtype=int)]
     rows = []
     for name, tp, fp in (("higher_f1", 6, 0), ("higher_recall", 8, 5),
-                         ("below_precision", 9, 7), ("both_goals", 9, 4)):
+                         ("below_precision", 9, 7), ("both_goals", 9, 4),
+                         ("highest_recall_low_f1", 10, 10)):
         probability = np.r_[np.full(tp, .9), np.full(10 - tp, .1),
                             np.full(fp, .9), np.full(10 - fp, .1)]
         path = tmp_path / f"{name}.npz"
@@ -50,10 +51,18 @@ def test_recall_outweighs_f1_above_precision_floor_and_below_floor_is_separate(t
                      "primaryPolicy": "optimal", "selectionPoint": point,
                      "validation": {"optimal": point}, "predictions": path.name})
     assert rows[0]["selectionPoint"]["f1"] > rows[1]["selectionPoint"]["f1"]
-    chosen, count = select_top_models(tmp_path, rows, {"precision": .4, "recall": .4, "f1": .4})
-    assert count == 4
-    assert [r["id"] for r in chosen] == ["both_goals", "higher_recall", "higher_f1", "below_precision"]
+    favorite = {"precision": 1., "recall": .55, "f1": 1.1 / 1.55}
+    assert rows[-1]["selectionPoint"]["f1"] < favorite["f1"]
+    assert rows[-1]["selectionPoint"]["precision"] < .6
+    chosen, count = select_top_models(tmp_path, rows, favorite)
+    assert count == 3
+    assert [r["id"] for r in chosen] == ["both_goals", "below_precision", "highest_recall_low_f1"]
     assert all(r["selectionPoint"]["threshold"] == .5 for r in chosen)
+
+
+def test_no_recall90_candidate_is_not_silently_replaced_with_a_lower_recall_winner(tmp_path):
+    lower = candidate(tmp_path, "lower", np.array([.9, .1, .8, .1, .1, .1]))
+    assert select_top_models(tmp_path, [lower], {"precision": .4, "recall": .4, "f1": .4}) == ([], 0)
 
 
 def test_cleanup_keeps_favorite_top_model_dependencies_and_all_verified_predictions(tmp_path):

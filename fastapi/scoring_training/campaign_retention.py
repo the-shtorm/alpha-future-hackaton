@@ -5,7 +5,7 @@ import hashlib
 import joblib
 import numpy as np
 
-from scoring_training.campaign_priority import recall_rank_values
+from scoring_training.campaign_priority import passes_recall_floor, recall_rank_values
 from scoring_training.data import sha256_file
 from scoring_training.thresholds import threshold_table
 from scoring_training.train import write_json
@@ -17,10 +17,7 @@ def select_top_models(root, candidates, favorite, limit=10):
 
     def improved(row):
         values = point(row)
-        return (values["precision"] >= favorite["precision"] and values["recall"] >= favorite["recall"]
-                and values["f1"] > favorite["f1"]) or (
-            values["f1"] > favorite["f1"] and values["recall"] >= favorite["recall"]
-        )
+        return recall_rank_values(values) > recall_rank_values(favorite)
 
     def rank(row):
         values = point(row)
@@ -28,6 +25,7 @@ def select_top_models(root, candidates, favorite, limit=10):
         calibrated = row["config"].get("calibrationMethod") != "none"
         return (*recall_rank_values(values), int(safe), int(calibrated))
 
+    candidates = [row for row in candidates if passes_recall_floor(point(row))]
     qualifying = [row for row in candidates if improved(row)]
     # If nothing improved, retain the best measured alternatives without labeling
     # them improvements. The final report must expose this case explicitly.

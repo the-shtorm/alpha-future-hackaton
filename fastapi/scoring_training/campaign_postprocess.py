@@ -286,6 +286,8 @@ def postprocess(root, export, results, parents):
     proximity_ranked = sorted(eligible, key=result_rank, reverse=True)
     favorite = read_json(export / "favorite-validation.json")["byFold"]["B"]["metrics"]
     top10, improved_count = select_top_models(root, eligible, favorite)
+    if not top10:
+        raise ValueError("No candidate satisfies recall>=0.90; final selection and cleanup are forbidden")
     winner = top10[0]
     safe = [r for r in ranked if r["config"]["bundle"] != "original9_diagnostic_term_unconfirmed"]
     # A mixed ensemble is safe only when both components were safe.
@@ -313,6 +315,8 @@ def postprocess(root, export, results, parents):
                          "f1": point["f1"], "recall": point["recall"], "TP": point["tp"], "FP": point["fp"],
                          "FN": point["fn"], "goalPassed": row["validationTargetPassed"],
                          "precisionFloorPassed": point["precision"] >= .6,
+                         "dominatesFavorite": all(point[k] >= favorite[k] for k in ("precision", "recall", "f1")),
+                         "tradeoffAgainstFavorite": any(point[k] < favorite[k] for k in ("precision", "recall", "f1")),
                          "deltaPrecision": point["precision"] - favorite["precision"],
                          "deltaF1": point["f1"] - favorite["f1"],
                          "deltaRecall": point["recall"] - favorite["recall"],

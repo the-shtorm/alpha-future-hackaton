@@ -21,13 +21,13 @@
     2026
   ],
   "sourceCacheSha256": "43834820e524cf4445c2df2881d895249cb38a7f534dfd4726ab47fd8004ff58",
-  "implementationSha256": "1aa641e62dc5b1d8a647694f4418ab34c9854b596ece56d4afcb8b7519cea0c3",
+  "implementationSha256": "f05cdec6c6fa562aed79ab681c4a70dd7c3e351b05b5c3912a448eba4be95447",
   "minimumPerClassPerDevelopmentRole": 100,
   "wholeYearMinimumSupportUsesOnlyHistoricalLabels": true,
   "fitWindowAppliedOnlyToAssignedTrainingRows": true,
   "sourceShortlistUsesPreviouslyInspectedFY2023": true,
   "isUntouchedExternalTest": false,
-  "sourceParentRank": "precision >=0.60 first; then recall, F1, precision; unique cold-fit configurations at frozen thresholds",
+  "sourceParentRank": "recall >=0.90 filter, then maximum precision; ties recall then F1; frozen thresholds only",
   "audits": {
     "random_rows": {
       "None": {
@@ -732,5 +732,5 @@
       "positives": 0
     }
   },
-  "rankingImplementationSha256": "7fce8f88e962f5c058d14b9ead70e9c7876bd9e920f0647ff827ce4eef9927fc"
+  "rankingImplementationSha256": "5ec86fe10f82cdf8b54c297ebabe634734d899eafe9c9969fda812fdadffb54e"
 }

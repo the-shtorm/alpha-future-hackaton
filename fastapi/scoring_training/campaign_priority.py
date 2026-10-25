@@ -1,10 +1,14 @@
 """Recall-first ranking at existing, independently frozen operating points."""
 
-RANKING = "precision >=0.60 first; then recall, F1, precision; frozen thresholds only"
+RANKING = "recall >=0.90 filter, then maximum precision; ties prefer recall then F1; frozen thresholds only"
+
+
+def passes_recall_floor(point):
+    return point["recall"] >= .90
 
 
 def recall_rank_values(point):
-    return (int(point["precision"] >= .60), point["recall"], point["f1"], point["precision"])
+    return (int(passes_recall_floor(point)), point["precision"], point["recall"], point["f1"])
 
 
 def recall_rank(row):

@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from scoring_training import campaign_fit
-from scoring_training.campaign_priority import RANKING, recall_rank, recall_rank_values
+from scoring_training.campaign_priority import RANKING, passes_recall_floor, recall_rank, recall_rank_values
 from scoring_training.data import sha256_file
 from scoring_training.train import read_json, write_json
 
@@ -101,7 +101,8 @@ def shortlist_configurations(results, count=100):
     eligible = [r for r in results if r.get("status") == "complete" and r["config"]["fold"] == "B"
                 and r["config"]["seed"] == 42 and r["config"]["family"] in FAMILIES
                 and r["config"]["stage"] in ("screening", "refinement", "competitors")
-                and not r["config"].get("initArtifact")]
+                and not r["config"].get("initArtifact")
+                and passes_recall_floor(r["validation"][r["primaryPolicy"]])]
 
     selected, seen = [], set()
     for row in sorted(eligible, key=lambda r: (*recall_rank(r), r["id"]), reverse=True):
@@ -254,7 +255,8 @@ def run_recent_stage(root, export, source_results):
                          ("operating-points.csv", "recent-holdout-operating-points.csv")):
         (export / name).write_bytes((root / "stages" / source).read_bytes())
     good = [r for r in results if r["status"] == "complete"]
-    development_top = [r["id"] for r in sorted(good, key=historical_rank, reverse=True)[:10]]
+    development_eligible = [r for r in good if passes_recall_floor(r["historicalValidation"][r["primaryPolicy"]])]
+    development_top = [r["id"] for r in sorted(development_eligible, key=historical_rank, reverse=True)[:10]]
     write_json(export / "recent-holdout-results.json", {
         "records": len(results), "parentCount": policy["parentCount"],
         "futureFYsExcludedFromFitting": list(range(2020, 2027)),

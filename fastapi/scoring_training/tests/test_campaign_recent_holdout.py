@@ -38,7 +38,7 @@ def parent(index=0):
     return {"id": f"parent-{index}", "status": "complete", "primaryPolicy": "optimal",
             "config": {"family": "catboost", "bundle": "safe8_without_term", "stage": "refinement",
                        "fold": "B", "seed": 42, "parameters": {"l2_leaf_reg": index + 1}},
-            "validation": {"optimal": {"precision": .6, "recall": .7, "f1": .64}}}
+            "validation": {"optimal": {"precision": .6, "recall": .95, "f1": .735}}}
 
 
 def tiny_config(tmp_path, strategy):
@@ -175,11 +175,13 @@ def test_historical_finalists_do_not_depend_on_future_scores():
     assert sorted([first, second], key=recent.historical_rank) == before
 
 
-def test_source_shortlist_and_historical_finalists_prioritize_recall_over_f1():
-    high_f1, high_recall = parent(1), parent(2)
+def test_source_and_historical_shortlists_filter_recall90_then_maximize_precision():
+    high_f1, high_recall, higher_precision = parent(1), parent(2), parent(3)
     high_f1["validation"] = {"optimal": {"precision": 1., "recall": .6, "f1": .75}}
-    high_recall["validation"] = {"optimal": {"precision": .615, "recall": .8, "f1": .695}}
-    assert recent.shortlist_configurations([high_f1, high_recall], 1)[0]["sourceId"] == high_recall["id"]
-    for row in (high_f1, high_recall):
+    high_recall["validation"] = {"optimal": {"precision": .3, "recall": .95, "f1": .456}}
+    higher_precision["validation"] = {"optimal": {"precision": .4, "recall": .91, "f1": .556}}
+    rows = [high_f1, high_recall, higher_precision]
+    assert recent.shortlist_configurations(rows, 1)[0]["sourceId"] == higher_precision["id"]
+    for row in rows:
         row["historicalValidation"] = row["validation"]
-    assert max([high_f1, high_recall], key=recent.historical_rank)["id"] == high_recall["id"]
+    assert max(rows, key=recent.historical_rank)["id"] == higher_precision["id"]
