@@ -170,8 +170,9 @@ def write_csv(path, rows, fieldnames=None):
 def brief(row):
     result = {key: row[key] for key in ("id", "config", "status", "primaryPolicy", "selectionPoint", "selection",
                                       "validation", "validationTargetPassed", "artifact", "modelSha256")}
-    if "historicalRandomTest" in row:
-        result["historicalRandomTest"] = row["historicalRandomTest"]
+    for key in ("historicalRandomTest", "historicalValidation", "futureHoldout"):
+        if key in row:
+            result[key] = row[key]
     return result
 
 
@@ -266,11 +267,18 @@ def postprocess(root, export, results, parents):
 
         mixed = run_mixed_stage(root, export)
         results = results + mixed
+    recent = []
+    recent_policy = root / "recent-holdout-policy.json"
+    if recent_policy.exists() and read_json(recent_policy).get("enabled") is True:
+        from scoring_training.campaign_recent_holdout import run_recent_stage
+
+        recent = run_recent_stage(root, export, results)
+        results = results + recent
     robust = [r for r in results if r["config"]["stage"] == "robustness"]
     variants = calibration_variants(root, parents)
     blends = blend_candidates(root, parents, robust)
     results = results + variants + blends
-    write_json(root / "stages" / "postprocess-results.json", mixed + variants + blends)
+    write_json(root / "stages" / "postprocess-results.json", mixed + recent + variants + blends)
     eligible = [r for r in results if r.get("status") == "complete" and r["config"]["fold"] == "B"
                 and r["config"]["seed"] == 42]
     ranked = sorted(eligible, key=result_rank, reverse=True)
@@ -335,6 +343,7 @@ def postprocess(root, export, results, parents):
         "metricsAreAveraged": False, "favoriteRetained": True, "deploymentChanged": False,
         "improvedRecordCount": improved_count, "top10Count": len(top10),
         "mixedSplitRecords": len(mixed),
+        "recentHoldoutRecords": len(recent),
         "retentionCompleted": bool(retention and retention["cleanupComplete"]),
         "bestId": winner["id"], "bestWithoutTermId": safe_winner["id"],
         "protocolSha256": sha256_file(export / "protocol.json"),

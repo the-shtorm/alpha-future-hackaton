@@ -63,7 +63,10 @@ def test_failed_only_stage_exports_explicit_failure_without_fabricated_metrics(t
 
 
 @pytest.mark.parametrize("enable_mixed", [False, True])
-def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(tmp_path, monkeypatch, enable_mixed):
+@pytest.mark.parametrize("enable_recent", [False, True])
+def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
+    tmp_path, monkeypatch, enable_mixed, enable_recent
+):
     root, export = tmp_path / "run", tmp_path / "export"
     root.mkdir()
     (root / "stages").mkdir()
@@ -89,12 +92,22 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(tmp_path
             "splitStrategy": "random_rows", "splitSeed": 42
         }}
         monkeypatch.setattr(campaign_mixed, "run_mixed_stage", lambda *args: [extra])
+    if enable_recent:
+        from scoring_training import campaign_recent_holdout
+
+        write_json(root / "recent-holdout-policy.json", {"enabled": True})
+        recent_extra = {**parents[1], "id": "recent-fixture", "config": {
+            **parents[1]["config"], "id": "recent-fixture", "stage": "recent_holdout",
+            "splitStrategy": "random_years", "splitSeed": 42
+        }}
+        monkeypatch.setattr(campaign_recent_holdout, "run_recent_stage", lambda *args: [recent_extra])
     monkeypatch.setattr(campaign_postprocess, "future_diagnostics", lambda *args: {})
     monkeypatch.setattr(campaign_postprocess, "plot_results", lambda *args: None)
     campaign_postprocess.postprocess(root, export, parents, parents)
     summary = json.loads((export / "summary.json").read_text())
-    assert summary["recordCount"] == 11 + int(enable_mixed)
+    assert summary["recordCount"] == 11 + int(enable_mixed) + int(enable_recent)
     assert summary["mixedSplitRecords"] == int(enable_mixed)
+    assert summary["recentHoldoutRecords"] == int(enable_recent)
     assert summary["distinctBaseModelArtifacts"] == 2
     assert summary["metricsAreAveraged"] is False
     assert summary["favoriteRetained"] is True
