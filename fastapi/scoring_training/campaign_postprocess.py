@@ -19,6 +19,7 @@ from scoring_training.campaign_fit import (
     result_rank,
     signature,
 )
+from scoring_training.campaign_priority import RANKING, recall_rank
 from scoring_training.campaign_retention import retain_top_models, select_top_models
 from scoring_training.data import sha256_file
 from scoring_training.thresholds import threshold_table
@@ -281,7 +282,8 @@ def postprocess(root, export, results, parents):
     write_json(root / "stages" / "postprocess-results.json", mixed + recent + variants + blends)
     eligible = [r for r in results if r.get("status") == "complete" and r["config"]["fold"] == "B"
                 and r["config"]["seed"] == 42]
-    ranked = sorted(eligible, key=result_rank, reverse=True)
+    ranked = sorted(eligible, key=recall_rank, reverse=True)
+    proximity_ranked = sorted(eligible, key=result_rank, reverse=True)
     favorite = read_json(export / "favorite-validation.json")["byFold"]["B"]["metrics"]
     top10, improved_count = select_top_models(root, eligible, favorite)
     winner = top10[0]
@@ -310,6 +312,7 @@ def postprocess(root, export, results, parents):
                          "threshold": point["threshold"], "precision": point["precision"],
                          "f1": point["f1"], "recall": point["recall"], "TP": point["tp"], "FP": point["fp"],
                          "FN": point["fn"], "goalPassed": row["validationTargetPassed"],
+                         "precisionFloorPassed": point["precision"] >= .6,
                          "deltaPrecision": point["precision"] - favorite["precision"],
                          "deltaF1": point["f1"] - favorite["f1"],
                          "deltaRecall": point["recall"] - favorite["recall"],
@@ -318,13 +321,17 @@ def postprocess(root, export, results, parents):
     write_csv(export / "top10.csv", top_rows)
     write_json(export / "top10.json", {"favorite": favorite, "sameCohort": True,
                                        "distinctValidationDecisions": True,
-                                       "ranking": "goal passed first, then F1, recall, precision; only improvements if any",
+                                       "ranking": RANKING + "; only improvements if any",
                                        "candidates": [brief(row) for row in top10]})
     leaders = {"bestOverall": brief(winner), "bestWithoutTerm": brief(safe_winner),
-               "closestToBothFloors": brief(ranked[0]), "top20ByConstraintProximity": [brief(r) for r in ranked[:20]]}
+               "ranking": RANKING, "top20ByRecallPriority": [brief(r) for r in ranked[:20]],
+               "maximumMeasuredF1": brief(max(eligible, key=lambda r: r["validation"][r["primaryPolicy"]]["f1"])),
+               "closestToBothFloors": brief(proximity_ranked[0]),
+               "top20ByConstraintProximity": [brief(r) for r in proximity_ranked[:20]]}
     if retention:
         for row in [leaders["bestOverall"], leaders["bestWithoutTerm"], leaders["closestToBothFloors"],
-                    *leaders["top20ByConstraintProximity"]]:
+                    leaders["maximumMeasuredF1"], *leaders["top20ByConstraintProximity"],
+                    *leaders["top20ByRecallPriority"]]:
             row["artifactRetained"] = row["artifact"] in retention["retainedModelFiles"]
     write_json(export / "leaders.json", leaders)
     family_counts = {}
@@ -341,6 +348,7 @@ def postprocess(root, export, results, parents):
                                             ("calibration", "ensembles")}),
         "failedRecords": [{"id": r["id"], "error": r["error"]} for r in results if r["status"] != "complete"],
         "metricsAreAveraged": False, "favoriteRetained": True, "deploymentChanged": False,
+        "ranking": RANKING,
         "improvedRecordCount": improved_count, "top10Count": len(top10),
         "mixedSplitRecords": len(mixed),
         "recentHoldoutRecords": len(recent),

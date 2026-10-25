@@ -111,6 +111,9 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
     assert summary["distinctBaseModelArtifacts"] == 2
     assert summary["metricsAreAveraged"] is False
     assert summary["favoriteRetained"] is True
+    assert "then recall, F1" in summary["ranking"]
     leaders = json.loads((export / "leaders.json").read_text())
+    assert "top20ByRecallPriority" in leaders
+    assert "then recall, F1" in json.loads((export / "top10.json").read_text())["ranking"]
     assert leaders["bestWithoutTerm"]["config"]["bundle"] == "safe8_without_term"
     assert b"\r" not in (export / "trials.csv").read_bytes()

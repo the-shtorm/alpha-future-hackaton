@@ -36,6 +36,26 @@ def test_top_models_prioritize_goals_and_deduplicate_identical_binary_decisions(
     assert [row["id"] for row in chosen] == ["goal", "lower"]
 
 
+def test_recall_outweighs_f1_above_precision_floor_and_below_floor_is_separate(tmp_path):
+    labels = np.r_[np.ones(10, dtype=int), np.zeros(10, dtype=int)]
+    rows = []
+    for name, tp, fp in (("higher_f1", 6, 0), ("higher_recall", 8, 5),
+                         ("below_precision", 9, 7), ("both_goals", 9, 4)):
+        probability = np.r_[np.full(tp, .9), np.full(10 - tp, .1),
+                            np.full(fp, .9), np.full(10 - fp, .1)]
+        path = tmp_path / f"{name}.npz"
+        np.savez_compressed(path, validationProbability=probability, validationIndices=np.arange(20))
+        point = threshold_table(labels, probability, [.5])[0]
+        rows.append({"id": name, "config": {"bundle": "safe8_without_term"},
+                     "primaryPolicy": "optimal", "selectionPoint": point,
+                     "validation": {"optimal": point}, "predictions": path.name})
+    assert rows[0]["selectionPoint"]["f1"] > rows[1]["selectionPoint"]["f1"]
+    chosen, count = select_top_models(tmp_path, rows, {"precision": .4, "recall": .4, "f1": .4})
+    assert count == 4
+    assert [r["id"] for r in chosen] == ["both_goals", "higher_recall", "higher_f1", "below_precision"]
+    assert all(r["selectionPoint"]["threshold"] == .5 for r in chosen)
+
+
 def test_cleanup_keeps_favorite_top_model_dependencies_and_all_verified_predictions(tmp_path):
     probability = np.array([0.9, 0.1, 0.8, 0.1, 0.8, 0.1])
     left = candidate(tmp_path, "left", probability)

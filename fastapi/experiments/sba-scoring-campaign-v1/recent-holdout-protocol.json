@@ -21,13 +21,13 @@
     2026
   ],
   "sourceCacheSha256": "43834820e524cf4445c2df2881d895249cb38a7f534dfd4726ab47fd8004ff58",
-  "implementationSha256": "3aca0b1e216d65dda27bd05f8c1c47a4517dcf9b3d3ea3295294169bb4053641",
+  "implementationSha256": "1aa641e62dc5b1d8a647694f4418ab34c9854b596ece56d4afcb8b7519cea0c3",
   "minimumPerClassPerDevelopmentRole": 100,
   "wholeYearMinimumSupportUsesOnlyHistoricalLabels": true,
   "fitWindowAppliedOnlyToAssignedTrainingRows": true,
   "sourceShortlistUsesPreviouslyInspectedFY2023": true,
   "isUntouchedExternalTest": false,
-  "sourceParentRank": "goals passed first, then F1, recall, precision; unique cold fit configurations",
+  "sourceParentRank": "precision >=0.60 first; then recall, F1, precision; unique cold-fit configurations at frozen thresholds",
   "audits": {
     "random_rows": {
       "None": {
@@ -731,5 +731,6 @@
       "rows": 83,
       "positives": 0
     }
-  }
+  },
+  "rankingImplementationSha256": "7fce8f88e962f5c058d14b9ead70e9c7876bd9e920f0647ff827ce4eef9927fc"
 }

@@ -5,6 +5,7 @@ import hashlib
 import joblib
 import numpy as np
 
+from scoring_training.campaign_priority import recall_rank_values
 from scoring_training.data import sha256_file
 from scoring_training.thresholds import threshold_table
 from scoring_training.train import write_json
@@ -23,10 +24,9 @@ def select_top_models(root, candidates, favorite, limit=10):
 
     def rank(row):
         values = point(row)
-        goal = values["precision"] >= 0.6 and values["recall"] >= 0.9
         safe = row["config"]["bundle"] != "original9_diagnostic_term_unconfirmed"
         calibrated = row["config"].get("calibrationMethod") != "none"
-        return (int(goal), values["f1"], values["recall"], values["precision"], int(safe), int(calibrated))
+        return (*recall_rank_values(values), int(safe), int(calibrated))
 
     qualifying = [row for row in candidates if improved(row)]
     # If nothing improved, retain the best measured alternatives without labeling

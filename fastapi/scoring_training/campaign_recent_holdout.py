@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from scoring_training import campaign_fit
+from scoring_training.campaign_priority import RANKING, recall_rank, recall_rank_values
 from scoring_training.data import sha256_file
 from scoring_training.train import read_json, write_json
 
@@ -102,12 +103,8 @@ def shortlist_configurations(results, count=100):
                 and r["config"]["stage"] in ("screening", "refinement", "competitors")
                 and not r["config"].get("initArtifact")]
 
-    def rank(row):
-        p = row["validation"][row["primaryPolicy"]]
-        return (p["precision"] >= .6 and p["recall"] >= .9, p["f1"], p["recall"], p["precision"], row["id"])
-
     selected, seen = [], set()
-    for row in sorted(eligible, key=rank, reverse=True):
+    for row in sorted(eligible, key=lambda r: (*recall_rank(r), r["id"]), reverse=True):
         template = configuration_template(row["config"])
         digest = hashlib.sha256(json.dumps(template, sort_keys=True).encode()).hexdigest()
         if digest not in seen:
@@ -127,6 +124,7 @@ def frozen_configurations(root, results, count):
             raise ValueError("Frozen recent-holdout shortlist differs from the policy")
     else:
         frozen = {"implementationSha256": implementation, "parents": shortlist_configurations(results, count),
+                  "ranking": RANKING,
                   "selectionUsesPreviouslyInspectedFY2023": True,
                   "note": "Adaptive historical benchmark, not untouched external testing."}
         write_json(path, frozen)
@@ -230,7 +228,7 @@ def _run_recent_trial(config):
 
 def historical_rank(row):
     p = row["historicalValidation"][row["primaryPolicy"]]
-    return (p["precision"] >= .6 and p["recall"] >= .9, p["f1"], p["recall"], p["precision"], row["id"])
+    return (*recall_rank_values(p), row["id"])
 
 
 def run_recent_stage(root, export, source_results):

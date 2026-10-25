@@ -173,3 +173,13 @@ def test_historical_finalists_do_not_depend_on_future_scores():
     before = sorted([first, second], key=recent.historical_rank)
     first["validation"] = {"optimal": {"precision": 1, "recall": 1, "f1": 1}}
     assert sorted([first, second], key=recent.historical_rank) == before
+
+
+def test_source_shortlist_and_historical_finalists_prioritize_recall_over_f1():
+    high_f1, high_recall = parent(1), parent(2)
+    high_f1["validation"] = {"optimal": {"precision": 1., "recall": .6, "f1": .75}}
+    high_recall["validation"] = {"optimal": {"precision": .615, "recall": .8, "f1": .695}}
+    assert recent.shortlist_configurations([high_f1, high_recall], 1)[0]["sourceId"] == high_recall["id"]
+    for row in (high_f1, high_recall):
+        row["historicalValidation"] = row["validation"]
+    assert max([high_f1, high_recall], key=recent.historical_rank)["id"] == high_recall["id"]
