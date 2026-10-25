@@ -1,0 +1,49 @@
+{
+  "stage": "warm",
+  "records": 24,
+  "failures": 0,
+  "distinctModelArtifacts": 24,
+  "byFold": {
+    "B": {
+      "maximumMeasuredF1": {
+        "id": "warm-0005",
+        "point": {
+          "threshold": 0.037145512924654255,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1222,
+          "fp": 1207,
+          "fn": 506,
+          "tn": 7028,
+          "precision": 0.5030876904075752,
+          "recall": 0.7071759259259259,
+          "f1": 0.5879239836420496,
+          "f2": 0.6541055561503051,
+          "falsePositiveRate": 0.14656952034001214,
+          "flaggedCount": 2429,
+          "flaggedShare": 0.24380206765030613
+        }
+      },
+      "closestToBothFloors": {
+        "id": "warm-0005",
+        "point": {
+          "threshold": 0.037145512924654255,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1222,
+          "fp": 1207,
+          "fn": 506,
+          "tn": 7028,
+          "precision": 0.5030876904075752,
+          "recall": 0.7071759259259259,
+          "f1": 0.5879239836420496,
+          "f2": 0.6541055561503051,
+          "falsePositiveRate": 0.14656952034001214,
+          "flaggedCount": 2429,
+          "flaggedShare": 0.24380206765030613
+        }
+      }
+    }
+  },
+  "metricsAreAveraged": false
+}

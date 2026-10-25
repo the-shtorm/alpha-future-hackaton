@@ -116,3 +116,8 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 
 - 168 records; 168 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/competitors`.
 - Fold B, largest measured fixed-threshold validation F1: `competitor-0033`, threshold 0.03997261747808091, precision **0.230007**, F1 **0.368572**, recall **0.927083**.
+
+### Completed stage: warm
+
+- 24 records; 24 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/warm`.
+- Fold B, largest measured fixed-threshold validation F1: `warm-0005`, threshold 0.037145512924654255, precision **0.503088**, F1 **0.587924**, recall **0.707176**.
