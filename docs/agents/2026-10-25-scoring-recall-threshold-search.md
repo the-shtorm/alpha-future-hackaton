@@ -10,7 +10,7 @@
 ## Subtasks and progress
 
 1. Inspect package identity, cohort boundaries and baseline decision rules — complete.
-2. Implement exact threshold enumeration and recall-aware selection with focused correctness tests — pending.
+2. Implement exact threshold enumeration and recall-aware selection with focused correctness tests — complete.
 3. Add a reproducible offline experiment with frozen choices before later-cohort evaluation — pending.
 4. Run the current model, compare F1/F2/recall and operational counts, document results and commit locally — pending.
 
@@ -24,7 +24,9 @@
 
 ## Changes and deliverables
 
-- This report; shared index entry will be added with the implementation.
+- `fastapi/scoring_training/thresholds.py`: exact score-boundary search with inclusive comparison, indivisible ties, confusion counts, precision/recall/F1/F2 and recall-constrained selection.
+- `fastapi/scoring_training/tests/test_thresholds.py`: direct comparison to sklearn, tied scores/objectives, boundary decisions and invalid-input coverage.
+- This report and a shared index entry.
 
 ## Verification so far
 
@@ -32,7 +34,8 @@
 - `git status --short` confirmed the unrelated changes listed above.
 - `git branch --show-current`: `scoring_model`; initial HEAD `d09b65b`.
 - Training Python and Ruff are available in `fastapi/scoring_training/.venv/bin/`.
-- No experiment or tests have been run yet.
+- Focused tests initially passed (20 cases); Ruff found one missing explicit `zip(strict=False)`, which was corrected. The final focused result is recorded below after rerunning.
+- Final metrics-focused run: 21 tests passed; Ruff and `git diff --check` passed.
 
 ## Contract and migration impacts
 
@@ -44,4 +47,6 @@ Historical SBA completed-loan data is a demo proxy. Mutable loan-term availabili
 
 ## Git status and commits
 
-In progress. No commits or push performed by this task yet.
+- `efd3845` — record the experiment plan.
+- Git writes require sandbox escalation; the first unprivileged commit attempt failed to create `.git/index.lock`, and the authorized retry succeeded.
+- No push performed.
