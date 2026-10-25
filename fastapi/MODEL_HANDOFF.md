@@ -1,147 +1,154 @@
-# Передача дообученной E5
+# Передача и запуск дообученной E5
 
-## Что передаётся с веткой
+## Хранение
 
-Готовый inference checkpoint находится в `fastapi/models/e5-credit-finetune-v1/final/`.
-`model.safetensors` размером 470637416 байт хранится через **Git LFS**. Остальные
-девять файлов — tokenizer, конфигурации, model card и manifest — входят в Git.
-Базовые веса, training checkpoints, окружения, логи и локальный ZIP не передаются.
-Для запуска готовой модели повторное обучение и загрузка исходной E5 не нужны.
+HF-репозиторий: `thedauns/e5-credit-finetune-v1` (private, организация thedauns).
+В HF `model/` содержит 10 неизменённых inference-файлов; `service/` — код,
+словарь, контракты, примеры, синтетические данные, параметры и lock-файлы обучения.
+`package-manifest.json` фиксирует SHA переданных файлов. Секреты, окружения, кэши
+и промежуточные training checkpoints не включаются. GitHub хранит код и небольшие
+ресурсы. Локальные веса в models/e5-credit-finetune-v1/final сохранены вне Git.
 
-После публикации ветки получать её нужно с установленным Git LFS:
+## Одна переменная MODEL_PATH
 
-```powershell
-git lfs install
-git clone --branch fast_api https://github.com/the-shtorm/alpha-future-hackaton.git
-cd alpha-future-hackaton
-git lfs pull
-git lfs fsck
-cd fastapi
-uv sync --frozen --python 3.11
-uv run --frozen python -m scripts.verify_model --smoke
+Источник определяется только значением MODEL_PATH в fastapi/.env или в переменных
+процесса. Переменные процесса имеют приоритет. Примеры альтернативных значений:
+
+```dotenv
+# HF, immutable revision внутри того же значения:
+MODEL_PATH=hf://thedauns/e5-credit-finetune-v1@e93f86ce54f0a6d2b3da24dac803e50ee92bbb2b/model
+# Для этого известного репозитория допустима короткая запись:
+# MODEL_PATH=thedauns/e5-credit-finetune-v1
+# Локальный диск Windows:
+# MODEL_PATH=C:/models/e5-credit-finetune-v1/final
+# Локальный диск Linux:
+# MODEL_PATH=/srv/models/e5-credit-finetune-v1/final
+# S3 на будущее — существующий bucket/prefix с содержимым model/:
+# MODEL_PATH=s3://bucket/e5-credit-finetune-v1
 ```
 
-Для существующего checkout после обновления ветки достаточно `git lfs pull`.
-Авторизация GitHub нужна также для LFS, если репозиторий закрытый. Файл весов в
-рабочем дереве должен иметь указанный размер, а не быть маленьким LFS pointer.
-`verify_model` проверяет все SHA, manifest и реальный CPU inference без сети.
+Короткое HF-имя использует SHA из config/hf-deployment.lock.json. Для другого
+HF-репозитория укажите @<SHA> прямо в MODEL_PATH. Допустимы file:// URI и обычные
+локальные пути; неоднозначный относительный путь начинайте с ./.
+Старые MODEL_SOURCE/HF_MODEL_ID/HF_MODEL_REVISION остаются совместимыми, но не
+нужны: MODEL_PATH имеет приоритет. Источник не меняется автоматически при ошибке.
 
-Пока ветка/новые коммиты и LFS object не отправлены, этих файлов на GitHub может
-не быть. Сам факт локального commit или наличия pointer не доказывает загрузку
-бинарного LFS object. На машине автора `git lfs fsck` проверяет только локальный кэш.
+Аутентификация задаётся отдельно от адреса:
+- Private HF: HF_TOKEN с read-доступом к репозиторию. На VPS рекомендуется
+  отдельный read-токен; локально может использоваться сохранённый HF CLI login.
+- Private S3: стандартная AWS credential chain / IAM role или
+  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, AWS_DEFAULT_REGION.
+  Для MinIO и других совместимых сервисов есть необязательный S3_ENDPOINT_URL.
+  Доступ к реальному S3 не нужен для работы из HF/локальной папки.
+- FastAPI: ML_INTERNAL_API_KEY, случайный секрет минимум 32 символа.
 
-## Идентичность и текущая политика
+Секреты не добавляются в Git и не помещаются в MODEL_PATH. Settings читает
+fastapi/.env. Кэш задаётся HF_CACHE_DIR (также используется S3); обычно достаточно
+значения по умолчанию. HF_LOCAL_FILES_ONLY=true разрешает только готовый HF-кэш.
+
+```powershell
+uv sync --frozen --python 3.11
+uv run --frozen python -m scripts.verify_model --smoke
+uv run --frozen python -m app.server
+```
+
+Скачивание выполняется только при startup, далее inference идёт из проверенной
+локальной папки CPU float32. Проверяются manifest, artifact SHA и все файлы.
+На S3 ожидаются finetune-manifest.json и девять файлов из model/ с исходными
+байтами. S3-ветка поддержана кодом и unit-тестами; реальный bucket не создавался.
+При ошибке доступа/manifest startup останавливается, без fallback.
+Перед первой HF-загрузкой уберите внешние HF_HUB_OFFLINE=1/TRANSFORMERS_OFFLINE=1.
+
+## Docker Compose
+
+Та же переменная MODEL_PATH задаётся в корневом .env. Compose заранее монтирует
+fastapi/models в /models read-only; локальное значение внутри контейнера:
+MODEL_PATH=/models/e5-credit-finetune-v1/final. Для HF и S3 меняется только
+MODEL_PATH; соответствующие секреты доступа задаются отдельно.
+
+Кэш постоянный, writable volume /model-cache. На Linux HF-кэш с симлинками
+превращается в обычную папку для строгой проверки SHA: предусмотрите примерно
+1 ГБ диска под snapshot и runtime-копию. У ML есть сеть исходящего доступа;
+порт API по умолчанию наружу не публикуется. Остальные параметры Java/БД — по
+корневому .env.example. Пустой RECOMMENDATION_MAX_COSINE_DISTANCE выбирает F1-порог.
+
+## Идентичность, API, порог
 
 | Параметр | Значение |
 |---|---|
-| Model ID | `local/e5-credit-finetune-v1` |
-| Artifact SHA-256 | `116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8` |
-| SHA-256 model.safetensors / LFS OID | `502f9765a9cebed997794d64dcdc905721d0ca7b0c47a66262f227ea42a63b4c` |
-| Базовая модель | `intfloat/multilingual-e5-small` |
-| Git revision базовой модели | `614241f622f53c4eeff9890bdc4f31cfecc418b3` |
-| Размерность / длина | 384 / максимум 512 токенов вместе с prefix и special tokens |
-| Runtime | CPU, float32, batch 4, Torch threads 2, interop 1 |
-| Минимальный cosine similarity | `0.47622181475162506` |
-| Максимальная cosine distance | `0.5237781852483749` |
-| Критерий порога | максимум micro F1 на calibration, затем precision и меньшая distance |
+| Model ID | local/e5-credit-finetune-v1 |
+| Artifact SHA-256 | 116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8 |
+| SHA-256 весов | 502f9765a9cebed997794d64dcdc905721d0ca7b0c47a66262f227ea42a63b4c |
+| Размер весов | 470637416 байт |
+| База | intfloat/multilingual-e5-small, SHA 614241f622f53c4eeff9890bdc4f31cfecc418b3 |
+| Размерность / длина | 384 / 512 токенов с prefix и special tokens |
+| Runtime | CPU float32, batch 4, threads 2 / interop 1 |
+| Минимальный similarity | 0.47622181475162506 |
+| Максимальная distance | 0.5237781852483749 |
 
-Источники истины — `config/finetuned-model.lock.json`,
-`config/finetuned-selection-policy.json` и `final/finetune-manifest.json`.
-Весовой SHA и artifact SHA различаются: второй хеширует полный набор модельных
-файлов. Runtime при несовпадении завершает startup, автоматической подмены нет.
-Не изменяйте файлы внутри final/: их точные байты закреплены manifest.
+Источники истины: config/finetuned-model.lock.json и finetuned-selection-policy.json.
+Порог выбран по максимуму micro F1 на calibration. Веса не менялись. В историческом
+резервном ZIP осталась первоначальная F0.5-политика; текущая берётся из config.
+Файлы model/ изменять нельзя: их точные байты покрыты manifest.
 
-В локальном историческом ZIP сохранён первоначальный F0.5-порог. Если используете
-этот резервный архив, действующий F1-порог всё равно берётся из config репозитория.
-Архив и metadata первоначального эксперимента не являются текущей runtime policy.
+Java вызывает POST /api/v1/recommendations/rank-java с внутренним Bearer key.
+Основной /rank использует X-Internal-API-Key. /api/v1/model-info показывает SHA
+и порог; /health/live и /health/ready открыты. Формат API не зависит от источника:
+возвращаются все кандидаты, рекомендуются 0…topK первых, максимум 3. Java определяет
+eligibility и кредитные решения; cosine не является вероятностью одобрения.
+Словарь, OpenAPI, JSON Schema и примеры — в config/, contracts/, examples/.
 
-## Запуск и интеграция
+## Обучение и качество
 
-Из корня репозитория настройте локальный `.env` по `.env.example`, включая
-случайный `RECSYS_API_KEY` не короче 32 символов и обязательные параметры БД.
-Существующий `.env` не перезаписывайте. Для ML:
+Train: 1500 профилей / 300 семейств, 10610 пар (2060 positive). Full fine-tuning,
+OnlineContrastiveLoss margin 0.5, 2 эпохи, 1328 шагов, batch 16, LR 2e-5,
+weight decay 0.01, warmup 10%, seed 20261024, BF16 autocast на RTX 4070 Laptop.
+CPU и CUDA зависимости закреплены раздельно. Подробности —
+experiments/e5-credit-finetune-v1.json и scripts/train_e5.py.
 
-```dotenv
-RECSYS_MODEL_VARIANT=finetuned
-RECSYS_MODEL_PATH=./fastapi/models/e5-credit-finetune-v1/final
-RECOMMENDATION_MAX_COSINE_DISTANCE=
-```
-
-Пустой override выбирает F1-порог из config. `docker compose up -d --build`
-монтирует checkpoint read-only. В образ веса не копируются. Обычная конфигурация
-не публикует ML-порт наружу; для localhost существует `compose.dev.yaml`.
-ML runtime работает offline и без CUDA. Ключи и содержимое запросов не логируются.
-
-Java вызывает `POST /api/v1/recommendations/rank-java` с внутренним Bearer key.
-Основной ML endpoint — `POST /api/v1/recommendations/rank` с X-Internal-API-Key.
-OpenAPI и JSON Schema: `contracts/`, примеры: `examples/`.
-`GET /api/v1/model-info` с X-Internal-API-Key подтверждает текущие SHA и порог.
-`/health/live` и `/health/ready` доступны без ключа.
-
-Java определяет допустимость продуктов, суммы, сроки и кредитные решения.
-ML возвращает **всех** переданных кандидатов с rank и cosine similarity;
-`isRecommended=true` у 0…topK первых позиций, максимум трёх, прошедших порог.
-Статусы и pendingConditions возвращаются неизменными. Score не является процентом
-соответствия или вероятностью одобрения. Порог не изменяет порядок полного ranking.
-
-## Обучение и данные
-
-Код, данные и lock-файлы передаются вместе с моделью:
-
-- `scripts/train_e5.py`, `scripts/finetune_utils.py`: full fine-tuning с
-  OnlineContrastiveLoss, margin 0.5; известные positives исключены из negatives.
-- 1500 train-профилей / 300 семейств, 10610 пар (2060 положительных, 8550 отрицательных).
-- Две эпохи, 1328 шагов, batch 16, LR 2e-5, weight decay 0.01, warmup 10%, seed 20261024.
-- CUDA BF16 autocast на RTX 4070 Laptop; экспортированные веса используются как float32.
-- Development: 180 профилей, выбор checkpoint по AP; calibration: 180 для порога;
-  первоначальный final: 90. Тексты и familyId между этими группами не пересекались.
-- `evaluation/backend-products.json`: 15 синтетических продуктов; train, calibration,
-  holdout, reranker-test и finetune-test находятся рядом. `diagnostic-15.json`
-  содержит дополнительные 15 примеров, уже использованных для анализа ошибок.
-- CPU зависимости: `pyproject.toml` / `uv.lock`; отдельное CUDA-окружение обучения:
-  `training/pyproject.toml` / `training/uv.lock`. Для готового inference CUDA не нужна.
-- `experiments/e5-credit-finetune-v1.json`: параметры, версии библиотек и исторические
-  метрики первоначальной F0.5-политики. Текущий F1 описан отдельно в config и отчётах.
-
-Все метки — **SYNTHETIC_PROPOSED**, не экспертная банковская оценка. Каталог общий
-для всех частей; это проверка новых запросов к известным продуктам. Прежние final90
-и diagnostic15 уже просматривались и теперь являются диагностическими наборами.
-Они не доказывают качество на реальных клиентах или новых продуктах.
-
-## Воспроизводимая проверка текущего F1-порога
-
-Из `fastapi/`, после `git lfs pull` и `uv sync --frozen`:
+Development 180 использовался для checkpoint, calibration 180 — для порога.
+Первоначальный final90 и diagnostic15 уже просмотрены. Тексты/familyId обучения
+и исходных evaluation-splits не пересекались; каталог из 15 продуктов общий.
+Метки SYNTHETIC_PROPOSED требуют экспертной проверки. Это не доказательство
+качества на реальных клиентах или новых продуктах.
 
 ```powershell
 uv run --frozen python -m scripts.evaluate_active_model
 uv run --frozen python -m scripts.evaluate_active_model --dataset evaluation/diagnostic-15.json --output reports/diagnostic15.json
 ```
 
-Эти команды не обучают модель и не подбирают новый порог. При пустом override
-ожидается приблизительно следующее (CPU float32, числовой допуск на границах):
+Без перенастройки порога диагностический replay даёт:
 
-| Уже просмотренный набор | Precision | Recall | F1 | TP / FP / FN |
+| Набор | Precision | Recall | F1 | TP/FP/FN |
 |---|---:|---:|---:|---:|
-| finetune-test, 90 | 91.85% | 96.12% | 0.9394 | 124 / 11 / 5 |
-| diagnostic-15 | 89.47% | 85.00% | 0.8718 | 17 / 2 / 3 |
+| finetune-test 90 | 91.85% | 96.12% | 0.9394 | 124/11/5 |
+| diagnostic15 | 89.47% | 85.00% | 0.8718 | 17/2/3 |
 
-У нового порога выше recall, но встречаются лишние рекомендации и ошибочные отказы.
-Синтетическая разметка требует проверки ML-разработчиком/экспертом.
-`scripts.evaluate_finetune` — отдельный исторический эксперимент с повторной
-калибровкой F0.5; для проверки текущей F1-политики используйте evaluate_active_model.
+`evaluate_finetune` — исторический эксперимент с F0.5, не проверка текущей политики.
+Для готового inference повторное обучение не нужно.
 
-## Проверки пакета и CI
+## Повторная передача на HF и CI
 
-CI `model-package` получает веса через checkout с `lfs: true`, проверяет Git LFS,
-контрольные суммы и offline CPU smoke. `contracts` не скачивает крупные веса и
-использует fake encoder. Ручной `real-java` проверяет обе модели и Java-цепочку.
+```powershell
+uv run --frozen python -m scripts.prepare_hf_package --output models/hf-export-new
+uv run --frozen hf auth login
+uv run --frozen hf upload thedauns/e5-credit-finetune-v1 models/hf-export-new . --private
+```
 
-Полный локальный pytest с исходной и дообученной моделями требует подготовленных
-базовых весов, `RUN_REAL_MODEL_TESTS=1` и `RUN_FINETUNED_MODEL_TESTS=1`.
-Для inference и проверки опубликованного checkpoint достаточно verify_model.
+После загрузки зафиксируйте SHA нового HF-коммита в .env. Не загружайте всё рабочее
+дерево: подготовленный пакет содержит только явно разрешённые файлы без секретов.
 
-Исходная E5 помечена MIT в её
-[model card на закреплённом revision](https://huggingface.co/intfloat/multilingual-e5-small/blob/614241f622f53c4eeff9890bdc4f31cfecc418b3/README.md).
-Model card экспортированного checkpoint также указывает MIT. Авторство исходной
-E5 принадлежит её авторам. Этот пакет не является реальным предложением банка и
-не меняет лицензию остального кода репозитория.
+CI contracts работает без весов. Ручные model-package / real-java требуют GitHub
+Variable MODEL_PATH и соответствующие Secrets HF_TOKEN / AWS credentials. Они проверяют download,
+SHA, CPU smoke и Java-цепочку. Git LFS для нового checkout не нужен.
+В старых коммитах остались LFS pointers: история не переписывается. Чтобы будущий
+push кода не загружал старые веса, оператор может выполнить:
+
+```powershell
+$env:GIT_LFS_SKIP_PUSH='1'
+git push origin fast_api
+Remove-Item Env:GIT_LFS_SKIP_PUSH
+```
+
+Агент ничего в GitHub не пушит. Исходная E5 и model card checkpoint помечены MIT;
+источник базы закреплён Git SHA в lock-файле.

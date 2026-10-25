@@ -2,19 +2,19 @@
 
 `e5-credit-finetune-v1.json` фиксирует идентичность локальной дообученной модели,
 контрольные суммы её файлов и архива, параметры обучения, отдельный порог и результаты
-на calibration/development/final test. Готовые веса теперь отслеживаются через
-Git LFS; tokenizer, конфиги и manifest входят в Git. Окружения не включены.
+на calibration/development/final test. Модель и полный пакет хранятся на Hugging
+Face; локальные веса, tokenizer, manifest и окружения больше не отслеживаются Git.
 
 **Передача и запуск модели: [MODEL_HANDOFF.md](../MODEL_HANDOFF.md).**
-После получения ветки выполните `git lfs install` и `git lfs pull`, затем из fastapi/
+Выберите MODEL_PATH (локальный путь, hf:// или s3://) в fastapi/.env, затем выполните из fastapi/
 `uv run --frozen python -m scripts.verify_model --smoke`.
 
 Сохранённая модель: `fastapi/models/e5-credit-finetune-v1/final/`.
 Переносимый архив: `fastapi/models/exports/e5-credit-finetune-v1-116acca8c002.zip`.
 Рядом лежит файл `.zip.sha256`; внутри архива — `final/` с manifest,
-`training-summary.json` и `selection-policy.json`. Это локальные файлы на машине,
-ZIP остаётся локальной резервной копией. Рабочий каталог final/ передаётся через
-Git/Git LFS и появляется после clone/checkout с настроенным Git LFS.
+`training-summary.json` и исторический `selection-policy.json`. ZIP остаётся
+локальной резервной копией. Готовый пакет передаётся через приватный HF-репозиторий
+thedauns/e5-credit-finetune-v1, GitHub хранит только код и небольшие ресурсы.
 
 Проверка архива из PowerShell в `fastapi/`:
 
@@ -80,10 +80,11 @@ identity/revision/manifest прекращает startup, автоматичес�
 ./.venv/Scripts/python.exe -m scripts.java_acceptance --model-variant finetuned
 ```
 
-Для этого образ должен быть собран из текущего кода. CI скачивает сохранённую
-модель через LFS: `model-package` проверяет её SHA и CPU smoke, а ручной `real-java`
-проверяет обе модели и Java-цепочку. Для полного локального pytest с обоими
-checkpoint задаются `RUN_REAL_MODEL_TESTS=1` и `RUN_FINETUNED_MODEL_TESTS=1`.
+Для этого образ должен быть собран из текущего кода и локальная модель подготовлена
+из HF-пакета. Ручные CI model-package/real-java скачивают pinned HF revision и
+требуют MODEL_PATH в Variables и соответствующий токен в Secrets.
+Для полного локального pytest с обоими checkpoint задаются
+RUN_REAL_MODEL_TESTS=1 и RUN_FINETUNED_MODEL_TESTS=1.
 
 Текущий F1-порог проверяется без перенастройки через
 `uv run --frozen python -m scripts.evaluate_active_model`; дополнительные 15

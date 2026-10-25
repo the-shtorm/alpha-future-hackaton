@@ -1,0 +1,8 @@
+{
+  "repoId": "thedauns/e5-credit-finetune-v1",
+  "revision": "e93f86ce54f0a6d2b3da24dac803e50ee92bbb2b",
+  "modelSubfolder": "model",
+  "private": true,
+  "modelArtifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+  "source": "Hugging Face; separate from runtime artifact identity"
+}

@@ -3,7 +3,7 @@
 
 # Кредитный кабинет: backend и frontend MVP
 
-Подключённая дообученная E5 и её веса передаются через Git LFS.
+Дообученная E5 хранится на Hugging Face или в локальной папке; источник выбирается одной переменной MODEL_PATH в .env.
 Инструкция получения, проверки, запуска и оценки: [ML model handoff](fastapi/MODEL_HANDOFF.md).
 
 Java 21 / Spring Boot 3.5.16, JDBC, PostgreSQL 17. Два независимых процесса:
@@ -53,7 +53,7 @@ Java 21 / Spring Boot 3.5.16, JDBC, PostgreSQL 17. Два независимых
 
 ## Запуск
 
-Перед запуском получите веса: `git lfs install` и `git lfs pull`.
+Перед запуском выберите источник модели: `MODEL_PATH=hf://…`, локальный путь или `s3://…`.
 Проверка checkpoint и подробные команды приведены в [MODEL_HANDOFF.md](fastapi/MODEL_HANDOFF.md).
 
 Если .env отсутствует, скопируйте .env.example; существующий файл не перезаписывайте.

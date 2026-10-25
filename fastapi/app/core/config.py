@@ -1,10 +1,13 @@
 import json
 import math
+import re
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.core.model_location import parse_model_path
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_ID = "intfloat/multilingual-e5-small"
@@ -42,13 +45,30 @@ def calibrated_distance(variant: str = "base") -> float | None:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore", env_ignore_empty=True)
+    model_config = SettingsConfigDict(
+        extra="ignore", env_ignore_empty=True, env_file=ROOT / ".env", env_file_encoding="utf-8"
+    )
     environment: str = "production"
     ml_internal_api_key: str = ""
     model_variant: Literal["base", "finetuned"] = "finetuned"
+    model_path: str | None = None
+    model_source: Literal["local", "hf", "s3"] = "local"
     model_id: str = MODEL_ID
     model_revision: str = ""
     model_local_path: Path = ROOT / "models" / "multilingual-e5-small"
+    hf_model_id: str | None = None
+    hf_model_revision: str | None = None
+    hf_model_subfolder: str = "model"
+    hf_cache_dir: Path = ROOT / "models/hf-cache"
+    hf_local_files_only: bool = False
+    hf_token: SecretStr | None = Field(default=None, repr=False, exclude=True)
+    s3_bucket: str | None = None
+    s3_prefix: str = ""
+    s3_endpoint_url: str | None = None
+    aws_default_region: str | None = None
+    aws_access_key_id: SecretStr | None = Field(default=None, repr=False, exclude=True)
+    aws_secret_access_key: SecretStr | None = Field(default=None, repr=False, exclude=True)
+    aws_session_token: SecretStr | None = Field(default=None, repr=False, exclude=True)
     embedding_batch_size: int = Field(default=4, ge=1, le=32)
     torch_num_threads: int = Field(default=2, ge=1)
     torch_num_interop_threads: int = Field(default=1, ge=1)
@@ -68,6 +88,9 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_runtime(self):
+        if self.model_path is not None:
+            for name, value in parse_model_path(self.model_path, ROOT).items():
+                setattr(self, name, value)
         key = self.ml_internal_api_key.strip()
         if not key or (
             self.environment != "test"
@@ -83,6 +106,18 @@ class Settings(BaseSettings):
         self.model_revision = lock["revision"]
         if self.model_variant == "finetuned" and "model_local_path" not in self.model_fields_set:
             self.model_local_path = ROOT / "models/e5-credit-finetune-v1/final"
+        if not self.model_local_path.is_absolute():
+            self.model_local_path = ROOT / self.model_local_path
+        if self.model_source == "hf":
+            if not self.hf_model_id or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", self.hf_model_id):
+                raise ValueError("HF_MODEL_ID must be namespace/repository")
+            if not self.hf_model_revision or not re.fullmatch(r"[0-9a-f]{40}", self.hf_model_revision):
+                raise ValueError("HF_MODEL_REVISION must be a pinned 40-character commit SHA")
+            folder = self.hf_model_subfolder
+            if "\\" in folder or folder.startswith("/") or any(p in (".", "..") for p in folder.split("/")):
+                raise ValueError("HF_MODEL_SUBFOLDER must be a safe relative Hub path")
+        if self.model_source == "s3" and not self.s3_bucket:
+            raise ValueError("S3 source requires MODEL_PATH=s3://bucket/prefix")
         if "recommendation_max_cosine_distance" not in self.model_fields_set:
             self.recommendation_max_cosine_distance = calibrated_distance(self.model_variant)
         self.ml_internal_api_key = key

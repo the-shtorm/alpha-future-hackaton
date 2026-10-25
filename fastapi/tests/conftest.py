@@ -44,6 +44,8 @@ def encoder():
 @pytest.fixture
 def settings():
     return Settings(
+        model_path=None,
+        model_source="local",
         model_variant="base",
         environment="test",
         ml_internal_api_key="test-key",

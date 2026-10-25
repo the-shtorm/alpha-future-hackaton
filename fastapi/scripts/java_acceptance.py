@@ -39,7 +39,7 @@ def main():
     directory = (
         "e5-credit-finetune-v1/final" if args.model_variant == "finetuned" else "multilingual-e5-small"
     )
-    env["ML_TEST_MODEL_PATH"] = str(ROOT / "fastapi/models" / directory)
+    env.setdefault("ML_TEST_MODEL_PATH", str(ROOT / "fastapi/models" / directory))
     expected_model = locked_model(args.model_variant)
     env["ML_TEST_MAX_COSINE_DISTANCE"] = (
         str(args.max_cosine_distance) if args.max_cosine_distance is not None else ""

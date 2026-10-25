@@ -5,6 +5,7 @@ services:
     environment:
       ML_INTERNAL_API_KEY: ${ML_TEST_API_KEY:?Set test key}
       MODEL_VARIANT: ${ML_TEST_MODEL_VARIANT:-base}
+      MODEL_SOURCE: local
       MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
     volumes:

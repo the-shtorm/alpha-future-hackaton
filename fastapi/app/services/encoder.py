@@ -8,6 +8,7 @@ from typing import Protocol
 import numpy as np
 
 from app.core.config import MODEL_ID, Settings, locked_model
+from app.services.model_source import resolve_model_path
 
 
 class Encoder(Protocol):
@@ -86,8 +87,9 @@ class SentenceEncoder:
     dimension = 384
 
     def __init__(self, settings: Settings):
+        directory = resolve_model_path(settings)
         if settings.model_variant == "finetuned":
-            manifest = verify_finetuned_manifest(settings.model_local_path, settings.model_revision)
+            manifest = verify_finetuned_manifest(directory, settings.model_revision)
             lock = locked_model("finetuned")
             if (
                 manifest["localModelId"] != settings.model_id
@@ -99,12 +101,10 @@ class SentenceEncoder:
                 raise ValueError("Fine-tuned model metadata differs from runtime lock")
             self.revision = manifest["artifactSha256"]
         else:
-            manifest = verify_manifest(settings.model_local_path, settings.model_revision)
+            manifest = verify_manifest(directory, settings.model_revision)
             self.revision = manifest["revision"]
         self.model_id = settings.model_id
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        os.environ["HF_HUB_OFFLINE"] = "1"
-        os.environ["TRANSFORMERS_OFFLINE"] = "1"
         import torch
         from sentence_transformers import SentenceTransformer
 
@@ -112,7 +112,7 @@ class SentenceEncoder:
         if torch.get_num_interop_threads() != settings.torch_num_interop_threads:
             torch.set_num_interop_threads(settings.torch_num_interop_threads)
         self.model = SentenceTransformer(
-            str(settings.model_local_path),
+            str(directory),
             device="cpu",
             local_files_only=True,
             trust_remote_code=False,

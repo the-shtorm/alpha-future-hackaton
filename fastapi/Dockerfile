@@ -10,8 +10,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_LINK_MODE=copy \
     PATH="/opt/venv/bin:$PATH" \
-    HF_HUB_OFFLINE=1 \
-    TRANSFORMERS_OFFLINE=1 \
     TOKENIZERS_PARALLELISM=false \
     OMP_NUM_THREADS=2 \
     MKL_NUM_THREADS=2
@@ -20,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system --gid 10001 app \
-    && useradd --system --uid 10001 --gid 10001 --home-dir /app --no-create-home app
+    && useradd --system --uid 10001 --gid 10001 --home-dir /app --no-create-home app \
+    && mkdir /model-cache && chown 10001:10001 /model-cache
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project --no-cache

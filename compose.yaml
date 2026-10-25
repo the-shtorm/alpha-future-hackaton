@@ -67,12 +67,22 @@ services:
     environment:
       ML_INTERNAL_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
       MODEL_VARIANT: ${RECSYS_MODEL_VARIANT:-finetuned}
-      MODEL_LOCAL_PATH: /models/active
+      MODEL_PATH: ${MODEL_PATH:-/models/e5-credit-finetune-v1/final}
+      HF_CACHE_DIR: /model-cache
+      HF_LOCAL_FILES_ONLY: ${HF_LOCAL_FILES_ONLY:-false}
+      HF_TOKEN: ${HF_TOKEN:-}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${RECOMMENDATION_MAX_COSINE_DISTANCE:-}
     volumes:
-      - ${RECSYS_MODEL_PATH:-./fastapi/models/e5-credit-finetune-v1/final}:/models/active:ro
+      - ./fastapi/models:/models:ro
+      - recsys_model_cache:/model-cache
     networks:
       - recsys_internal
+      - recsys_egress
     mem_limit: 2g
     init: true
     read_only: true
@@ -127,10 +137,12 @@ services:
     restart: unless-stopped
 
 volumes:
+  recsys_model_cache:
   postgres_data:
   pgadmin_data:
   documents_data:
 
 networks:
+  recsys_egress:
   recsys_internal:
     internal: true

@@ -7,7 +7,7 @@ from scripts import verify_model
 
 
 def test_unresolved_lfs_pointer_and_missing_weights_are_actionable(tmp_path):
-    with pytest.raises(ValueError, match="git lfs"):
+    with pytest.raises(ValueError, match="weights are missing"):
         verify_model.check_lfs_download(tmp_path)
     (tmp_path / "model.safetensors").write_bytes(
         b"version https://git-lfs.github.com/spec/v1\noid sha256:" + b"a" * 64 + b"\nsize 100\n"

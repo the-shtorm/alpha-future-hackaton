@@ -35,6 +35,8 @@ pytestmark = [
 def test_real_offline_encoder_and_http(payload, monkeypatch, variant):
     monkeypatch.setenv("HF_HUB_OFFLINE", "1")
     settings = Settings(
+        model_path=None,
+        model_source="local",
         model_variant=variant,
         environment="test",
         ml_internal_api_key="integration-key",

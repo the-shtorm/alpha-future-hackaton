@@ -16,13 +16,7 @@ __pycache__/
 **/*.tsbuildinfo
 .venv/
 models/
-# Publish only the selected inference checkpoint; keep base weights, training
-# checkpoints, logs and local export archives excluded.
-!fastapi/models/
-fastapi/models/*
-!fastapi/models/e5-credit-finetune-v1/
-fastapi/models/e5-credit-finetune-v1/*
-!fastapi/models/e5-credit-finetune-v1/final/
+# All model files, HF caches and upload packages stay outside Git.
 .pytest_cache/
 .ruff_cache/
 .coverage

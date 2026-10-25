@@ -29,34 +29,43 @@ jobs:
             fastapi/reports/junit.xml
             fastapi/coverage.xml
   model-package:
+    if: github.event_name == 'workflow_dispatch' && vars.MODEL_PATH != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      MODEL_PATH: ${{ vars.MODEL_PATH }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
       - uses: astral-sh/setup-uv@v6
         with:
           version: '0.10.2'
           enable-cache: true
           cache-dependency-glob: fastapi/uv.lock
-      - run: git lfs fsck
       - run: uv sync --frozen --no-dev --python 3.11
         working-directory: fastapi
-      - name: Verify published model and run offline CPU smoke
+      - name: Download pinned HF model, verify and run local CPU smoke
         run: uv run --frozen --no-dev python -m scripts.verify_model --smoke
         working-directory: fastapi
-        env:
-          HF_HUB_OFFLINE: '1'
-          TRANSFORMERS_OFFLINE: '1'
   real-java:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && vars.MODEL_PATH != ''
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      MODEL_PATH: ${{ vars.MODEL_PATH }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
       - uses: astral-sh/setup-uv@v6
         with:
           version: '0.10.2'
@@ -64,16 +73,21 @@ jobs:
         working-directory: fastapi
       - run: uv run --frozen python -m scripts.prepare_model
         working-directory: fastapi
+      - name: Prepare the model selected by MODEL_PATH
+        run: uv run --frozen python -m scripts.verify_model --copy-to models/selected-model
+        working-directory: fastapi
       - run: docker build --target runtime -t alpha-future-recsys:java-contract ./fastapi
       - run: docker build -t alpha-future-backend:ml-acceptance .
       - run: uv run --frozen python -m scripts.java_acceptance --output ../work/ml-acceptance/java-base-e2e.json
         working-directory: fastapi
       - run: uv run --frozen python -m scripts.java_acceptance --model-variant finetuned --output ../work/ml-acceptance/java-finetuned-e2e.json
         working-directory: fastapi
+        env:
+          ML_TEST_MODEL_PATH: ${{ github.workspace }}/fastapi/models/selected-model
       - name: Real offline tests in Linux
         run: |
           docker build --target test -t alpha-future-recsys:tests ./fastapi
-          docker run --rm --network none --memory 2g --read-only --tmpfs /tmp:size=64m -e RUN_REAL_MODEL_TESTS=1 -e RUN_FINETUNED_MODEL_TESTS=1 -e MODEL_LOCAL_PATH=/models/multilingual-e5-small -e FINETUNED_MODEL_LOCAL_PATH=/models/e5-credit-finetune-v1/final -v "$PWD/fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro" -v "$PWD/fastapi/models/e5-credit-finetune-v1/final:/models/e5-credit-finetune-v1/final:ro" alpha-future-recsys:tests python -m pytest -o addopts='' -v
+          docker run --rm --network none --memory 2g --read-only --tmpfs /tmp:size=64m -e RUN_REAL_MODEL_TESTS=1 -e RUN_FINETUNED_MODEL_TESTS=1 -e MODEL_LOCAL_PATH=/models/multilingual-e5-small -e FINETUNED_MODEL_LOCAL_PATH=/models/e5-credit-finetune-v1/final -v "$PWD/fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro" -v "$PWD/fastapi/models/selected-model:/models/e5-credit-finetune-v1/final:ro" alpha-future-recsys:tests python -m pytest -o addopts='' -v
       - uses: actions/upload-artifact@v4
         if: always()
         with:
