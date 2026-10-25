@@ -89,6 +89,22 @@
 
 - Quiet checkpoint 2026-10-26 00:39 Europe/Moscow: competitors92/168,0 failures; random forests completed, current active0092/0093 areLightGBM, log freshly updated. Main42195/committer29113 live. No accepted84/53 or85/55 point among primary/other frozen policies; best favorite-dominating recall remains announced0036 (72.22%). Pending extension/target/ranking hashes verified. No intervention, extra fits/retuning/cleanup or commit.
 
+- Monitoring checkpoint 2026-10-26 00:49 Europe/Moscow: competitors168/168 and warm24/24 complete without failures; their stage commit markers verified (warm `364e1fb`). Robustness now13/90,0 failures. Main42195/committer29113 live; favorite/backup integrity and pending extension hashes verified. No accepted84/53 or85/55 point yet; best dominating recall unchanged0036. Model seed42 remains the main selection seed; other robustness seeds are diagnostics, not picked as a lucky primary. Stage completion notified once; no monitoring-triggered refits, threshold changes, cleanup or duplicate processes.
+
+- Quiet checkpoint 2026-10-26 00:59 Europe/Moscow: robustness20/90,0 failures; main42195/committer29113 live, log age71 seconds. Primary model-seed42 scan has no accepted84/53 or85/55 point and no new dominating-recall leader. Both queued extensions and target/ranking hashes verified. No intervention, refit/retuning/cleanup, load change or extra commit.
+
+- Quiet checkpoint 2026-10-26 01:09 Europe/Moscow: robustness33/90,0 failures; main42195/committer29113 live, log age44 seconds. Seed42/FY2023 primary and alternative fixed-policy scans still0 acceptable84/53 and0 goal85/55, best dominating recall unchanged0036. Extension/target/ranking hashes verified; no intervention, retuning/cleanup/load change or extra commit.
+
+- Quiet checkpoint 2026-10-26 01:19 Europe/Moscow: robustness42/90,0 failures; sessions42195/29113 live, log age26 seconds. Primary-seed42/FY2023 still0 acceptable84/53 or85/55 among frozen points; dominating-recall leader unchanged0036. Frozen policies verified; no intervention/cleanup/retuning/load change or commit.
+
+- Quiet checkpoint 2026-10-26 01:29 Europe/Moscow: robustness58/90,0 failures; sessions42195/29113 live, log age30 seconds. Primary-seed42/FY2023 no acceptable84/53 or85/55 fixed-policy result; dominating-recall leader unchanged0036. Pending policy hashes verified; no intervention, retuning/cleanup/load change or extra commit.
+
+- Quiet checkpoint 2026-10-26 01:39 Europe/Moscow: robustness75/90,0 failures; sessions42195/29113 live, log age43 seconds. No primary-seed42/FY2023 acceptable84/53 or85/55 frozen-policy point or new dominating-recall leader. Policies/hashes verified; no intervention, retuning/cleanup/load change or extra commit.
+
+- Quiet checkpoint 2026-10-26 01:49 Europe/Moscow: robustness87/90,0 failures; sessions42195/29113 live, log age26 seconds. No primary-seed42/FY2023 accepted84/53/85/55 result or new dominating-recall leader; both queued policies and code hashes verified. No intervention, retuning/cleanup/load change or commit.
+
+- User requested5-minute monitoring near the end of robustness. Existing native automation updated successfully and saved ACTIVE5-minute interval verified; local monitor metadata/README synchronized, no duplicate automation. Current robustness88/90 with0 failures; completion of this stage still leaves all72+200 mixed/refit attempts and compositions. No training resource change; documentation joins next stage/final commit.
+
 ## Contract and migration impacts
 
 Offline experiments only. Feature variants are research artifacts; no API, database, model lock or runtime policy changes are authorized by this campaign itself.
@@ -121,3 +137,10 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 
 - 24 records; 24 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/warm`.
 - Fold B, largest measured fixed-threshold validation F1: `warm-0005`, threshold 0.037145512924654255, precision **0.503088**, F1 **0.587924**, recall **0.707176**.
+
+### Completed stage: robustness
+
+- 90 records; 90 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/robustness`.
+- Fold A, largest measured fixed-threshold validation F1: `robust-0066`, threshold 0.15328763852158048, precision **0.462220**, F1 **0.557161**, recall **0.701186**.
+- Fold B, largest measured fixed-threshold validation F1: `robust-0022`, threshold 0.089549102489006674, precision **0.665505**, F1 **0.664348**, recall **0.663194**.
+- Fold C, largest measured fixed-threshold validation F1: `robust-0047`, threshold 0.12920571633634872, precision **0.530466**, F1 **0.502547**, recall **0.477419**.
