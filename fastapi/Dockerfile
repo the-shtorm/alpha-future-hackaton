@@ -35,6 +35,7 @@ COPY --chown=10001:10001 evaluation ./evaluation
 FROM base AS test
 RUN uv sync --frozen --no-install-project --no-cache
 COPY tests ./tests
+COPY scoring_training ./scoring_training
 CMD ["python", "-m", "pytest"]
 
 FROM base AS runtime

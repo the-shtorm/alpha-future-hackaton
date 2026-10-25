@@ -18,5 +18,11 @@
 !examples/**
 !evaluation/
 !evaluation/**
+!scoring_training/
+!scoring_training/*.py
+!scoring_training/config/
+!scoring_training/config/**
+!scoring_training/tests/
+!scoring_training/tests/**
 **/__pycache__/
 **/*.pyc
