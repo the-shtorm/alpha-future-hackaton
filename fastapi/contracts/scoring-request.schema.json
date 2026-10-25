@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "BusinessAge": {
+      "enum": [
+        "Startup, Loan Funds will Open Business",
+        "New, Less than 1 Year old",
+        "New Business or 2 years or less",
+        "Less than 3 years old but at least 2",
+        "Less than 4 years old but at least 3",
+        "Less than 5 years old but at least 4",
+        "Existing, 5 or more years",
+        "Existing or more than 2 years old",
+        "Change of Ownership"
+      ],
+      "title": "BusinessAge",
+      "type": "string"
+    },
+    "BusinessType": {
+      "enum": [
+        "CORPORATION",
+        "INDIVIDUAL",
+        "PARTNERSHIP"
+      ],
+      "title": "BusinessType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "sba-scoring-1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "requestId": {
+      "format": "uuid",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "loanAmountUsd": {
+      "maxLength": 24,
+      "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$",
+      "title": "Loanamountusd",
+      "type": "string"
+    },
+    "termMonths": {
+      "maximum": 360,
+      "minimum": 1,
+      "title": "Termmonths",
+      "type": "integer"
+    },
+    "initialInterestRatePct": {
+      "maxLength": 24,
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,5})?$",
+      "title": "Initialinterestratepct",
+      "type": "string"
+    },
+    "interestRateType": {
+      "enum": [
+        "FIXED",
+        "VARIABLE"
+      ],
+      "title": "Interestratetype",
+      "type": "string"
+    },
+    "isRevolving": {
+      "title": "Isrevolving",
+      "type": "boolean"
+    },
+    "hasCollateral": {
+      "title": "Hascollateral",
+      "type": "boolean"
+    },
+    "businessType": {
+      "$ref": "#/$defs/BusinessType"
+    },
+    "businessAgeCategory": {
+      "$ref": "#/$defs/BusinessAge"
+    },
+    "naicsCode": {
+      "pattern": "^[0-9]{6}$",
+      "title": "Naicscode",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "loanAmountUsd",
+    "termMonths",
+    "initialInterestRatePct",
+    "interestRateType",
+    "isRevolving",
+    "hasCollateral",
+    "businessType",
+    "businessAgeCategory",
+    "naicsCode"
+  ],
+  "title": "ScoringRequest",
+  "type": "object"
+}

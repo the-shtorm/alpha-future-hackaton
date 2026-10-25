@@ -25,7 +25,7 @@ torch = { index = "pytorch-cpu" }
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'", "sys_platform == 'win32' and platform_machine == 'AMD64'"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "scoring_training/tests"]
 markers = ["integration: requires explicitly prepared real model (never downloads)"]
 addopts = "-q --cov=app --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-fail-under=95"
 

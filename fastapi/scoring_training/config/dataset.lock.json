@@ -1,0 +1,18 @@
+{
+  "datasetVersion": "sba-completed-2010-2026-v1",
+  "sha256": "eb9efbe801725f70969a1e1128c4ce3b1930c4f34e8820d3d0b81c84f4951e43",
+  "rowCount": 461559,
+  "columnCount": 23,
+  "classCounts": {"0": 424601, "1": 36958},
+  "target": {"column": "LoanStatus", "positiveClass": 1, "meaning": "CHGOFF"},
+  "columns": null,
+  "dateColumns": null,
+  "schemaStatus": "awaiting-source-header",
+  "splits": {
+    "train": {"years": [2010, 2014], "rows": 189354, "positives": 13308},
+    "validation": {"years": [2015, 2016], "rows": 96113, "positives": 7151},
+    "calibration": {"years": [2017, 2017], "rows": 43456, "positives": 3952},
+    "test": {"years": [2018, 2019], "rows": 60186, "positives": 5927},
+    "transfer": {"years": [2020, 2026], "rows": 72450, "positives": 6620}
+  }
+}
