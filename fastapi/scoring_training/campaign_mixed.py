@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 from scoring_training import campaign_fit
 from scoring_training.campaign_data import BUNDLES
-from scoring_training.campaign_priority import passes_target
+from scoring_training.campaign_priority import passes_target, reaches_goal
 from scoring_training.campaign_target import new_fit_target
 from scoring_training.data import sha256_file
 from scoring_training.train import read_json, write_json
@@ -129,8 +129,11 @@ def run_mixed_trial(config):
         "note": "Randomized historical holdout only; future quality is measured separately on FY2023.",
     }
     iid_point = result["historicalRandomTest"]["policies"][result["primaryPolicy"]]
-    result["historicalRandomTest"]["targetPassedAtPrimaryPoint"] = passes_target(iid_point)
-    result["validationTargetPassed"] = passes_target(result["validation"][result["primaryPolicy"]])
+    result["historicalRandomTest"]["targetPassedAtPrimaryPoint"] = reaches_goal(iid_point)
+    result["historicalRandomTest"]["acceptablePassedAtPrimaryPoint"] = passes_target(iid_point)
+    validation = result["validation"][result["primaryPolicy"]]
+    result["validationTargetPassed"] = reaches_goal(validation)
+    result["activeTargetPassed"] = passes_target(validation)
     result["splitImplementationSha256"] = config["splitterSha256"]
     path = root / result["predictions"]
     with np.load(path) as stored:

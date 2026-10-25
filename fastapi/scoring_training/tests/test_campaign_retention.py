@@ -4,6 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import pytest
+from scoring_training.campaign_priority import passes_target, reaches_goal
 from scoring_training.campaign_retention import model_dependencies, retain_top_models, select_top_models
 from scoring_training.data import sha256_file
 from scoring_training.thresholds import threshold_table
@@ -51,8 +52,7 @@ def test_both_recall85_and_precision55_are_filters_then_precision_is_maximized(t
                      "primaryPolicy": "optimal", "selectionPoint": point,
                      "validation": {"optimal": point}, "predictions": path.name})
     assert rows[0]["selectionPoint"]["f1"] > rows[1]["selectionPoint"]["f1"]
-    favorite = {"precision": 1., "recall": .55, "f1": 1.1 / 1.55}
-    assert rows[-1]["selectionPoint"]["f1"] < favorite["f1"]
+    favorite = {"precision": .4, "recall": .4, "f1": .4}
     assert rows[-1]["selectionPoint"]["precision"] < .6
     chosen, count = select_top_models(tmp_path, rows, favorite)
     assert count == 2
@@ -63,6 +63,22 @@ def test_both_recall85_and_precision55_are_filters_then_precision_is_maximized(t
 def test_no_jointly_eligible_candidate_is_not_silently_replaced_with_a_fallback(tmp_path):
     lower = candidate(tmp_path, "lower", np.array([.9, .1, .8, .1, .1, .1]))
     assert select_top_models(tmp_path, [lower], {"precision": .4, "recall": .4, "f1": .4}) == ([], 0)
+
+
+@pytest.mark.parametrize("recall,precision,accepted,goal", [
+    (.84, .53, True, False), (.839999, .6, False, False), (.9, .529999, False, False),
+    (.85, .55, True, True), (.849, .56, True, False), (.86, .54, True, False),
+])
+def test_explicit_tolerance_is_separate_from_aspirational_goal(recall, precision, accepted, goal):
+    point = {"recall": recall, "precision": precision}
+    assert passes_target(point) is accepted
+    assert reaches_goal(point) is goal
+
+
+def test_acceptable_candidate_with_worse_precision_than_favorite_is_not_an_improvement(tmp_path):
+    row = candidate(tmp_path, "tradeoff", np.array([.9, .9, .9, .1, .9, .9]))
+    assert passes_target(row["selectionPoint"])
+    assert select_top_models(tmp_path, [row], {"precision": .8, "recall": .8, "f1": .8}) == ([], 0)
 
 
 def test_cleanup_keeps_favorite_top_model_dependencies_and_all_verified_predictions(tmp_path):

@@ -15,6 +15,7 @@ from scoring_training.campaign_priority import (
     RANKING,
     passes_recall_floor,
     passes_target,
+    reaches_goal,
     recall_rank,
     recall_rank_values,
 )
@@ -222,7 +223,8 @@ def _run_recent_trial(config):
     result["futureHoldout"] = tests
     result["validation"] = tests["2023"]
     point = result["validation"][result["primaryPolicy"]]
-    result["validationTargetPassed"] = passes_target(point)
+    result["validationTargetPassed"] = reaches_goal(point)
+    result["activeTargetPassed"] = passes_target(point)
     result["audit"]["historicalValidation"] = result["audit"]["validation"]
     result["audit"]["validation"] = {"rows": int(common.sum()),
                                          "positives": int(future.loc[common, "LoanStatus"].sum()),

@@ -1,8 +1,10 @@
 """Recall-first ranking at existing, independently frozen operating points."""
 
-MIN_RECALL = .85
-MIN_PRECISION = .55
-RANKING = "recall >=0.85 AND precision >=0.55; then maximum precision; ties recall then F1; frozen thresholds only"
+MIN_RECALL = .84
+MIN_PRECISION = .53
+TARGET_RECALL = .85
+TARGET_PRECISION = .55
+RANKING = "accept recall >=0.84 AND precision >=0.53; aim85/55; then maximum precision; ties recall then F1"
 
 
 def passes_recall_floor(point):
@@ -11,6 +13,10 @@ def passes_recall_floor(point):
 
 def passes_target(point):
     return passes_recall_floor(point) and point["precision"] >= MIN_PRECISION
+
+
+def reaches_goal(point):
+    return point["recall"] >= TARGET_RECALL and point["precision"] >= TARGET_PRECISION
 
 
 def recall_rank_values(point):

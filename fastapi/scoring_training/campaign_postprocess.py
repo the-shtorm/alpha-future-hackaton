@@ -17,7 +17,16 @@ from scoring_training.campaign_fit import (
     result_rank,
     signature,
 )
-from scoring_training.campaign_priority import MIN_PRECISION, MIN_RECALL, RANKING, passes_target, recall_rank
+from scoring_training.campaign_priority import (
+    MIN_PRECISION,
+    MIN_RECALL,
+    RANKING,
+    TARGET_PRECISION,
+    TARGET_RECALL,
+    passes_target,
+    reaches_goal,
+    recall_rank,
+)
 from scoring_training.campaign_retention import retain_top_models, select_top_models
 from scoring_training.campaign_target import choose_operating_point, select_thresholds
 from scoring_training.data import sha256_file
@@ -44,7 +53,7 @@ def save_composition(root, config, threshold_labels, threshold_probability, vali
         "id": config["id"], "status": "complete", "config": config, "signature": signature(config),
         "selection": selection, "selectionPoint": point, "primaryPolicy": policy,
         "selectionSha256": frozen, "validation": evaluation,
-        "validationTargetPassed": passes_target(row),
+        "validationTargetPassed": reaches_goal(row), "activeTargetPassed": passes_target(row),
         "artifact": str((directory / "model.joblib").relative_to(root)),
         "modelSha256": sha256_file(directory / "model.joblib"),
         "predictions": str((directory / "predictions.npz").relative_to(root)),
@@ -311,7 +320,7 @@ def postprocess(root, export, results, parents):
         write_json(export / "retention.json", retention)
     elif not top10:
         retention = {"cleanupComplete": False, "favoriteUntouched": True, "allTrialWeightsPreserved": True,
-                     "reason": "No candidate meets both active target constraints; no fallback winner or cleanup.",
+                     "reason": "No candidate meets both active bounds and improves the favorite; no fallback winner or cleanup.",
                      "topIds": [], "verification": [], "retainedModelFiles": {},
                      "deletedFiles": 0, "freedBytes": 0}
         write_json(root / "retention.json", retention)
@@ -325,7 +334,8 @@ def postprocess(root, export, results, parents):
                          "splitSeed": row["config"].get("splitSeed"),
                          "threshold": point["threshold"], "precision": point["precision"],
                          "f1": point["f1"], "recall": point["recall"], "TP": point["tp"], "FP": point["fp"],
-                         "FN": point["fn"], "goalPassed": passes_target(point),
+                         "FN": point["fn"], "goalPassed": reaches_goal(point),
+                         "acceptablePassed": passes_target(point),
                          "precisionFloorPassed": point["precision"] >= MIN_PRECISION,
                          "dominatesFavorite": all(point[k] >= favorite[k] for k in ("precision", "recall", "f1")),
                          "tradeoffAgainstFavorite": any(point[k] < favorite[k] for k in ("precision", "recall", "f1")),
@@ -336,7 +346,7 @@ def postprocess(root, export, results, parents):
                          "modelSha256": row["modelSha256"]})
     write_csv(export / "top10.csv", top_rows, [
         "rank", "id", "family", "bundle", "validationFY", "splitStrategy", "splitSeed", "threshold",
-        "precision", "f1", "recall", "TP", "FP", "FN", "goalPassed", "precisionFloorPassed",
+        "precision", "f1", "recall", "TP", "FP", "FN", "goalPassed", "acceptablePassed", "precisionFloorPassed",
         "dominatesFavorite", "tradeoffAgainstFavorite", "deltaPrecision", "deltaF1", "deltaRecall",
         "primaryPolicy", "artifact", "modelSha256"])
     write_json(export / "top10.json", {"favorite": favorite, "sameCohort": True,
@@ -373,7 +383,9 @@ def postprocess(root, export, results, parents):
         "metricsAreAveraged": False, "favoriteRetained": True, "deploymentChanged": False,
         "ranking": RANKING,
         "activeTarget": {"minRecall": MIN_RECALL, "minPrecision": MIN_PRECISION},
+        "aspirationalTarget": {"minRecall": TARGET_RECALL, "minPrecision": TARGET_PRECISION},
         "activeTargetPassed": bool(top10),
+        "aspirationalGoalPassed": any(reaches_goal(r["validation"][r["primaryPolicy"]]) for r in top10),
         "improvedRecordCount": improved_count, "top10Count": len(top10),
         "mixedSplitRecords": len(mixed),
         "recentHoldoutRecords": len(recent),

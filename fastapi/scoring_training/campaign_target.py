@@ -3,11 +3,11 @@
 from contextlib import contextmanager
 
 from scoring_training.business_thresholds import business_operating_points
-from scoring_training.campaign_priority import MIN_PRECISION, MIN_RECALL
+from scoring_training.campaign_priority import TARGET_PRECISION, TARGET_RECALL
 
 
 def select_thresholds(labels, probability):
-    return business_operating_points(labels, probability, min_precision=MIN_PRECISION, min_recall=MIN_RECALL)
+    return business_operating_points(labels, probability, min_precision=TARGET_PRECISION, min_recall=TARGET_RECALL)
 
 
 def choose_operating_point(selection):

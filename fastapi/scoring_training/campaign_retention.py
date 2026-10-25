@@ -17,7 +17,8 @@ def select_top_models(root, candidates, favorite, limit=10):
 
     def improved(row):
         values = point(row)
-        return recall_rank_values(values) > recall_rank_values(favorite)
+        return (all(values[k] >= favorite[k] for k in ("precision", "recall", "f1"))
+                and any(values[k] > favorite[k] for k in ("precision", "recall", "f1")))
 
     def rank(row):
         values = point(row)
@@ -27,9 +28,7 @@ def select_top_models(root, candidates, favorite, limit=10):
 
     candidates = [row for row in candidates if passes_target(point(row))]
     qualifying = [row for row in candidates if improved(row)]
-    # If nothing improved, retain the best measured alternatives without labeling
-    # them improvements. The final report must expose this case explicitly.
-    pool = qualifying or candidates
+    pool = qualifying
     selected, masks = [], set()
     for row in sorted(pool, key=rank, reverse=True):
         data = np.load(root / row["predictions"])

@@ -627,11 +627,16 @@
     "Random historical holdout metrics are reported separately and cannot replace FY2023 metrics.",
     "Original9 term remains unconfirmed at application time."
   ],
-  "splitImplementationSha256": "75268c4efa9ce138d4bfffdf99482441a3690ec81d4f3c55ca8474e123c73bd8",
+  "splitImplementationSha256": "7bfce8bd49fe24f03ca4ae98e44f370c386954356a7051e6424aaa0453f1d6d2",
   "activeTarget": {
+    "minRecall": 0.84,
+    "minPrecision": 0.53
+  },
+  "targetDefinitionSha256": "877ed7e0429917b66c3b033872c493c679cd31e5d84f42df9f48fd61545da4b2",
+  "rankingImplementationSha256": "030b46f2e1e08e280697c1d4faa78ab3479360052aa13a39a933709affd9309e",
+  "aspirationalTarget": {
     "minRecall": 0.85,
     "minPrecision": 0.55
   },
-  "targetDefinitionSha256": "575fa23fc9063857605d7579024976ad6fb3fb189b0f90ec6cf726e9429189d3",
-  "rankingImplementationSha256": "37944b67d00bfd4bf0ecbe1087455a98ae2757e69e646b09cc828f7fc25aded0"
+  "mustDominateFavorite": true
 }

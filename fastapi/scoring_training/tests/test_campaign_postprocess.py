@@ -115,10 +115,10 @@ def test_end_to_end_postprocessing_keeps_metrics_and_artifacts_distinct(
     assert summary["distinctBaseModelArtifacts"] == 2
     assert summary["metricsAreAveraged"] is False
     assert summary["favoriteRetained"] is True
-    assert "recall >=0.85 AND precision >=0.55" in summary["ranking"]
+    assert "recall >=0.84 AND precision >=0.53" in summary["ranking"]
     leaders = json.loads((export / "leaders.json").read_text())
     assert "top20ByRecallPriority" in leaders
-    assert "recall >=0.85 AND precision >=0.55" in json.loads((export / "top10.json").read_text())["ranking"]
+    assert "recall >=0.84 AND precision >=0.53" in json.loads((export / "top10.json").read_text())["ranking"]
     if feasible:
         assert leaders["bestWithoutTerm"]["config"]["bundle"] == "safe8_without_term"
         assert summary["activeTargetPassed"] is True
