@@ -11,7 +11,7 @@
 
 1. Inspect package identity, cohort boundaries and baseline decision rules — complete.
 2. Implement exact threshold enumeration and recall-aware selection with focused correctness tests — complete.
-3. Add a reproducible offline experiment with frozen choices before later-cohort evaluation — pending.
+3. Add a reproducible offline experiment with frozen choices before later-cohort evaluation — complete.
 4. Run the current model, compare F1/F2/recall and operational counts, document results and commit locally — pending.
 
 ## Findings and methodology
@@ -26,6 +26,9 @@
 
 - `fastapi/scoring_training/thresholds.py`: exact score-boundary search with inclusive comparison, indivisible ties, confusion counts, precision/recall/F1/F2 and recall-constrained selection.
 - `fastapi/scoring_training/tests/test_thresholds.py`: direct comparison to sklearn, tied scores/objectives, boundary decisions and invalid-input coverage.
+- `fastapi/scoring_training/threshold_search.py`: pinned model/provenance verification, persisted development-only selection, fixed later-cohort/annual/backend-reachable evaluation, CSV and plot export.
+- `fastapi/scoring_training/tests/test_threshold_search.py`: verifies that thresholds exist before holdout reads and remain fixed when holdout labels change; guards provenance and output overwrite.
+- `fastapi/scoring_training/README.md`: CLI, assumptions and interpretation of outputs.
 - This report and a shared index entry.
 
 ## Verification so far
@@ -36,6 +39,9 @@
 - Training Python and Ruff are available in `fastapi/scoring_training/.venv/bin/`.
 - Focused tests initially passed (20 cases); Ruff found one missing explicit `zip(strict=False)`, which was corrected. The final focused result is recorded below after rerunning.
 - Final metrics-focused run: 21 tests passed; Ruff and `git diff --check` passed.
+- Combined threshold/experiment-focused run: 26 tests passed; Ruff passed for all four new Python files.
+- Full `scoring_training` suite: 222 tests passed in 14.90 seconds; configured existing scoring/data coverage 98.76% (95% gate passed). This coverage figure does not measure the new experiment modules; their correctness has dedicated tests.
+- `scoring_training/.venv/bin/ruff check app/scoring scoring_training` and `git diff --check` passed.
 
 ## Contract and migration impacts
 
@@ -48,5 +54,6 @@ Historical SBA completed-loan data is a demo proxy. Mutable loan-term availabili
 ## Git status and commits
 
 - `efd3845` — record the experiment plan.
+- `5004bf0` — exact recall-aware threshold metrics and 21 tests; shared index staged selectively to exclude the pre-existing upload entry.
 - Git writes require sandbox escalation; the first unprivileged commit attempt failed to create `.git/index.lock`, and the authorized retry succeeded.
 - No push performed.
