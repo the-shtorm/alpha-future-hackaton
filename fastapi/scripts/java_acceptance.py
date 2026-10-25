@@ -11,8 +11,6 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from app.core.config import locked_model
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -40,7 +38,9 @@ def main():
         "e5-credit-finetune-v1/final" if args.model_variant == "finetuned" else "multilingual-e5-small"
     )
     env.setdefault("ML_TEST_MODEL_PATH", str(ROOT / "fastapi/models" / directory))
-    expected_model = locked_model(args.model_variant)
+    # This Docker orchestrator needs only the standard library on the host.
+    lock_name = "finetuned-model.lock.json" if args.model_variant == "finetuned" else "model.lock.json"
+    expected_model = json.loads((ROOT / "fastapi/config" / lock_name).read_text(encoding="utf-8"))
     env["ML_TEST_MAX_COSINE_DISTANCE"] = (
         str(args.max_cosine_distance) if args.max_cosine_distance is not None else ""
     )
@@ -122,8 +122,11 @@ def main():
             selection = call(prefix + "/automatic-selection", "POST", {}, token)
             expected = "EMPTY" if variant == "empty" else "READY"
             assert selection["rankingStatus"] == expected, (variant, selection["rankingStatus"])
+            run = prefix + "/recommendations/" + selection["runId"]
+            assert call(run + "/view", token=token) == selection
+            saved = call(java_url + "/selections", token=token)["items"]
+            assert any(p["id"] == profile["id"] and p["run_id"] == selection["runId"] for p in saved)
             if variant != "empty":
-                run = prefix + "/recommendations/" + selection["runId"]
                 packet = call(run + "/ranking-export", token=token)
                 imported = call(run + "/ranking-result", token=token)
                 originals = {c["productId"]: c for c in packet["candidates"]}
@@ -172,6 +175,29 @@ def main():
                 assert call(run + "/ranking-result", "POST", reply, token)["results"] == imported["results"]
                 if variant == "conditional":
                     assert any(r["pendingConditions"] for r in imported["results"])
+                    # Follow the frontend's exact product -> draft application flow.
+                    chosen = selection["results"][0]
+                    profile = call(
+                        prefix + "/selected-product",
+                        "PUT",
+                        {
+                            "expectedVersion": profile["rowVersion"],
+                            "runId": selection["runId"],
+                            "productVersionId": chosen["productVersion"],
+                        },
+                        token,
+                    )
+                    draft = call(
+                        java_url + "/applications",
+                        "POST",
+                        {"profileId": profile["id"], "expectedProfileVersion": profile["rowVersion"], "answers": {}},
+                        token,
+                    )
+                    assert draft["status"] == "DRAFT"
+                    assert draft["productVersionId"] == chosen["productVersion"]
+                    assert draft["answers"]["request"]["amount"] == answers["request"]["amount"]
+                    assert call(java_url + "/applications/" + draft["id"], token=token)["id"] == draft["id"]
+                    assert call(run + "/view", token=token)["current"] is True
                     call(
                         prefix,
                         "PATCH",
@@ -206,6 +232,12 @@ def main():
             "model": expected_model,
             "maxCosineDistance": threshold,
             "transport": "real Java HTTP gateway -> CPU E5 -> Java immutable import",
+            "checks": {
+                "savedSelectionsAndViews": True,
+                "productChoiceAndDraftApplication": True,
+                "staleImportRejected": True,
+                "retryAndImportIdempotent": True,
+            },
             "cases": results,
             "mlContainerStats": stats,
         }

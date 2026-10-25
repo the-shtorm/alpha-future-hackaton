@@ -1,0 +1,17 @@
+{
+  "verified": true,
+  "modelId": "local/e5-credit-finetune-v1",
+  "artifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+  "checkedFiles": 9,
+  "dimension": 384,
+  "maxSeqLength": 512,
+  "maxCosineDistance": 0.5237781852483749,
+  "smoke": {
+    "device": "cpu",
+    "dtype": "float32",
+    "shape": [
+      2,
+      384
+    ]
+  }
+}

@@ -68,7 +68,11 @@ export function SelectionResults({
             <Icon name="check" size={18} />
             {selection.results.length} подходящих вариантов
           </span>
-          <p>Выделили предложения по вашей задаче. Это не гарантирует одобрение.</p>
+          <p>
+            {selection.results.some((candidate) => candidate.isRecommended)
+              ? 'Выделили предложения по вашей задаче. Это не гарантирует одобрение.'
+              : 'Модель не выделила персональные рекомендации. Ниже — продукты, прошедшие предварительную проверку условий.'}
+          </p>
         </div>
       ) : null}
       {selection.results.length ? (

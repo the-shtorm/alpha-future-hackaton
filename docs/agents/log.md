@@ -1,5 +1,13 @@
 # Task reports
 
+- [2026-10-25 — Finish git pull rebase](2026-10-25-finish-fast-api-pull-rebase.md) — restored the verified resolution after pull rebased the integration commit; application tree unchanged from the tested merge, no push.
+
+- [2026-10-25 — Resolve merge with origin/fast_api](2026-10-25-merge-origin-fast-api.md) — completed; both conflicts resolved preserving model-source and SELinux support; 201 FastAPI tests, 11 frontend tests/build, real CPU model and Java/draft acceptance passed; local merge, no push.
+
+- [2026-10-25 — Commit Java/FastAPI integration work](2026-10-25-commit-fast-api-integration.md) — completed; integration fixes and verification artifacts included in the user-requested local commit; staged diff check passed, no push.
+
+- [2026-10-25 — fast_api integration verification and repairs](2026-10-25-fast-api-integration-check.md) — completed; SELinux/model/startup repaired; 52 backend, 169 FastAPI, 11 frontend tests and real E5/form/product/draft acceptance passed; remaining limitations recorded.
+
 Each task has its own report. Reports cover every area of work and are never combined
 or overwritten. Historical backend reports remain available in their original location.
 

@@ -80,7 +80,8 @@ services:
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${RECOMMENDATION_MAX_COSINE_DISTANCE:-}
     volumes:
-      - ./fastapi/models:/models:ro
+      # Share the SELinux label with isolated checks of local model packages.
+      - ./fastapi/models:/models:ro,z
       - recsys_model_cache:/model-cache
     networks:
       - recsys_internal

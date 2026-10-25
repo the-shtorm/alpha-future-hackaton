@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "model": {
+    "modelId": "local/e5-credit-finetune-v1",
+    "revision": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "revisionType": "artifact_sha256",
+    "baseModelId": "intfloat/multilingual-e5-small",
+    "baseRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+  },
+  "maxCosineDistance": 0.0,
+  "transport": "real Java HTTP gateway -> CPU E5 -> Java immutable import",
+  "cases": [
+    {
+      "variant": "conditional",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 0
+    },
+    {
+      "variant": "unknown_context",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 0
+    },
+    {
+      "variant": "logistics",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 0
+    },
+    {
+      "variant": "empty",
+      "status": "EMPTY",
+      "candidateCount": 0,
+      "recommendedCount": 0
+    }
+  ],
+  "mlContainerStats": {
+    "MemUsage": "723.7MiB / 2GiB",
+    "MemPerc": "35.34%",
+    "PIDs": "9"
+  }
+}

@@ -12,7 +12,7 @@ Java 21 / Spring Boot 3.5.16, JDBC, PostgreSQL 17. Два независимых
 
 Текущие поля: [Data Policy 3.0](docs/reference/data-policy-3.0.md) и
 [Preliminary Form 2.0](docs/reference/preliminary-form-2.0.md), дополнения [Query/Passage MVP](docs/query_passage_mvp.md).
-Финансовый алгоритм пока остаётся [версией 2.1](docs/data-policy.md). Ветка: `backend-tasks_v2`.
+Финансовый алгоритм пока остаётся [версией 2.1](docs/data-policy.md).
 
 ## Реализовано
 
@@ -60,6 +60,9 @@ Java 21 / Spring Boot 3.5.16, JDBC, PostgreSQL 17. Два независимых
 Задайте пароли БД/pgAdmin. Для demo: SPRING_PROFILES_ACTIVE=demo,
 DEMO_PASSWORD и DEMO_BANK_PASSWORD (12+ символов, максимум 72 байта UTF-8).
 Для временной оценки включите DEMO_ASSESSMENT_ENABLED=true.
+Для существующего `.env` добавьте `RECSYS_API_KEY` — случайный секрет длиной минимум
+32 символа (например, результат `openssl rand -hex 32`). Java и FastAPI получают
+один ключ из этой переменной. Значение-заглушка из `.env.example` не подходит.
 
 ```sh
 docker compose up --build -d
@@ -67,15 +70,19 @@ docker compose up --build -d
 
 | Сервис | Адрес по умолчанию |
 |---|---|
+| Пользовательский интерфейс | http://localhost:3000 |
 | API / БД health | http://localhost:8080/health |
 | Swagger | http://localhost:8080/swagger-ui/index.html |
 | OpenAPI | http://localhost:8080/v3/api-docs |
 | Каталог | http://localhost:8080/products |
-| FastAPI health | http://localhost:8000/health |
+| FastAPI readiness | Внутри Docker: http://fastapi:8000/health/ready |
 | pgAdmin | http://localhost:5050 |
 
 Учитывайте BACKEND_PORT и другие порты из .env. PostgreSQL и том документов сохраняются.
-Миграции V1–V9 сохранены; V10 добавляет ручное ранжирование и нормализует readiness. V8–V9 добавили контекст выбора, макроданные,
+Для локального доступа к ML-порту и его документации используйте
+`docker compose -f compose.yaml -f compose.dev.yaml up -d --build`.
+Миграции V1–V9 сохранены; V10 добавляет ручное ранжирование и нормализует readiness,
+V11 — историю попыток автоматического подбора. V8–V9 добавили контекст выбора, макроданные,
 встречные предложения, финансовые операции и защиту их истории.
 
 После входа банком задайте действующий макроконтекст через POST /bank/macroeconomic-contexts.
@@ -108,6 +115,6 @@ mvn -f backend/pom.xml verify javadoc:javadoc
 `npm --prefix frontend ci`, затем `npm --prefix frontend run dev` → http://127.0.0.1:5173.
 В Docker UI доступен на http://127.0.0.1:3000. Полная инструкция:
 [frontend/README.md](frontend/README.md). Backend по умолчанию 127.0.0.1:8080.
-Интерфейс сохраняет разделение формы и полной заявки. Модель делает другая команда;
-вызов Recsys выполняется сервером при заданном RECSYS_URL. Без адреса интерфейс честно
+Интерфейс сохраняет разделение формы и полной заявки. Дообученная E5 подключена
+через серверный вызов Recsys при заданном RECSYS_URL. Без адреса интерфейс честно
 показывает продукты после проверки условий. Подборы восстанавливаются из кабинета после входа.

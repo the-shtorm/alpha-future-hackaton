@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "transport": "frontend nginx /api -> Java -> real CPU E5 -> PostgreSQL",
+  "payload": "frontend normalizeAnswers(exampleAnswers())",
+  "catalogCount": 15,
+  "rankingStatus": "READY",
+  "candidateCount": 4,
+  "recommendedCount": 3,
+  "automaticSelectionSeconds": 0.381,
+  "savedSelectionRestored": true,
+  "productSelected": true,
+  "draftCreatedAndRead": true
+}

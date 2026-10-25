@@ -1,4 +1,29 @@
-> Проверки новой схемы 2.0/3.0 зафиксированы в [отдельном отчёте](agents/2026-10-24-backend-fields-v3.md). Ниже сохранены сведения предыдущих этапов.
+> 25 октября 2026: [проверка интеграции fast_api](agents/2026-10-25-fast-api-integration-check.md)
+> с настоящей дообученной E5, Java и PostgreSQL. Backend: 52 теста;
+> FastAPI: 169 тестов и отдельный real-model test; frontend: 11 тестов и сборка.
+> Ниже сохранены сведения предыдущих этапов.
+
+## Повторить сквозную проверку Java и E5
+
+После подготовки полной локальной папки модели и настройки `.env`:
+
+```sh
+docker compose build backend fastapi
+cd fastapi
+ML_TEST_IMAGE=alpha-future-fastapi:local ML_TEST_BACKEND_IMAGE=alpha-future-backend:local \
+  python3 -m scripts.java_acceptance --model-variant finetuned
+```
+
+Скрипту на хосте нужен только Python стандартной библиотеки и Docker Compose.
+По умолчанию он использует `fastapi/models/e5-credit-finetune-v1/final`;
+для другой папки передайте `ML_TEST_MODEL_PATH=/absolute/path/to/model`.
+Модель больше не хранится в Git: подготовка из HF/S3 и экспорт локальной копии
+описаны в [MODEL_HANDOFF.md](../fastapi/MODEL_HANDOFF.md).
+Он создаёт отдельный проект со случайными локальными портами и одноразовой БД,
+проверяет рекомендации, сохранение/восстановление, выбор продукта, черновик заявки,
+повторные запросы и запрет устаревшего импорта, затем удаляет только свой стенд.
+Для проверки отсутствия рекомендаций можно добавить `--max-cosine-distance 0`;
+порог работающего приложения не меняется. Веса монтируются с общей SELinux-меткой `z`.
 
 # Проверки Query/Passage MVP и Preliminary Form 1.1
 

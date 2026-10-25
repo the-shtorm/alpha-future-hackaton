@@ -9,7 +9,7 @@ services:
       MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
     volumes:
-      - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro
+      - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro,z
     ports: ["127.0.0.1::8000"]
     mem_limit: 2g
     read_only: true
@@ -58,7 +58,7 @@ services:
       DB_APP_PASSWORD: ${ML_TEST_DB_APP_PASSWORD:?Set test password}
     volumes:
       - test_pgdata:/var/lib/postgresql/data
-      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro,z
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "recsys_acceptance"]
