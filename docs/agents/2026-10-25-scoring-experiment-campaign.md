@@ -53,6 +53,10 @@
 - Latest full verification after this fix: **268 passed in 5.64 seconds**; Ruff and `git diff --check` passed. Existing configured scoring/data coverage remains 98.76%; dedicated campaign tests cover the new modules.
 - Latest recorded checkpoint: **223/480 screening records**, **127 distinct completed model artifacts**, zero model failures. Background execution remains in progress; no final top-10 is claimed yet.
 
+- Monitoring checkpoint 2026-10-25 19:23 UTC: screening **419/480**, zero failures; main session 42195 and committer session 25712 remain live, mixed policy is enabled with its frozen code hash. No duplicate process was started. Favorite and backup pass `ScoringPackage` integrity. Newly announced precision-floor alternative `screen-v1-0381`, fixed t=0.0826965891311357, FY2023 9,963 rows/1,728 positives: precision/F1/recall **0.614075/0.620057/0.626157** (TP1082/FP680/FN646). All three exceed the original favorite; versus announced `0375`, precision is higher but F1 and recall are lower. Research original9 includes unconfirmed historical term; joint 90/60 target remains unmet. Frozen threshold selection SHA-256 verified; no model fitting or threshold tuning during this monitoring check.
+
+- User status check 2026-10-25 22:25 Europe/Moscow: campaign did not stop. Primary/committer sessions both remain running; observed progress advanced from 419 to 432/480 screening records, zero failures, journal and console updated five seconds before inspection. Existing two-fit/two-thread control unchanged. No restart, new dispatcher, model change or per-check commit.
+
 ## Contract and migration impacts
 
 Offline experiments only. Feature variants are research artifacts; no API, database, model lock or runtime policy changes are authorized by this campaign itself.
@@ -62,3 +66,11 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 - `bc9638a` — favorite preservation, audited temporal protocol, fitted-trial engine and deterministic screening/stage scheduler.
 - Composition/export and bounded CPU scheduler form the next implementation-stage commit. Original unrelated working-tree changes remain excluded. No push.
 - Final retention, background notifications and stage-only private-index commits are implemented; stage-committer deployment follows its implementation commit. No per-combination commits or push.
+- `e8ad471` — completed composition/export, verified top-10 retention/cleanup, bounded CPU scheduling and private-index stage commits. Stage-committer is running independently with verified nice=10; initial status records PID 45354. Native 30-minute thread monitoring is active. Implementation files are committed; subsequent report updates are captured by the next completed-stage commit.
+- User selected **both random rows and random whole years**. Implemented/audited a 72-fit extension, executed by the existing dispatcher after base fitting and before final top-10/cleanup. FY2023 stays outside fit/calibration/threshold search; randomized historical test is separately reported at the same frozen threshold. See [extension report](2026-10-25-scoring-mixed-split-extension.md). No full-data mixed fit has run at this checkpoint.
+- Extension verification: **281 tests passed in 6.99 seconds**, Ruff and whitespace checks passed; original favorite and backup integrity verified. The current screening checkpoint is **400/480 records, zero failures**. Latest announced FY2023 candidate `screen-v1-0375` at t=0.062320984836261285: precision/F1/recall **0.580366/0.633736/0.697917**, still below 90/60.
+
+### Completed stage: screening
+
+- 480 records; 384 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/screening`.
+- Fold B, largest measured fixed-threshold validation F1: `screen-v1-0426`, threshold 0.082309165577004892, precision **0.665411**, F1 **0.638362**, recall **0.613426**.
