@@ -77,6 +77,18 @@
 
 - Quiet checkpoint 2026-10-25 23:52 Europe/Moscow: refinement332/360, zero failures, main/committer sessions live, log age4 seconds. Recall90-filter/precision leader0241 unchanged, no joint90/60 achiever. Both extension policies and ranking code hashes verified; no intervention, code/model change, cleanup or extra commit.
 
+- Monitoring checkpoint 2026-10-26 00:02 Europe/Moscow: refinement completed360/360,360 distinct artifacts, zero failures; stage commit `a7c8e04`. Competitor stage running31/168 without failures, both sessions live. Confirmed recall90/max-precision leader remains `refine-0241`, safe engineered features without term, t0.04497684248442092: P/F1/R0.246927/0.388160/0.906829. Against identical-cohort favorite, delta P/F1/R is **-24.40/-7.55/+46.76 percentage points**; a tradeoff, not dominance, precision60% unmet. Full cohort/selection checksum and original/backup integrity verified; no new fits/retuning/cleanup from monitoring, both queued extensions still enabled/frozen. Stage completion and conditional leader notified once.
+
+- New user target **recall>=85% AND precision>=55% simultaneously**, ranked by precision among qualifying rows. Initial canonical primary/all-frozen-policy scan found0 hits on identical FY2023. Existing trained weights/thresholds remain unchanged; new mixed72/recent200 fits and composition selections use85/55 on historical threshold data before later-year evaluation. The100 parent sources use recall85/max-precision for retraining, not a claim that100 sources already meet55%. Empty-feasible outcome preserves all weights and has no substitute winner. See [85/55 extension report](2026-10-26-scoring-recall85-precision55.md);303 tests passed.
+
+- User confirmed desired85%/55% with acceptable84%/53% and strong favorite improvement. Final eligibility requires both accepted bounds AND dominance over the favorite, with85/55 achievement separate. New-fit threshold target still85/55 before validation. Commits `e3d9249`/`e392157`,310 tests passed in10.43s; runtime policies and10-minute monitor synchronized. No accepted/goal points yet; full program continues. Final service committer session29113/PID from monitor is live at nice10; main session42195 unchanged. Original favorite/backup integrity and unchanged four fit/cache modules verified. See [current target report](2026-10-26-scoring-recall85-precision55.md).
+
+- Quiet checkpoint 2026-10-26 00:19 Europe/Moscow: competitors40/168,0 failures; current long fits are500-tree random forests with unlimited depth, min_samples_leaf10 (two active trials), explaining a5-minute gap between completed records. Main42195/committer29113 remain live. No accepted84/53 or desired85/55 point among canonical primary or saved policy metrics. Both extension/target/ranking hashes and2×2 limit verified. No restart, load change, code/model mutation, cleanup or extra commit.
+
+- Quiet checkpoint 2026-10-26 00:29 Europe/Moscow: competitors42/168,0 failures; previous long forests completed and next0042/0043 are running (unlimited depth, leaf10, max_features1). Main42195/committer29113 live, no qualifying84/53 or85/55 point among saved primary/alternative policies; frozen policies verified. No intervention/cleanup/code change or extra commit.
+
+- Quiet checkpoint 2026-10-26 00:39 Europe/Moscow: competitors92/168,0 failures; random forests completed, current active0092/0093 areLightGBM, log freshly updated. Main42195/committer29113 live. No accepted84/53 or85/55 point among primary/other frozen policies; best favorite-dominating recall remains announced0036 (72.22%). Pending extension/target/ranking hashes verified. No intervention, extra fits/retuning/cleanup or commit.
+
 ## Contract and migration impacts
 
 Offline experiments only. Feature variants are research artifacts; no API, database, model lock or runtime policy changes are authorized by this campaign itself.
@@ -99,3 +111,8 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 
 - 360 records; 360 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/refinement`.
 - Fold B, largest measured fixed-threshold validation F1: `refine-0114`, threshold 0.20164814049303642, precision **0.709900**, F1 **0.681709**, recall **0.655671**.
+
+### Completed stage: competitors
+
+- 168 records; 168 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/competitors`.
+- Fold B, largest measured fixed-threshold validation F1: `competitor-0033`, threshold 0.03997261747808091, precision **0.230007**, F1 **0.368572**, recall **0.927083**.
