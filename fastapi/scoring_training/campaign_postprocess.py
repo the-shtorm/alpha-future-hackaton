@@ -265,6 +265,7 @@ def plot_results(export, candidates, winner, safe_winner, diagnostics):
             continue
         axes[1].plot(years, [diagnostics[str(y)][name]["recall"] for y in years], marker=marker, label=name)
     axes[1].axhline(MIN_RECALL, color="gray", linestyle="--")
+    axes[1].set_xticks(sorted(int(y) for y, rows in diagnostics.items() if rows["favorite"]["recallDefined"]))
     axes[1].set(title="Fixed-threshold recall; completed-loan population", xlabel="Approval FY", ylabel="Recall")
     for axis in axes:
         axis.set_ylim(0, 1.02)

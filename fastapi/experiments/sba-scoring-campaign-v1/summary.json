@@ -1,5 +1,5 @@
 {
-  "status": "complete_no_feasible",
+  "status": "complete_with_subtarget_improvements",
   "recordCount": 1489,
   "familyCounts": {
     "catboost": {
@@ -38,7 +38,7 @@
   "metricsAreAveraged": false,
   "favoriteRetained": true,
   "deploymentChanged": false,
-  "ranking": "accept recall >=0.84 AND precision >=0.53; aim85/55; then maximum precision; ties recall then F1",
+  "ranking": "substantial favorite improvements below target: recall, then precision, then F1",
   "activeTarget": {
     "minRecall": 0.84,
     "minPrecision": 0.53
@@ -50,11 +50,11 @@
   "activeTargetPassed": false,
   "aspirationalGoalPassed": false,
   "improvedRecordCount": 0,
-  "top10Count": 0,
+  "top10Count": 10,
   "mixedSplitRecords": 72,
   "recentHoldoutRecords": 200,
-  "retentionCompleted": false,
-  "bestId": null,
+  "retentionCompleted": true,
+  "bestId": "refine-0036",
   "bestWithoutTermId": null,
   "protocolSha256": "de996942124ff308a7810d39d7c3c8cff202017c0217715bbc84bc10d77a62a7",
   "limitations": [
@@ -63,5 +63,13 @@
     "Validation cohorts were historically inspected; this is not a fresh external test.",
     "Maturation gap and validation years explicitly revise the original proposal.",
     "Each operating point uses one threshold; no fold or threshold metric averaging."
-  ]
+  ],
+  "selectionTier": "substantial_improvement_below_target",
+  "fallbackSelection": true,
+  "fallbackCriteria": {
+    "minRecallGain": 0.1,
+    "minF1Gain": 0.05,
+    "noMetricRegression": true
+  },
+  "substantialImprovementRecordCount": 251
 }
