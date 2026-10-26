@@ -82,3 +82,9 @@ no-new-privileges: статическая страница возвращает 
 JSON Schema проверена jsonschema Draft 2020-12: полный ответ и пустой results валидны.
 Миграции V1–V9 совпадают с HEAD побайтно; приложенный query_passage_mvp.md сохранён
 без изменения. Рабочие контейнеры/тома и пользовательский .env не изменены запуском стенда.
+
+## Инфраструктурные проверки db-init
+
+Добавлены `compose.test.yaml`, CI `.github/workflows/tests.yaml`, JaCoCo и
+проверка внешних ролей БД `CloudBootstrapTest`. Облачные шаблоны описаны в
+[cloud-deployment.md](cloud-deployment.md).

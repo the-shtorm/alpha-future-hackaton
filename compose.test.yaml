@@ -1,0 +1,15 @@
+name: alpha-future-tests
+services:
+  fastapi-tests:
+    build:
+      context: ./fastapi
+      target: test
+    volumes:
+      - ./work/test-reports/fastapi:/reports
+    command:
+      - python
+      - -m
+      - pytest
+      - --cov-report=xml:/reports/coverage.xml
+      - --cov-report=html:/reports/htmlcov
+      - --junitxml=/reports/junit.xml
