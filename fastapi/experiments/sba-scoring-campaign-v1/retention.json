@@ -1,0 +1,11 @@
+{
+  "cleanupComplete": false,
+  "favoriteUntouched": true,
+  "allTrialWeightsPreserved": true,
+  "reason": "No candidate meets both active bounds and improves the favorite; no fallback winner or cleanup.",
+  "topIds": [],
+  "verification": [],
+  "retainedModelFiles": {},
+  "deletedFiles": 0,
+  "freedBytes": 0
+}

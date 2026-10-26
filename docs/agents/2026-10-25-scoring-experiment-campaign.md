@@ -11,8 +11,8 @@
 
 1. Audit original data, temporal feasibility and favorite preservation — complete.
 2. Implement tested, restartable campaign runner and exact per-candidate reporting — complete.
-3. Execute screening, refinement, robustness, warm-start, competitors and ensembles — in progress.
-4. Compare actual operating points, export aggregate artifacts and finalize local commits — pending.
+3. Execute screening, refinement, robustness, warm-start, competitors and ensembles — complete.
+4. Compare actual operating points, export aggregate artifacts and finalize local commits — complete.
 
 ## Initial audit
 
@@ -105,6 +105,8 @@
 
 - User requested5-minute monitoring near the end of robustness. Existing native automation updated successfully and saved ACTIVE5-minute interval verified; local monitor metadata/README synchronized, no duplicate automation. Current robustness88/90 with0 failures; completion of this stage still leaves all72+200 mixed/refit attempts and compositions. No training resource change; documentation joins next stage/final commit.
 
+- User restored30-minute monitoring and requested final substantial-improvement top-10 even if target candidates are absent. Added a separate POST-RUN fallback finalizer, so the live dispatcher and72/200 policies remain untouched. Operational substantial heuristic: recall+10p.p., F1+5p.p., no metric regression; rank recall/P/F1, deduplicate, no padding. It waits for the entire program and original commits, backs up target-only exports and replays before allowed retention. Full318 tests plus final8 focused checks passed. Partial-stage preview has10 distinct improvements, NOT final results. See [fallback implementation report](2026-10-26-scoring-fallback-top10.md).
+
 ## Contract and migration impacts
 
 Offline experiments only. Feature variants are research artifacts; no API, database, model lock or runtime policy changes are authorized by this campaign itself.
@@ -144,3 +146,16 @@ Offline experiments only. Feature variants are research artifacts; no API, datab
 - Fold A, largest measured fixed-threshold validation F1: `robust-0066`, threshold 0.15328763852158048, precision **0.462220**, F1 **0.557161**, recall **0.701186**.
 - Fold B, largest measured fixed-threshold validation F1: `robust-0022`, threshold 0.089549102489006674, precision **0.665505**, F1 **0.664348**, recall **0.663194**.
 - Fold C, largest measured fixed-threshold validation F1: `robust-0047`, threshold 0.12920571633634872, precision **0.530466**, F1 **0.502547**, recall **0.477419**.
+
+### Completed stage: postprocess
+
+- 367 records; 367 distinct saved artifacts; 0 failed records. Exact per-point CSVs exported under `fastapi/experiments/sba-scoring-campaign-v1/stages/postprocess`.
+- Fold A, largest measured fixed-threshold validation F1: `blend-2-0.1-A`, threshold 0.20269975839623453, precision **0.442084**, F1 **0.539173**, recall **0.690909**.
+- Fold B, largest measured fixed-threshold validation F1: `mixed-v1-0002`, threshold 0.25125060103237185, precision **0.822206**, F1 **0.729556**, recall **0.655671**.
+- Fold C, largest measured fixed-threshold validation F1: `blend-4-0.1-C`, threshold 0.17922870156809695, precision **0.562863**, F1 **0.511873**, recall **0.469355**.
+
+## Final executed outcome
+
+- 1489 measured records, 1288 distinct base-model artifacts, 0 failed records.
+- No candidate meets both active constraints {'minRecall': 0.84, 'minPrecision': 0.53}; no fallback winner, no cleanup, all trial weights and favorite preserved.
+- Final metrics refer to historical FY2023 validation; no fresh independent test or deployment is claimed.
