@@ -34,6 +34,8 @@ data/scoring/raw/*
 data/scoring/prepared/*
 !data/scoring/prepared/.gitkeep
 fastapi/scoring_training/runs/
-# The sole released SBA inference package; keep all trial models in ignored runs/.
+# Versioned SBA inference packages; keep trial models in ignored runs/.
 !fastapi/models/sba-scoring-v1/
 !fastapi/models/sba-scoring-v1/**
+!fastapi/models/sba-scoring-v2/
+!fastapi/models/sba-scoring-v2/**

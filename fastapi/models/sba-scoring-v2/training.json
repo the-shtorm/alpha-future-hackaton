@@ -1,0 +1,125 @@
+{
+  "sourceTrial": "mixed-v1-0051",
+  "sourceArtifactSha256": "1df3fa6e9e5579889c1aa83c133c55b946e36664fb82cce28b891f5793a26cce",
+  "sourceSelectionSha256": "288d3c912a82125b995f2f0ede65aa2b3fe1f6cf8df9d48fac120488de576238",
+  "sourceSha256": "eb9efbe801725f70969a1e1128c4ce3b1930c4f34e8820d3d0b81c84f4951e43",
+  "config": {
+    "id": "mixed-v1-0051",
+    "stage": "mixed",
+    "family": "catboost",
+    "fold": "B",
+    "seed": 42,
+    "window": null,
+    "halfLife": null,
+    "balance": "Balanced",
+    "bundle": "original9_diagnostic_term_unconfirmed",
+    "parameters": {},
+    "splitStrategy": "random_years",
+    "splitSeed": 137,
+    "splitterSha256": "7bfce8bd49fe24f03ca4ae98e44f370c386954356a7051e6424aaa0453f1d6d2",
+    "targetDefinitionSha256": "877ed7e0429917b66c3b033872c493c679cd31e5d84f42df9f48fd61545da4b2"
+  },
+  "audit": {
+    "simulationCutoff": "2022-10-01",
+    "splitStrategy": "random_years",
+    "splitSeed": 137,
+    "historicalPoolRows": 316208,
+    "historicalPoolPositives": 23376,
+    "excludedOutcomeNotKnown": 93244,
+    "historicalPoolThroughFY": 2020,
+    "futureValidationFY": 2023,
+    "historicalTestIsProspective": false,
+    "fit": {
+      "rows": 196221,
+      "positives": 14344,
+      "approvalFiscalYears": [
+        2011,
+        2013,
+        2014,
+        2016,
+        2017,
+        2018,
+        2020
+      ],
+      "firstApproval": "2010-10-01",
+      "lastApproval": "2020-09-30",
+      "sourceIndicesSha256": "6720ed702bcee5b8cb19220ab93544d02b5892993a5f10ca8f4595874908cf21"
+    },
+    "early": {
+      "rows": 10197,
+      "positives": 761,
+      "approvalFiscalYears": [
+        2019
+      ],
+      "firstApproval": "2018-10-01",
+      "lastApproval": "2019-09-30",
+      "sourceIndicesSha256": "1712d2f3f31984b737a3d431423111f953b54928995585e2bcd6e74c1e92403a"
+    },
+    "calibration": {
+      "rows": 33986,
+      "positives": 2127,
+      "approvalFiscalYears": [
+        2012
+      ],
+      "firstApproval": "2011-10-01",
+      "lastApproval": "2012-09-30",
+      "sourceIndicesSha256": "f2ba396d8dfc8a2d71aa039e8d709b478a1daf439cfe3200102970091ba7438c"
+    },
+    "threshold": {
+      "rows": 41067,
+      "positives": 2893,
+      "approvalFiscalYears": [
+        2015
+      ],
+      "firstApproval": "2014-10-01",
+      "lastApproval": "2015-09-30",
+      "sourceIndicesSha256": "1e46f72153581fab29dd74e650d236423bd689eaf2bba4fa43fc6ddcc0d3f221"
+    },
+    "historicalTest": {
+      "rows": 34737,
+      "positives": 3251,
+      "approvalFiscalYears": [
+        2010
+      ],
+      "firstApproval": "2009-10-01",
+      "lastApproval": "2010-09-30",
+      "sourceIndicesSha256": "148105af08110b66e070eb66f79411d86df1bacc0d02e133cf19f8256cdce6e5"
+    },
+    "validation": {
+      "rows": 9963,
+      "positives": 1728,
+      "approvalFiscalYears": [
+        2023
+      ],
+      "firstApproval": "2022-10-01",
+      "lastApproval": "2023-09-30",
+      "sourceIndicesSha256": "f3f2ffd5c850dece50099087edf979c94b2c0d1ea3f05421a1be22ee1beacd38"
+    }
+  },
+  "calibrationYears": [
+    2012,
+    2012
+  ],
+  "trainingFiscalYears": [
+    2011,
+    2013,
+    2014,
+    2016,
+    2017,
+    2018,
+    2020
+  ],
+  "baselineProbability": 0.0731012480825192,
+  "operatingPoint": {
+    "policy": "bestPrecisionAtRecallFloor",
+    "threshold": 0.167204479067272,
+    "selectedOn": "historical FY2015 threshold cohort, before FY2023 evaluation"
+  },
+  "limitations": [
+    "TermInMonths historical availability is unconfirmed.",
+    "FY2023 was previously inspected; this is not a fresh independent test.",
+    "Selected on previously inspected historical results; not an independent prospective test.",
+    "SBA completed-loan demo; quality deteriorates on later fiscal years.",
+    "This operating point does not replace the Java financial decision policy."
+  ]
+}
