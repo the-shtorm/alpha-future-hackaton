@@ -27,7 +27,7 @@ threshold FY2015; случайный исторический тест FY2010. �
 Желаемые85/55 и допустимые84/53 не достигнуты. На FY2024 у V2 precision37.25%,
 F1 43.27%, recall51.61%; на FY2025 —3.43%/5.08%/9.76%; FY2026 содержит0 списаний,
 поэтому recall не определён. Эти метрики не усредняются.
-Пакет, точные счётчики и provenance: [sba-scoring-v2](../fastapi/models/sba-scoring-v2/README.md).
+Пакет, точные счётчики и provenance: [sba-scoring-v2 на HF](https://huggingface.co/thedauns/sba-scoring-v2/tree/5a0049417dae97bdc8a341c89c705d7505563645/model).
 Release approval в manifest означает выбранный пользователем demo-пакет с
 проверенными целостностью и воспроизведением, не одобрение для банковского production.
 
@@ -65,16 +65,19 @@ git lfs pull
 git lfs fsck
 ```
 
-В Git/LFS передаются основной SBA v2, сохранённый v1 и используемый checkpoint E5.
-Пробные модели и полный CSV не передаются. Веса E5, её SHA и пороги сохранены.
-В этой задаче созданы только локальные коммиты. До явной публикации коммитов и
-LFS-объекта SBA пакет может быть недоступен на другой машине.
+В этой ветке Git/LFS по-прежнему передаёт checkpoint E5. Скоринг v2 хранится
+в публичном HF; исходные scoring-пакеты v1/v2 удалены из Git. Их исторические
+коммиты не переписывались. Веса, калибровка, пороги и API не менялись.
+Короткий адрес HF закреплён immutable revision в config/scoring-hf.lock.json.
+Подробности и проверка без E5: [SCORING_HF.md](../fastapi/SCORING_HF.md).
 
 В существующем `.env` задайте, сохранив остальные значения:
 
 ```dotenv
 SCORING_ENABLED=true
-SCORING_MODEL_PATH=./fastapi/models/sba-scoring-v2
+SCORING_MODEL_PATH=thedauns/sba-scoring-v2
+HF_TOKEN=
+HF_LOCAL_FILES_ONLY=false
 SCORING_URL=http://fastapi:8000/api/v1/scoring/evaluate
 DEMO_ASSESSMENT_ENABLED=false
 ```
@@ -193,13 +196,14 @@ fallback на DemoAssessment нет. Сохранённые оценки, реш
 Чтобы вернуть скоринг, восстановить проверенный пакет/pin и SCORING_ENABLED=true.
 Не заменять опубликованный пакет в его каталоге: новое обучение — новая версия/путь.
 
-Для возврата именно V1 сохранены `fastapi/models/sba-scoring-v1` и его pin:
+Для возврата именно V1 сохранён pin; сам пакет нужно предоставить из проверенной
+внешней или резервной копии. Например, положить его в fastapi/models/rollback-v1:
 
 ```sh
 cp fastapi/config/scoring-model-v1.lock.json fastapi/config/scoring-model.lock.json
-SCORING_MODEL_PATH=./fastapi/models/sba-scoring-v1 docker compose up -d --build --no-deps fastapi
+SCORING_MODEL_PATH=/scoring-models/rollback-v1 docker compose up -d --build --no-deps fastapi
 ```
 
-Для standalone дополнительно задайте `SCORING_MODEL_PATH=models/sba-scoring-v1`.
+Для standalone задайте `SCORING_MODEL_PATH=models/rollback-v1`.
 После отката путь и pin должны соответствовать одной версии: несовпадение даёт503,
 автоматической подмены модели нет. E5 и сохранённые исторические решения не меняются.

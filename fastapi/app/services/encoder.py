@@ -103,8 +103,6 @@ class SentenceEncoder:
             self.revision = manifest["revision"]
         self.model_id = settings.model_id
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        os.environ["HF_HUB_OFFLINE"] = "1"
-        os.environ["TRANSFORMERS_OFFLINE"] = "1"
         import torch
         from sentence_transformers import SentenceTransformer
 

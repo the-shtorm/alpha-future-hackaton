@@ -20,6 +20,11 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "fastapi/experiments/sba-full-stack-v2.json")
+    parser.add_argument(
+        "--source-smoke",
+        action="store_true",
+        help="Check HF/source integration with decline and missing-data journeys, without v1 approval fixtures",
+    )
     args = parser.parse_args()
     project = "sba-journey-" + secrets.token_hex(5)
     env = dict(os.environ)
@@ -30,7 +35,7 @@ def main():
         ML_TEST_MODEL_VARIANT="finetuned",
         ML_TEST_MODEL_PATH=str(ROOT / "fastapi/models/e5-credit-finetune-v1/final"),
         ML_TEST_SCORING_ENABLED="true",
-        ML_TEST_SCORING_MODEL_PATH=str(ROOT / "fastapi/models/sba-scoring-v2"),
+        ML_TEST_SCORING_MODEL_PATH=os.getenv("SCORING_MODEL_PATH", "thedauns/sba-scoring-v2"),
     )
     for name in ("API_KEY", "DB_PASSWORD", "DB_APP_PASSWORD", "DB_MIGRATOR_PASSWORD", "DEMO_PASSWORD"):
         env["ML_TEST_" + name] = secrets.token_hex(24)
@@ -91,9 +96,7 @@ def main():
         stable = next(
             row for row in call(java + "/demo/scenarios", token=owner)["items"] if row["code"] == "STABLE"
         )
-        product = next(
-            row for row in call(java + "/products?size=50", token=owner)["content"] if row["code"] == "P01"
-        )
+        products = {row["code"]: row for row in call(java + "/products?size=50", token=owner)["content"]}
         now = datetime.now(timezone.utc)
         call(
             java + "/bank/macroeconomic-contexts",
@@ -107,10 +110,24 @@ def main():
             bank,
         )
         outcomes = []
-        for scenario in ("APPROVED", "COUNTEROFFERED", "DECLINED", "REQUEST_INFO"):
+        scenarios = (
+            ("DECLINED", "REQUEST_INFO")
+            if args.source_smoke
+            else ("APPROVED", "COUNTEROFFERED", "DECLINED", "REQUEST_INFO")
+        )
+        for scenario in scenarios:
+            # Synthetic branch fixtures exercise the frozen v2/Java integration;
+            # they are not a held-out ML quality evaluation or threshold selection.
+            product_code = "P07" if scenario == "APPROVED" else "P01"
+            product = products[product_code]
             answers = copy.deepcopy(stable["preliminaryAnswers"])
             additions = copy.deepcopy(stable["applicationAdditionalAnswers"])
             answers["request"]["amount"] = "1000000.00" if scenario == "COUNTEROFFERED" else "300000.00"
+            if scenario == "APPROVED":
+                answers["request"].update(amount="500000.00", termMonths=60, purpose="EQUIPMENT")
+                answers["security"]["collateralReady"] = "YES"
+                additions["security"]["collateralValue"] = "1000000.00"
+                additions["project"]["ownContributionPct"] = "20.00"
             if scenario == "COUNTEROFFERED":
                 answers["financial"]["revenue"] = "6000000.00"
                 additions["financial"]["monthlyDebtPayment"] = "170000.00"
@@ -187,6 +204,7 @@ def main():
             conditions = journey["decision"]["conditions"]
             entry = {
                 "decision": scenario,
+                "productCode": product_code,
                 "rankingStatus": automatic["rankingStatus"],
                 "assessmentCount": len(conditions.get("assessmentIds", [])),
             }
@@ -243,8 +261,13 @@ def main():
                 "SELECT json_build_object('assessments',(SELECT count(*) FROM credit.assessment_run),'linkedDecisions',(SELECT count(*) FROM credit.credit_decision WHERE assessment_id IS NOT NULL),'models',(SELECT json_agg(DISTINCT model_version) FROM credit.assessment_run))",
             )
         )
-        assert audit["assessments"] == 4 and audit["linkedDecisions"] == 3
-        benchmark_path = ROOT / "fastapi/experiments/sba-scoring-http-acceptance-v2.json"
+        expected_assessments, expected_links = (1, 1) if args.source_smoke else (4, 3)
+        assert audit["assessments"] == expected_assessments and audit["linkedDecisions"] == expected_links
+        benchmark_path = (
+            args.output.with_name(args.output.stem + "-http.json")
+            if args.source_smoke
+            else ROOT / "fastapi/experiments/sba-scoring-http-acceptance-v2.json"
+        )
         subprocess.run(
             [
                 sys.executable,
@@ -289,6 +312,7 @@ def main():
         assert memory_budget["sumContainerLimitsBytes"] + reserve <= budget
         report = {
             "passed": True,
+            "scope": "source-smoke" if args.source_smoke else "four-decision-journey",
             "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
             "cases": outcomes,
             "audit": audit,

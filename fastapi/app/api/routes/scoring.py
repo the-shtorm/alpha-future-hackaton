@@ -1,5 +1,6 @@
 import json
-from pathlib import Path
+
+from fastapi import APIRouter, Depends, Request
 
 from app.core.config import ROOT
 from app.core.errors import ServiceError
@@ -7,14 +8,14 @@ from app.core.security import require_bearer
 from app.schemas.responses import ERROR_RESPONSES
 from app.scoring.contracts import ScoringRequest, ScoringResponse
 from app.scoring.package import ScoringPackage
-from fastapi import APIRouter, Depends, Request
+from app.scoring.source import resolve_scoring_path
 
 router = APIRouter(prefix="/api/v1/scoring", tags=["scoring"], dependencies=[Depends(require_bearer)])
 
 
 def load_scoring(settings):
     lock = json.loads((ROOT / "config/scoring-model.lock.json").read_text(encoding="utf-8"))
-    model = ScoringPackage(Path(settings.scoring_model_path), lock["manifestSha256"])
+    model = ScoringPackage(resolve_scoring_path(settings), lock["manifestSha256"])
     if model.manifest.modelVersion != lock["modelVersion"]:
         raise ValueError("Scoring model identity mismatch")
     return model

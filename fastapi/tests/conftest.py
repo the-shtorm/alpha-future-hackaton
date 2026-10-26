@@ -12,6 +12,11 @@ from app.main import create_app
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def isolate_local_dotenv(monkeypatch):
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
+
+
 class FakeEncoder:
     model_id = MODEL_ID
     revision = "f" * 40

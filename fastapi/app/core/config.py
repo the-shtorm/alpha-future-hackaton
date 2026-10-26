@@ -3,7 +3,7 @@ import math
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,7 +42,9 @@ def calibrated_distance(variant: str = "base") -> float | None:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore", env_ignore_empty=True)
+    model_config = SettingsConfigDict(
+        extra="ignore", env_ignore_empty=True, env_file=ROOT / ".env", env_file_encoding="utf-8"
+    )
     environment: str = "production"
     ml_internal_api_key: str = ""
     model_variant: Literal["base", "finetuned"] = "finetuned"
@@ -66,7 +68,10 @@ class Settings(BaseSettings):
     docs_enabled: bool = False
     log_level: str = "INFO"
     scoring_enabled: bool = False
-    scoring_model_path: Path = ROOT / "models/sba-scoring-v2"
+    scoring_model_path: str | Path = "thedauns/sba-scoring-v2"
+    hf_cache_dir: Path = ROOT / "models/hf-cache"
+    hf_local_files_only: bool = False
+    hf_token: SecretStr | None = Field(default=None, repr=False, exclude=True)
 
     @model_validator(mode="after")
     def validate_runtime(self):

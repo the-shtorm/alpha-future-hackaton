@@ -12,7 +12,3 @@ Dockerfile text eol=lf
 # Preserve exact model bytes: finetune-manifest.json checksums cover these files.
 fastapi/models/e5-credit-finetune-v1/final/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
 fastapi/models/e5-credit-finetune-v1/final/model.safetensors filter=lfs diff=lfs merge=lfs -text
-fastapi/models/sba-scoring-v1/** -text
-fastapi/models/sba-scoring-v1/model.cbm filter=lfs diff=lfs merge=lfs -text
-fastapi/models/sba-scoring-v2/** -text
-fastapi/models/sba-scoring-v2/model.cbm filter=lfs diff=lfs merge=lfs -text

@@ -57,6 +57,10 @@ REQUEST_INFO/ASSESSMENT_UNAVAILABLE. Fixed weights доступны только
 за train-диапазон. Метрики переноса, предупреждения, запуск, проверка пакета и откат:
 [документация скоринга](docs/credit-scoring.md).
 
+SBA v2 загружается из публичного HF через `SCORING_MODEL_PATH=thedauns/sba-scoring-v2`
+либо из явно заданной локальной папки. Файлы скоринга больше не передаются Git/LFS;
+проверка пакета и кэш описаны в [SCORING_HF.md](fastapi/SCORING_HF.md).
+
 ## Запуск
 
 Перед запуском получите веса: `git lfs install` и `git lfs pull`.
@@ -66,7 +70,7 @@ REQUEST_INFO/ASSESSMENT_UNAVAILABLE. Fixed weights доступны только
 Задайте пароли БД/pgAdmin. Для demo: SPRING_PROFILES_ACTIVE=demo,
 DEMO_PASSWORD и DEMO_BANK_PASSWORD (12+ символов, максимум 72 байта UTF-8).
 Для нового скоринга: SCORING_ENABLED=true, DEMO_ASSESSMENT_ENABLED=false.
-В Compose выбранный пакет монтируется read-only; standalone FastAPI по умолчанию
+В Compose HF-пакет скачивается в постоянный кэш; standalone FastAPI по умолчанию
 оставляет скоринг выключенным. Существующий .env автоматически не перезаписывается.
 
 ```sh

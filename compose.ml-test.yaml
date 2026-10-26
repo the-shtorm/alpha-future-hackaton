@@ -9,10 +9,14 @@ services:
       MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
       SCORING_ENABLED: ${ML_TEST_SCORING_ENABLED:-false}
-      SCORING_MODEL_PATH: /models/scoring
+      SCORING_MODEL_PATH: ${ML_TEST_SCORING_MODEL_PATH:-thedauns/sba-scoring-v2}
+      HF_CACHE_DIR: /model-cache
+      HF_LOCAL_FILES_ONLY: ${ML_TEST_HF_LOCAL_FILES_ONLY:-false}
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro
-      - ${ML_TEST_SCORING_MODEL_PATH:-./fastapi/models/sba-scoring-v2}:/models/scoring:ro
+      - ./fastapi/models:/scoring-models:ro
+      - test_model_cache:/model-cache
     ports: ["127.0.0.1::8000"]
     mem_limit: 2g
     read_only: true
@@ -82,4 +86,5 @@ services:
     depends_on:
       backend: {condition: service_started}
 volumes:
+  test_model_cache:
   test_pgdata:

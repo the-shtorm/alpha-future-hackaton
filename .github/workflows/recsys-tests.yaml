@@ -73,9 +73,32 @@ jobs:
       - name: Real offline tests in Linux
         run: |
           docker build --target test -t alpha-future-recsys:tests ./fastapi
-          docker run --rm --network none --memory 2g --read-only --tmpfs /tmp:size=64m -e RUN_REAL_MODEL_TESTS=1 -e RUN_FINETUNED_MODEL_TESTS=1 -e MODEL_LOCAL_PATH=/models/multilingual-e5-small -e FINETUNED_MODEL_LOCAL_PATH=/models/e5-credit-finetune-v1/final -v "$PWD/fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro" -v "$PWD/fastapi/models/e5-credit-finetune-v1/final:/models/e5-credit-finetune-v1/final:ro" alpha-future-recsys:tests python -m pytest -o addopts='' -v
+          docker run --rm --network none --memory 2g --read-only --tmpfs /tmp:size=64m -e RUN_REAL_MODEL_TESTS=1 -e RUN_FINETUNED_MODEL_TESTS=1 -v "$PWD/fastapi/models/multilingual-e5-small:/app/models/multilingual-e5-small:ro" -v "$PWD/fastapi/models/e5-credit-finetune-v1/final:/app/models/e5-credit-finetune-v1/final:ro" alpha-future-recsys:tests python -m pytest -o addopts='' -v
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: real-java-ml-acceptance
           path: work/ml-acceptance/
+  scoring-model:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SCORING_MODEL_PATH: ${{ vars.SCORING_MODEL_PATH || 'thedauns/sba-scoring-v2' }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.10.2'
+      - run: uv sync --frozen --python 3.11
+        working-directory: fastapi
+      - name: Verify the public pinned HF scoring package and native inference
+        run: uv run --frozen python -m scripts.prepare_scoring_model --smoke
+        working-directory: fastapi
+      - name: Offline scoring package and API tests
+        run: uv run --frozen python -m pytest tests/integration/test_scoring_v2_package.py -o addopts='' -q
+        working-directory: fastapi
+        env:
+          HF_LOCAL_FILES_ONLY: 'true'
+          RUN_SCORING_INTEGRATION: '1'

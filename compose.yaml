@@ -75,12 +75,19 @@ services:
       MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${RECOMMENDATION_MAX_COSINE_DISTANCE:-}
       SCORING_ENABLED: ${SCORING_ENABLED:-true}
-      SCORING_MODEL_PATH: /models/scoring
+      SCORING_MODEL_PATH: ${SCORING_MODEL_PATH:-thedauns/sba-scoring-v2}
+      HF_CACHE_DIR: /model-cache
+      HF_HOME: /model-cache/hf-home
+      HF_XET_CACHE: /model-cache/xet
+      HF_LOCAL_FILES_ONLY: ${HF_LOCAL_FILES_ONLY:-false}
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${RECSYS_MODEL_PATH:-./fastapi/models/e5-credit-finetune-v1/final}:/models/active:ro
-      - ${SCORING_MODEL_PATH:-./fastapi/models/sba-scoring-v2}:/models/scoring:ro
+      - ./fastapi/models:/scoring-models:ro
+      - recsys_model_cache:/model-cache
     networks:
       - recsys_internal
+      - recsys_egress
     mem_limit: 2g
     init: true
     read_only: true
@@ -137,10 +144,12 @@ services:
     restart: unless-stopped
 
 volumes:
+  recsys_model_cache:
   postgres_data:
   pgadmin_data:
   documents_data:
 
 networks:
+  recsys_egress:
   recsys_internal:
     internal: true
