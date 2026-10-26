@@ -1,0 +1,1 @@
+rank,id,family,bundle,validationFY,splitStrategy,splitSeed,threshold,precision,f1,recall,TP,FP,FN,goalPassed,acceptablePassed,precisionFloorPassed,dominatesFavorite,tradeoffAgainstFavorite,deltaPrecision,deltaF1,deltaRecall,primaryPolicy,artifact,modelSha256

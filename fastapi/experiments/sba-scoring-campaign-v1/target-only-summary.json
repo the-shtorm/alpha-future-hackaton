@@ -1,0 +1,67 @@
+{
+  "status": "complete_no_feasible",
+  "recordCount": 1489,
+  "familyCounts": {
+    "catboost": {
+      "records": 1180,
+      "complete": 1180,
+      "failed": 0
+    },
+    "logistic": {
+      "records": 24,
+      "complete": 24,
+      "failed": 0
+    },
+    "randomForest": {
+      "records": 40,
+      "complete": 40,
+      "failed": 0
+    },
+    "lightgbm": {
+      "records": 86,
+      "complete": 86,
+      "failed": 0
+    },
+    "xgboost": {
+      "records": 84,
+      "complete": 84,
+      "failed": 0
+    },
+    "blend": {
+      "records": 75,
+      "complete": 75,
+      "failed": 0
+    }
+  },
+  "distinctBaseModelArtifacts": 1288,
+  "failedRecords": [],
+  "metricsAreAveraged": false,
+  "favoriteRetained": true,
+  "deploymentChanged": false,
+  "ranking": "accept recall >=0.84 AND precision >=0.53; aim85/55; then maximum precision; ties recall then F1",
+  "activeTarget": {
+    "minRecall": 0.84,
+    "minPrecision": 0.53
+  },
+  "aspirationalTarget": {
+    "minRecall": 0.85,
+    "minPrecision": 0.55
+  },
+  "activeTargetPassed": false,
+  "aspirationalGoalPassed": false,
+  "improvedRecordCount": 0,
+  "top10Count": 0,
+  "mixedSplitRecords": 72,
+  "recentHoldoutRecords": 200,
+  "retentionCompleted": false,
+  "bestId": null,
+  "bestWithoutTermId": null,
+  "protocolSha256": "de996942124ff308a7810d39d7c3c8cff202017c0217715bbc84bc10d77a62a7",
+  "limitations": [
+    "Completed-loan selection bias remains.",
+    "Original term history is unconfirmed.",
+    "Validation cohorts were historically inspected; this is not a fresh external test.",
+    "Maturation gap and validation years explicitly revise the original proposal.",
+    "Each operating point uses one threshold; no fold or threshold metric averaging."
+  ]
+}

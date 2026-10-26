@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "source": "thedauns/sba-scoring-v2",
+  "coldDownload": true,
+  "snapshotCallsAtStartup": 1,
+  "nativeLoadsAtStartup": 1,
+  "inferenceNetworkCalls": 0,
+  "sameModelInRam": true,
+  "offlineRestart": true,
+  "localAndHfIdentical": true,
+  "response": {
+    "schemaVersion": "sba-scoring-1",
+    "requestId": "00000000-0000-4000-8000-000000000001",
+    "sbaDefaultProbability": 0.2525274156209339,
+    "score": 75,
+    "modelVersion": "sba-scoring-v2",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+    "domainStatus": "EXTRAPOLATION",
+    "isDemo": true,
+    "warnings": [
+      "SBA_US_TO_RU_DEMO",
+      "TERM_HISTORY_UNCONFIRMED",
+      "RATE_OUT_OF_RANGE"
+    ]
+  }
+}

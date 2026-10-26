@@ -1,0 +1,81 @@
+{
+  "note": "Historical previously inspected completed-loan cohorts; not a fresh external test. No retuning.",
+  "results": {
+    "2023": {
+      "favorite": {
+        "threshold": 0.15283707537791144,
+        "rows": 9963,
+        "positives": 1728,
+        "tp": 759,
+        "fp": 787,
+        "fn": 969,
+        "tn": 7448,
+        "precision": 0.4909443725743855,
+        "recall": 0.4392361111111111,
+        "f1": 0.4636530238240684,
+        "f2": 0.4486876330101679,
+        "falsePositiveRate": 0.09556769884638737,
+        "flaggedCount": 1546,
+        "flaggedShare": 0.15517414433403592,
+        "recallDefined": true
+      }
+    },
+    "2024": {
+      "favorite": {
+        "threshold": 0.15283707537791144,
+        "rows": 6094,
+        "positives": 620,
+        "tp": 172,
+        "fp": 550,
+        "fn": 448,
+        "tn": 4924,
+        "precision": 0.23822714681440443,
+        "recall": 0.27741935483870966,
+        "f1": 0.2563338301043219,
+        "f2": 0.26858213616489696,
+        "falsePositiveRate": 0.10047497259773475,
+        "flaggedCount": 722,
+        "flaggedShare": 0.11847719067935675,
+        "recallDefined": true
+      }
+    },
+    "2025": {
+      "favorite": {
+        "threshold": 0.15283707537791144,
+        "rows": 2194,
+        "positives": 82,
+        "tp": 6,
+        "fp": 209,
+        "fn": 76,
+        "tn": 1903,
+        "precision": 0.027906976744186046,
+        "recall": 0.07317073170731707,
+        "f1": 0.04040404040404041,
+        "f2": 0.055248618784530384,
+        "falsePositiveRate": 0.09895833333333333,
+        "flaggedCount": 215,
+        "flaggedShare": 0.09799453053783044,
+        "recallDefined": true
+      }
+    },
+    "2026": {
+      "favorite": {
+        "threshold": 0.15283707537791144,
+        "rows": 83,
+        "positives": 0,
+        "tp": 0,
+        "fp": 5,
+        "fn": 0,
+        "tn": 78,
+        "precision": 0.0,
+        "recall": null,
+        "f1": 0.0,
+        "f2": 0.0,
+        "falsePositiveRate": 0.060240963855421686,
+        "flaggedCount": 5,
+        "flaggedShare": 0.060240963855421686,
+        "recallDefined": false
+      }
+    }
+  }
+}

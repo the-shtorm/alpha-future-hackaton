@@ -3,6 +3,7 @@ services:
     build:
       context: ./frontend
     image: alpha-future-frontend:local
+    mem_limit: 128m
     ports:
       - '127.0.0.1:${FRONTEND_PORT:-3000}:8080'
     depends_on:
@@ -23,6 +24,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: alpha-future-backend:local
+    mem_limit: 768m
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-credit_cabinet}
       DB_USER: credit_app
@@ -38,6 +40,8 @@ services:
       RECSYS_URL: ${RECSYS_URL:-http://fastapi:8000/api/v1/recommendations/rank-java}
       RECSYS_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
       RECSYS_TIMEOUT_MS: ${RECSYS_TIMEOUT_MS:-10000}
+      SCORING_URL: ${SCORING_URL:-http://fastapi:8000/api/v1/scoring/evaluate}
+      SCORING_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}
     networks:
       - default
       - recsys_internal
@@ -61,6 +65,7 @@ services:
     restart: unless-stopped
 
   fastapi:
+    platform: linux/amd64
     build:
       context: ./fastapi
       dockerfile: Dockerfile
@@ -80,9 +85,12 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${RECOMMENDATION_MAX_COSINE_DISTANCE:-}
+      SCORING_ENABLED: ${SCORING_ENABLED:-true}
+      SCORING_MODEL_PATH: ${SCORING_MODEL_PATH:-thedauns/sba-scoring-v2}
     volumes:
       # Share the SELinux label with isolated checks of local model packages.
       - ./fastapi/models:/models:ro,z
+      - ./fastapi/models:/scoring-models:ro,z
       - recsys_model_cache:/model-cache
     networks:
       - recsys_internal
@@ -106,6 +114,7 @@ services:
 
   postgres:
     image: postgres:17-bookworm
+    mem_limit: 512m
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-credit_cabinet}
       POSTGRES_USER: postgres
@@ -127,6 +136,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:9.18
+    mem_limit: 384m
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD}

@@ -1,0 +1,129 @@
+{
+  "stage": "robustness",
+  "records": 90,
+  "failures": 0,
+  "distinctModelArtifacts": 90,
+  "byFold": {
+    "A": {
+      "maximumMeasuredF1": {
+        "id": "robust-0066",
+        "point": {
+          "threshold": 0.15328763852158048,
+          "rows": 20901,
+          "positives": 1265,
+          "tp": 887,
+          "fp": 1032,
+          "fn": 378,
+          "tn": 18604,
+          "precision": 0.46221990620114645,
+          "recall": 0.7011857707509881,
+          "f1": 0.5571608040201005,
+          "f2": 0.6354778621579023,
+          "falsePositiveRate": 0.052556528824607866,
+          "flaggedCount": 1919,
+          "flaggedShare": 0.09181378881393235
+        }
+      },
+      "closestToBothFloors": {
+        "id": "robust-0066",
+        "point": {
+          "threshold": 0.15328763852158048,
+          "rows": 20901,
+          "positives": 1265,
+          "tp": 887,
+          "fp": 1032,
+          "fn": 378,
+          "tn": 18604,
+          "precision": 0.46221990620114645,
+          "recall": 0.7011857707509881,
+          "f1": 0.5571608040201005,
+          "f2": 0.6354778621579023,
+          "falsePositiveRate": 0.052556528824607866,
+          "flaggedCount": 1919,
+          "flaggedShare": 0.09181378881393235
+        }
+      }
+    },
+    "B": {
+      "maximumMeasuredF1": {
+        "id": "robust-0022",
+        "point": {
+          "threshold": 0.08954910248900667,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1146,
+          "fp": 576,
+          "fn": 582,
+          "tn": 7659,
+          "precision": 0.6655052264808362,
+          "recall": 0.6631944444444444,
+          "f1": 0.6643478260869565,
+          "f2": 0.6636553161917998,
+          "falsePositiveRate": 0.06994535519125683,
+          "flaggedCount": 1722,
+          "flaggedShare": 0.1728395061728395
+        }
+      },
+      "closestToBothFloors": {
+        "id": "robust-0001",
+        "point": {
+          "threshold": 0.043127688704757465,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1248,
+          "fp": 1289,
+          "fn": 480,
+          "tn": 6946,
+          "precision": 0.49191959006700825,
+          "recall": 0.7222222222222222,
+          "f1": 0.5852286049237984,
+          "f2": 0.660387342575934,
+          "falsePositiveRate": 0.1565270188221008,
+          "flaggedCount": 2537,
+          "flaggedShare": 0.25464217605139017
+        }
+      }
+    },
+    "C": {
+      "maximumMeasuredF1": {
+        "id": "robust-0047",
+        "point": {
+          "threshold": 0.12920571633634872,
+          "rows": 6094,
+          "positives": 620,
+          "tp": 296,
+          "fp": 262,
+          "fn": 324,
+          "tn": 5212,
+          "precision": 0.5304659498207885,
+          "recall": 0.4774193548387097,
+          "f1": 0.5025466893039049,
+          "f2": 0.4871626069782752,
+          "falsePositiveRate": 0.04786262331019364,
+          "flaggedCount": 558,
+          "flaggedShare": 0.09156547423695438
+        }
+      },
+      "closestToBothFloors": {
+        "id": "robust-0011",
+        "point": {
+          "threshold": 0.040609551508736644,
+          "rows": 6094,
+          "positives": 620,
+          "tp": 321,
+          "fp": 552,
+          "fn": 299,
+          "tn": 4922,
+          "precision": 0.36769759450171824,
+          "recall": 0.5177419354838709,
+          "f1": 0.43000669792364365,
+          "f2": 0.4786758127050403,
+          "falsePositiveRate": 0.10084033613445378,
+          "flaggedCount": 873,
+          "flaggedShare": 0.14325566130620282
+        }
+      }
+    }
+  },
+  "metricsAreAveraged": false
+}

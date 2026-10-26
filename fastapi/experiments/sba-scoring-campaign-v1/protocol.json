@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "sba-campaign-execution-1",
+  "proposedPlanSha256": "89c1843e7f96c8c7b11d2dd39e2f79e54b240aa338354c7fc54f4bcad5f11c29",
+  "sourceSha256": "eb9efbe801725f70969a1e1128c4ce3b1930c4f34e8820d3d0b81c84f4951e43",
+  "preparedManifestSha256": "b0ffe8ecd124e33c8388bca49e4f5a7e325ae2c9f82d20bbc8575355ee033990",
+  "cacheSha256": "43834820e524cf4445c2df2881d895249cb38a7f534dfd4726ab47fd8004ff58",
+  "favorite": "favorite.json",
+  "folds": {
+    "A": {
+      "fitThroughFY": 2015,
+      "validationFY": 2021
+    },
+    "B": {
+      "fitThroughFY": 2017,
+      "validationFY": 2023
+    },
+    "C": {
+      "fitThroughFY": 2018,
+      "validationFY": 2024
+    }
+  },
+  "cohorts": {
+    "A": {
+      "fit": {
+        "rows": 184511,
+        "positives": 13606,
+        "excludedOutcomeNotKnown": 53475,
+        "firstApproval": "2009-10-01",
+        "lastApproval": "2015-09-30"
+      },
+      "early": {
+        "rows": 19810,
+        "positives": 1784,
+        "excludedOutcomeNotKnown": 27671,
+        "firstApproval": "2015-10-01",
+        "lastApproval": "2016-09-30"
+      },
+      "calibration": {
+        "rows": 12866,
+        "positives": 1229,
+        "excludedOutcomeNotKnown": 30590,
+        "firstApproval": "2016-10-03",
+        "lastApproval": "2017-09-30"
+      },
+      "threshold": {
+        "rows": 6091,
+        "positives": 574,
+        "excludedOutcomeNotKnown": 29127,
+        "firstApproval": "2017-10-02",
+        "lastApproval": "2018-09-30"
+      },
+      "validation": {
+        "rows": 20901,
+        "positives": 1265,
+        "excludedOutcomeNotKnown": 0,
+        "firstApproval": "2020-10-01",
+        "lastApproval": "2021-09-30"
+      },
+      "simulationCutoff": "2020-10-01"
+    },
+    "B": {
+      "fit": {
+        "rows": 281976,
+        "positives": 20638,
+        "excludedOutcomeNotKnown": 46947,
+        "firstApproval": "2009-10-01",
+        "lastApproval": "2017-09-30"
+      },
+      "early": {
+        "rows": 18462,
+        "positives": 1814,
+        "excludedOutcomeNotKnown": 16756,
+        "firstApproval": "2017-10-01",
+        "lastApproval": "2018-09-30"
+      },
+      "calibration": {
+        "rows": 10197,
+        "positives": 761,
+        "excludedOutcomeNotKnown": 14771,
+        "firstApproval": "2018-10-01",
+        "lastApproval": "2019-09-30"
+      },
+      "threshold": {
+        "rows": 5573,
+        "positives": 163,
+        "excludedOutcomeNotKnown": 14770,
+        "firstApproval": "2019-10-01",
+        "lastApproval": "2020-09-30"
+      },
+      "validation": {
+        "rows": 9963,
+        "positives": 1728,
+        "excludedOutcomeNotKnown": 0,
+        "firstApproval": "2022-10-01",
+        "lastApproval": "2023-09-30"
+      },
+      "simulationCutoff": "2022-10-01"
+    },
+    "C": {
+      "fit": {
+        "rows": 326114,
+        "positives": 24356,
+        "excludedOutcomeNotKnown": 38027,
+        "firstApproval": "2009-10-01",
+        "lastApproval": "2018-09-30"
+      },
+      "early": {
+        "rows": 14510,
+        "positives": 1151,
+        "excludedOutcomeNotKnown": 10458,
+        "firstApproval": "2018-10-01",
+        "lastApproval": "2019-09-30"
+      },
+      "calibration": {
+        "rows": 9698,
+        "positives": 382,
+        "excludedOutcomeNotKnown": 10645,
+        "firstApproval": "2019-10-01",
+        "lastApproval": "2020-09-30"
+      },
+      "threshold": {
+        "rows": 6882,
+        "positives": 185,
+        "excludedOutcomeNotKnown": 14019,
+        "firstApproval": "2020-10-01",
+        "lastApproval": "2021-09-30"
+      },
+      "validation": {
+        "rows": 6094,
+        "positives": 620,
+        "excludedOutcomeNotKnown": 0,
+        "firstApproval": "2023-10-01",
+        "lastApproval": "2024-09-30"
+      },
+      "simulationCutoff": "2023-10-01"
+    }
+  },
+  "revisionReason": "Consecutive annual PIT roles had only 2 threshold positives in B and zero calibration positives in C. Execution uses a two-year maturation gap after threshold approvals and one common simulation cutoff before validation.",
+  "pointInTime": "All model-fit, early-stop, calibrator and threshold labels must have outcomeDate < validation FY start. No validation labels enter those components.",
+  "baselineChanges": [
+    "Validation years changed to A=2021, B=2023, C=2024; role approval years remain distinct.",
+    "Full-originated-book selection bias cannot be removed from completed-loan-only source.",
+    "original9 remains diagnostic because point-in-time loan term is unconfirmed."
+  ],
+  "modelLibraries": {
+    "catboost": "1.2.10",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.0.5"
+  },
+  "reporting": "Each point reports precision, F1, recall at one threshold; no means; evaluation is historical validation, not fresh independent test.",
+  "newDeployment": false
+}

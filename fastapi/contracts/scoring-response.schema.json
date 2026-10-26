@@ -1,0 +1,80 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "sba-scoring-1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "requestId": {
+      "format": "uuid",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "sbaDefaultProbability": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Sbadefaultprobability",
+      "type": "number"
+    },
+    "score": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Score",
+      "type": "integer"
+    },
+    "modelVersion": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Modelversion",
+      "type": "string"
+    },
+    "featureVersion": {
+      "const": "sba-features-1",
+      "title": "Featureversion",
+      "type": "string"
+    },
+    "calibrationVersion": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Calibrationversion",
+      "type": "string"
+    },
+    "domainStatus": {
+      "enum": [
+        "IN_RANGE",
+        "EXTRAPOLATION"
+      ],
+      "title": "Domainstatus",
+      "type": "string"
+    },
+    "isDemo": {
+      "const": true,
+      "title": "Isdemo",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "sbaDefaultProbability",
+    "score",
+    "modelVersion",
+    "featureVersion",
+    "calibrationVersion",
+    "domainStatus",
+    "isDemo",
+    "warnings"
+  ],
+  "title": "ScoringResponse",
+  "type": "object"
+}

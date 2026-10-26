@@ -1,0 +1,129 @@
+{
+  "stage": "postprocess",
+  "records": 367,
+  "failures": 0,
+  "distinctModelArtifacts": 367,
+  "byFold": {
+    "A": {
+      "maximumMeasuredF1": {
+        "id": "blend-2-0.1-A",
+        "point": {
+          "threshold": 0.20269975839623453,
+          "rows": 20901,
+          "positives": 1265,
+          "tp": 874,
+          "fp": 1103,
+          "fn": 391,
+          "tn": 18533,
+          "precision": 0.4420839656044512,
+          "recall": 0.6909090909090909,
+          "f1": 0.5391733497840839,
+          "f2": 0.6210032684382549,
+          "falsePositiveRate": 0.05617233652475046,
+          "flaggedCount": 1977,
+          "flaggedShare": 0.09458877565666715
+        }
+      },
+      "closestToBothFloors": {
+        "id": "blend-2-0.25-A",
+        "point": {
+          "threshold": 0.20841112754655103,
+          "rows": 20901,
+          "positives": 1265,
+          "tp": 867,
+          "fp": 1090,
+          "fn": 398,
+          "tn": 18546,
+          "precision": 0.4430250383239652,
+          "recall": 0.6853754940711463,
+          "f1": 0.5381750465549349,
+          "f2": 0.6177853783668235,
+          "falsePositiveRate": 0.05551028722754125,
+          "flaggedCount": 1957,
+          "flaggedShare": 0.09363188364193101
+        }
+      }
+    },
+    "B": {
+      "maximumMeasuredF1": {
+        "id": "mixed-v1-0002",
+        "point": {
+          "threshold": 0.25125060103237185,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1133,
+          "fp": 245,
+          "fn": 595,
+          "tn": 7990,
+          "precision": 0.8222060957910015,
+          "recall": 0.6556712962962963,
+          "f1": 0.7295556986477785,
+          "f2": 0.6833534378769602,
+          "falsePositiveRate": 0.029751062537947785,
+          "flaggedCount": 1378,
+          "flaggedShare": 0.13831175348790525
+        }
+      },
+      "closestToBothFloors": {
+        "id": "cal-refine-0005-isotonic",
+        "point": {
+          "threshold": 0.10884353741496598,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1247,
+          "fp": 1399,
+          "fn": 481,
+          "tn": 6836,
+          "precision": 0.47127739984882844,
+          "recall": 0.7216435185185185,
+          "f1": 0.5701874714220393,
+          "f2": 0.6523331240845365,
+          "falsePositiveRate": 0.16988463873709775,
+          "flaggedCount": 2646,
+          "flaggedShare": 0.26558265582655827
+        }
+      }
+    },
+    "C": {
+      "maximumMeasuredF1": {
+        "id": "blend-4-0.1-C",
+        "point": {
+          "threshold": 0.17922870156809695,
+          "rows": 6094,
+          "positives": 620,
+          "tp": 291,
+          "fp": 226,
+          "fn": 329,
+          "tn": 5248,
+          "precision": 0.562862669245648,
+          "recall": 0.4693548387096774,
+          "f1": 0.5118733509234829,
+          "f2": 0.4854854854854855,
+          "falsePositiveRate": 0.041286079649251003,
+          "flaggedCount": 517,
+          "flaggedShare": 0.08483754512635379
+        }
+      },
+      "closestToBothFloors": {
+        "id": "blend-4-0.75-C",
+        "point": {
+          "threshold": 0.12045382271796451,
+          "rows": 6094,
+          "positives": 620,
+          "tp": 321,
+          "fp": 490,
+          "fn": 299,
+          "tn": 4984,
+          "precision": 0.3958076448828607,
+          "recall": 0.5177419354838709,
+          "f1": 0.44863731656184486,
+          "f2": 0.487693710118505,
+          "falsePositiveRate": 0.08951406649616368,
+          "flaggedCount": 811,
+          "flaggedShare": 0.133081719724319
+        }
+      }
+    }
+  },
+  "metricsAreAveraged": false
+}

@@ -73,12 +73,23 @@ async def validation_error(request: Request, error: RequestValidationError):
         "result",
         "actual",
         "expected",
+        "loanAmountUsd",
+        "termMonths",
+        "initialInterestRatePct",
+        "interestRateType",
+        "isRevolving",
+        "hasCollateral",
+        "businessType",
+        "businessAgeCategory",
+        "naicsCode",
     }
     details = [
         {"path": [p if isinstance(p, int) or p in known else "field" for p in e["loc"]]}
         for e in error.errors()[:20]
     ]
     contract = "Java exchange" if request.url.path.endswith("/rank-java") else "rank-v2"
+    if request.url.path.startswith("/api/v1/scoring/"):
+        contract = "sba-scoring-1"
     return response(422, "VALIDATION_ERROR", f"Request does not match {contract}", details=details)
 
 

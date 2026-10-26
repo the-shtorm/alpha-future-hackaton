@@ -85,6 +85,8 @@ class Settings(BaseSettings):
     max_request_bytes: int = Field(default=524288, ge=1, le=524288)
     docs_enabled: bool = False
     log_level: str = "INFO"
+    scoring_enabled: bool = False
+    scoring_model_path: str | Path = "thedauns/sba-scoring-v2"
 
     @model_validator(mode="after")
     def validate_runtime(self):

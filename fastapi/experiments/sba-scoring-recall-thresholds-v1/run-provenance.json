@@ -1,0 +1,28 @@
+{
+  "command": "scoring_training/.venv/bin/python -m scoring_training.threshold_search --prepared ../data/scoring/prepared/sba-v1 --package models/sba-scoring-v1 --output scoring_training/runs/sba-recall-thresholds-2026-10-25-v1 --recommended-recall 0.95",
+  "workingDirectory": "fastapi",
+  "implementationCommit": "0ede558",
+  "completedDate": "2026-10-25",
+  "fullExactCurve": {
+    "localIgnoredPath": "fastapi/scoring_training/runs/sba-recall-thresholds-2026-10-25-v1/development-exact-curve.csv",
+    "bytes": 7235370,
+    "sha256": "87736aa1fca1f9e710412033b17ccfaddadcc889f6d0209810c2c92ea292e69f",
+    "tracked": false
+  },
+  "files": {
+    "selection.json": "1064ef9254207f78760d563c8c2cea811fdff5db69eef090123efe5a0bcbf641",
+    "evaluation.json": "b33ac8a6fb1574fbbc16c7698c5fa6a52d91614613d86a06bfe13690d42a61c8",
+    "comparison.csv": "3ffabd96f9c23ccac0160b450f1687e001bfa6fd2f4dec3f8bc0e601da613a0c",
+    "development-grid.csv": "45bc35942d2faa6f5f3029916b8d5c7b424ddedc6852745fdd250cbcb0bf6068",
+    "threshold-tradeoffs.png": "97c9a2b548568aa762ba0b04ce6a2bb8f2c89f4c7eab26766658add3d06a7a30"
+  },
+  "verification": {
+    "trainingSuitePassed": 222,
+    "originalBaselineMetricComparisonsPassed": 24,
+    "selectionAndImplementationHashesVerified": true,
+    "allFrozenModelFileHashesVerified": true,
+    "figureVisuallyInspected": true,
+    "pushPerformed": false
+  },
+  "exportNormalization": "Exported compact CSVs use LF to match Git text storage; original ignored run outputs remain unchanged."
+}

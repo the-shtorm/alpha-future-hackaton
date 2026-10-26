@@ -1,0 +1,49 @@
+{
+  "stage": "screening",
+  "records": 480,
+  "failures": 0,
+  "distinctModelArtifacts": 384,
+  "byFold": {
+    "B": {
+      "maximumMeasuredF1": {
+        "id": "screen-v1-0426",
+        "point": {
+          "threshold": 0.08230916557700489,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1060,
+          "fp": 533,
+          "fn": 668,
+          "tn": 7702,
+          "precision": 0.6654111738857501,
+          "recall": 0.6134259259259259,
+          "f1": 0.6383619391749473,
+          "f2": 0.6231628453850676,
+          "falsePositiveRate": 0.0647237401335762,
+          "flaggedCount": 1593,
+          "flaggedShare": 0.15989159891598917
+        }
+      },
+      "closestToBothFloors": {
+        "id": "screen-v1-0375",
+        "point": {
+          "threshold": 0.062320984836261285,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1206,
+          "fp": 872,
+          "fn": 522,
+          "tn": 7363,
+          "precision": 0.5803657362848893,
+          "recall": 0.6979166666666666,
+          "f1": 0.6337362059905413,
+          "f2": 0.6707452725250278,
+          "falsePositiveRate": 0.10588949605343048,
+          "flaggedCount": 2078,
+          "flaggedShare": 0.2085717153467831
+        }
+      }
+    }
+  },
+  "metricsAreAveraged": false
+}

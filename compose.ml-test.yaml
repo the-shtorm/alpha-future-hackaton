@@ -1,6 +1,7 @@
 # Disposable acceptance stack; use scripts.java_acceptance, never a production project name.
 services:
   fastapi:
+    platform: linux/amd64
     image: ${ML_TEST_IMAGE:-alpha-future-recsys:java-contract}
     environment:
       ML_INTERNAL_API_KEY: ${ML_TEST_API_KEY:?Set test key}
@@ -8,8 +9,15 @@ services:
       MODEL_SOURCE: local
       MODEL_LOCAL_PATH: /models/active
       RECOMMENDATION_MAX_COSINE_DISTANCE: ${ML_TEST_MAX_COSINE_DISTANCE:-}
+      SCORING_ENABLED: ${ML_TEST_SCORING_ENABLED:-false}
+      SCORING_MODEL_PATH: ${ML_TEST_SCORING_MODEL_PATH:-thedauns/sba-scoring-v2}
+      HF_CACHE_DIR: /model-cache
+      HF_LOCAL_FILES_ONLY: ${ML_TEST_HF_LOCAL_FILES_ONLY:-false}
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro,z
+      - ./fastapi/models:/scoring-models:ro
+      - test_model_cache:/model-cache
     ports: ["127.0.0.1::8000"]
     mem_limit: 2g
     read_only: true
@@ -32,11 +40,16 @@ services:
       DB_MIGRATOR_PASSWORD: ${ML_TEST_DB_MIGRATOR_PASSWORD:?Set test password}
       SPRING_PROFILES_ACTIVE: demo
       DEMO_PASSWORD: ${ML_TEST_DEMO_PASSWORD:?Set test password}
+      DEMO_BANK_PASSWORD: ${ML_TEST_DEMO_PASSWORD:?Set test password}
       DEMO_ASSESSMENT_ENABLED: "false"
+      # This isolated stack publishes plain HTTP; HTTPS cookie checks use compose.session-test.yaml.
+      SESSION_COOKIE_SECURE: "false"
       DOCUMENTS_PATH: /app/documents
       RECSYS_URL: http://fastapi:8000/api/v1/recommendations/rank-java
       RECSYS_API_KEY: ${ML_TEST_API_KEY:?Set test key}
       RECSYS_TIMEOUT_MS: "10000"
+      SCORING_URL: http://fastapi:8000/api/v1/scoring/evaluate
+      SCORING_API_KEY: ${ML_TEST_API_KEY:?Set test key}
       JAVA_TOOL_OPTIONS: "-Xms64m -Xmx384m -XX:+ExitOnOutOfMemoryError"
     ports: ["127.0.0.1::8080"]
     mem_limit: 768m
@@ -64,5 +77,17 @@ services:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "recsys_acceptance"]
       interval: 2s
       retries: 30
+  frontend:
+    profiles: [scoring]
+    image: ${ML_TEST_FRONTEND_IMAGE:-alpha-future-frontend:scoring-acceptance}
+    ports: ["127.0.0.1::8080"]
+    mem_limit: 128m
+    read_only: true
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      backend: {condition: service_started}
 volumes:
+  test_model_cache:
   test_pgdata:

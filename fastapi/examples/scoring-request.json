@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "sba-scoring-1",
+  "requestId": "00000000-0000-4000-8000-000000000001",
+  "loanAmountUsd": "3333.33",
+  "termMonths": 12,
+  "initialInterestRatePct": "28.00000",
+  "interestRateType": "FIXED",
+  "isRevolving": false,
+  "hasCollateral": false,
+  "businessType": "CORPORATION",
+  "businessAgeCategory": "Existing, 5 or more years",
+  "naicsCode": "445110"
+}

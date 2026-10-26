@@ -1,0 +1,67 @@
+{
+  "modelVersion": "sba-scoring-v1",
+  "threshold": 0.15283707537791144,
+  "manifestSha256": "4e1f416090cb567bc44e53faeb92022a297384b681321fba5dde4d3c18e9efd5",
+  "modelFiles": {
+    "calibration.json": "573d8a456c11d344db3de6716d85271b459858ce14f2eb5239bc363759a53896",
+    "domain.json": "f26391e4b5a18a734db3ce1f80087094a50f040aaa8f9f95cddd67f5b05a8580",
+    "model.cbm": "9fb1218015e84f3e440164045d0904bd6923db8613bfe154d7602efacf7843f6",
+    "training.json": "4d7fc1ec09165a27810fe67c73083e4fe69cdfc2644045df8753b57ef058a4ff",
+    "evaluation.json": "2707ae5b32529c4a26e99eda33d5f2f770709bf25b25504fe4e0e5b16773c44b"
+  },
+  "originalPackage": "fastapi/models/sba-scoring-v1",
+  "backupPackage": "fastapi/scoring_training/runs/recall90-precision60-campaign-v1/favorite-package",
+  "historicalMetrics": {
+    "calibration": {
+      "threshold": 0.15283707537791144,
+      "rows": 43456,
+      "positives": 3952,
+      "tp": 3557,
+      "fp": 2818,
+      "fn": 395,
+      "tn": 36686,
+      "precision": 0.5579607843137255,
+      "recall": 0.9000506072874493,
+      "f1": 0.6888738258932894,
+      "f2": 0.8017400712257133,
+      "falsePositiveRate": 0.07133454840016201,
+      "flaggedCount": 6375,
+      "flaggedShare": 0.14670011045655376
+    },
+    "test": {
+      "threshold": 0.15283707537791144,
+      "rows": 60186,
+      "positives": 5927,
+      "tp": 5124,
+      "fp": 6626,
+      "fn": 803,
+      "tn": 47633,
+      "precision": 0.4360851063829787,
+      "recall": 0.8645183060570272,
+      "f1": 0.5797363806075692,
+      "f2": 0.722544982796548,
+      "falsePositiveRate": 0.12211798964227133,
+      "flaggedCount": 11750,
+      "flaggedShare": 0.19522812614229224
+    },
+    "transfer": {
+      "threshold": 0.15283707537791144,
+      "rows": 72450,
+      "positives": 6620,
+      "tp": 3716,
+      "fp": 6067,
+      "fn": 2904,
+      "tn": 59763,
+      "precision": 0.3798425840744148,
+      "recall": 0.5613293051359517,
+      "f1": 0.4530878497835762,
+      "f2": 0.5123679783801671,
+      "falsePositiveRate": 0.09216162843688289,
+      "flaggedCount": 9783,
+      "flaggedShare": 0.13503105590062112
+    }
+  },
+  "backupVerified": true,
+  "runtimePolicyChanged": false,
+  "note": "User favorite retained as immutable baseline; no candidate may overwrite this package or its pin."
+}

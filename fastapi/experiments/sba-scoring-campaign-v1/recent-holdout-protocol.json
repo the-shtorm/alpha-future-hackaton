@@ -1,0 +1,746 @@
+{
+  "schemaVersion": "sba-recent-holdout-1",
+  "status": "audited_protocol",
+  "approvedParentCount": 100,
+  "additionalFitCount": 200,
+  "strategies": [
+    "random_rows",
+    "random_years"
+  ],
+  "splitSeed": 42,
+  "modelSeed": 42,
+  "developmentThroughFY": 2019,
+  "outcomeKnownBefore": "2019-10-01",
+  "futureHoldoutFYs": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "sourceCacheSha256": "43834820e524cf4445c2df2881d895249cb38a7f534dfd4726ab47fd8004ff58",
+  "implementationSha256": "0017d18250f3c75e5692fbe9ec42b94f5b6868768c68738ad634fab6f579ac85",
+  "minimumPerClassPerDevelopmentRole": 100,
+  "wholeYearMinimumSupportUsesOnlyHistoricalLabels": true,
+  "fitWindowAppliedOnlyToAssignedTrainingRows": true,
+  "sourceShortlistUsesPreviouslyInspectedFY2023": true,
+  "isUntouchedExternalTest": false,
+  "sourceParentRank": "source recall>=0.84 then max precision; final acceptable84/53 plus favorite dominance, aim85/55",
+  "audits": {
+    "random_rows": {
+      "None": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_rows",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 1,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 133793,
+          "positives": 10321,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "98adc38981b419ec3727b38e3d19c94da707a6348d228972c6683d3fead3b7af"
+        },
+        "early": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "9a556dd725696413f44e6c915401e2d793a0d4ee52684289e0119bc6a58cac7a"
+        },
+        "calibration": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "bbda61324556c57eaf0fe91a062f36afe1774ddba5697b9c165945284fe788eb"
+        },
+        "threshold": {
+          "rows": 19114,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "78bee75debb601e6a0e659920c7f1ac8dff8bcf08ba105f2c3a79d52f8d2040e"
+        },
+        "validation": {
+          "rows": 19115,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "d8a1f54bdca2a76e7ccef143c0816817375cab5e3f0aa8afb3672eb3036e9d35"
+        }
+      },
+      "7": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_rows",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 1,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 67594,
+          "positives": 5096,
+          "approvalFiscalYears": [
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "300630f593074871b6a56127a16441d9e808863eb051d7037daebf5a7d305e3f"
+        },
+        "early": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "9a556dd725696413f44e6c915401e2d793a0d4ee52684289e0119bc6a58cac7a"
+        },
+        "calibration": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "bbda61324556c57eaf0fe91a062f36afe1774ddba5697b9c165945284fe788eb"
+        },
+        "threshold": {
+          "rows": 19114,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "78bee75debb601e6a0e659920c7f1ac8dff8bcf08ba105f2c3a79d52f8d2040e"
+        },
+        "validation": {
+          "rows": 19115,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "d8a1f54bdca2a76e7ccef143c0816817375cab5e3f0aa8afb3672eb3036e9d35"
+        }
+      },
+      "5": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_rows",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 1,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 33044,
+          "positives": 2766,
+          "approvalFiscalYears": [
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "d76b8424c8bc56ca85a6609d2877e230f9883cadc0ff7fe9ac0db12d03ee29c0"
+        },
+        "early": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "9a556dd725696413f44e6c915401e2d793a0d4ee52684289e0119bc6a58cac7a"
+        },
+        "calibration": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "bbda61324556c57eaf0fe91a062f36afe1774ddba5697b9c165945284fe788eb"
+        },
+        "threshold": {
+          "rows": 19114,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "78bee75debb601e6a0e659920c7f1ac8dff8bcf08ba105f2c3a79d52f8d2040e"
+        },
+        "validation": {
+          "rows": 19115,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "d8a1f54bdca2a76e7ccef143c0816817375cab5e3f0aa8afb3672eb3036e9d35"
+        }
+      },
+      "3": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_rows",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 1,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 7918,
+          "positives": 656,
+          "approvalFiscalYears": [
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "b526cd1168606d383715d97b4f2c4732a7489b944cbabfc7aab456f2a14ab617"
+        },
+        "early": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "9a556dd725696413f44e6c915401e2d793a0d4ee52684289e0119bc6a58cac7a"
+        },
+        "calibration": {
+          "rows": 9556,
+          "positives": 737,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "bbda61324556c57eaf0fe91a062f36afe1774ddba5697b9c165945284fe788eb"
+        },
+        "threshold": {
+          "rows": 19114,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "78bee75debb601e6a0e659920c7f1ac8dff8bcf08ba105f2c3a79d52f8d2040e"
+        },
+        "validation": {
+          "rows": 19115,
+          "positives": 1475,
+          "approvalFiscalYears": [
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "d8a1f54bdca2a76e7ccef143c0816817375cab5e3f0aa8afb3672eb3036e9d35"
+        }
+      }
+    },
+    "random_years": {
+      "None": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_years",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 2,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 92298,
+          "positives": 6842,
+          "approvalFiscalYears": [
+            2012,
+            2014,
+            2015,
+            2016,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "f8abd1868d62683b204dd35bd0f667e2f9ed76172b2bbde1b5006f8b20c8ac11"
+        },
+        "early": {
+          "rows": 7888,
+          "positives": 700,
+          "approvalFiscalYears": [
+            2017
+          ],
+          "sourceIndicesSha256": "bc6aaae92175e197c1f655ac3752595434a7c500618ce45b1c8d2716f8a9605e"
+        },
+        "calibration": {
+          "rows": 24865,
+          "positives": 1626,
+          "approvalFiscalYears": [
+            2013
+          ],
+          "sourceIndicesSha256": "df4f43535fab852153a37ac77dd0cead3eb2f03049721fdb25402009408be33f"
+        },
+        "threshold": {
+          "rows": 31267,
+          "positives": 3117,
+          "approvalFiscalYears": [
+            2010
+          ],
+          "sourceIndicesSha256": "1ff05e1fa2657e6fa09ae804613914a35f6dff3059aba2456e5ec68418518299"
+        },
+        "validation": {
+          "rows": 34816,
+          "positives": 2460,
+          "approvalFiscalYears": [
+            2011
+          ],
+          "sourceIndicesSha256": "bf2b8785ebd38f60c04ef19774aaf038dbe0ffba7c45333ac5f025c0a81ec75a"
+        }
+      },
+      "7": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_years",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 2,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 63796,
+          "positives": 4976,
+          "approvalFiscalYears": [
+            2014,
+            2015,
+            2016,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "0a3ed75f6a857634f827dd993077d73bd81970393a9f24a48faa4b44ebe1eb94"
+        },
+        "early": {
+          "rows": 7888,
+          "positives": 700,
+          "approvalFiscalYears": [
+            2017
+          ],
+          "sourceIndicesSha256": "bc6aaae92175e197c1f655ac3752595434a7c500618ce45b1c8d2716f8a9605e"
+        },
+        "calibration": {
+          "rows": 24865,
+          "positives": 1626,
+          "approvalFiscalYears": [
+            2013
+          ],
+          "sourceIndicesSha256": "df4f43535fab852153a37ac77dd0cead3eb2f03049721fdb25402009408be33f"
+        },
+        "threshold": {
+          "rows": 31267,
+          "positives": 3117,
+          "approvalFiscalYears": [
+            2010
+          ],
+          "sourceIndicesSha256": "1ff05e1fa2657e6fa09ae804613914a35f6dff3059aba2456e5ec68418518299"
+        },
+        "validation": {
+          "rows": 34816,
+          "positives": 2460,
+          "approvalFiscalYears": [
+            2011
+          ],
+          "sourceIndicesSha256": "bf2b8785ebd38f60c04ef19774aaf038dbe0ffba7c45333ac5f025c0a81ec75a"
+        }
+      },
+      "5": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_years",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 2,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 39225,
+          "positives": 3275,
+          "approvalFiscalYears": [
+            2015,
+            2016,
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "a4b1f336b2bad682ee3913767c3c7552ff50504068d1761c5618f55a186b6ade"
+        },
+        "early": {
+          "rows": 7888,
+          "positives": 700,
+          "approvalFiscalYears": [
+            2017
+          ],
+          "sourceIndicesSha256": "bc6aaae92175e197c1f655ac3752595434a7c500618ce45b1c8d2716f8a9605e"
+        },
+        "calibration": {
+          "rows": 24865,
+          "positives": 1626,
+          "approvalFiscalYears": [
+            2013
+          ],
+          "sourceIndicesSha256": "df4f43535fab852153a37ac77dd0cead3eb2f03049721fdb25402009408be33f"
+        },
+        "threshold": {
+          "rows": 31267,
+          "positives": 3117,
+          "approvalFiscalYears": [
+            2010
+          ],
+          "sourceIndicesSha256": "1ff05e1fa2657e6fa09ae804613914a35f6dff3059aba2456e5ec68418518299"
+        },
+        "validation": {
+          "rows": 34816,
+          "positives": 2460,
+          "approvalFiscalYears": [
+            2011
+          ],
+          "sourceIndicesSha256": "bf2b8785ebd38f60c04ef19774aaf038dbe0ffba7c45333ac5f025c0a81ec75a"
+        }
+      },
+      "3": {
+        "simulationCutoff": "2019-10-01",
+        "splitStrategy": "random_years",
+        "splitSeed": 42,
+        "minimumPerClass": 100,
+        "assignmentAttempts": 2,
+        "historicalPoolRows": 191134,
+        "historicalPoolPositives": 14745,
+        "excludedOutcomeNotKnown": 197975,
+        "fitWindowThroughFY": 2019,
+        "futureHoldoutFYs": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "futureHoldoutIsUntouchedExternalTest": false,
+        "fit": {
+          "rows": 3347,
+          "positives": 213,
+          "approvalFiscalYears": [
+            2018,
+            2019
+          ],
+          "sourceIndicesSha256": "cfa7c0ae654e3cecd82c484dfecb044f273ecb9fb2d608fc943477e0c279c0b2"
+        },
+        "early": {
+          "rows": 7888,
+          "positives": 700,
+          "approvalFiscalYears": [
+            2017
+          ],
+          "sourceIndicesSha256": "bc6aaae92175e197c1f655ac3752595434a7c500618ce45b1c8d2716f8a9605e"
+        },
+        "calibration": {
+          "rows": 24865,
+          "positives": 1626,
+          "approvalFiscalYears": [
+            2013
+          ],
+          "sourceIndicesSha256": "df4f43535fab852153a37ac77dd0cead3eb2f03049721fdb25402009408be33f"
+        },
+        "threshold": {
+          "rows": 31267,
+          "positives": 3117,
+          "approvalFiscalYears": [
+            2010
+          ],
+          "sourceIndicesSha256": "1ff05e1fa2657e6fa09ae804613914a35f6dff3059aba2456e5ec68418518299"
+        },
+        "validation": {
+          "rows": 34816,
+          "positives": 2460,
+          "approvalFiscalYears": [
+            2011
+          ],
+          "sourceIndicesSha256": "bf2b8785ebd38f60c04ef19774aaf038dbe0ffba7c45333ac5f025c0a81ec75a"
+        }
+      }
+    }
+  },
+  "futureRows": 72450,
+  "futurePositives": 6620,
+  "futureByFY": {
+    "2020": {
+      "rows": 20343,
+      "positives": 1227
+    },
+    "2021": {
+      "rows": 20901,
+      "positives": 1265
+    },
+    "2022": {
+      "rows": 12872,
+      "positives": 1698
+    },
+    "2023": {
+      "rows": 9963,
+      "positives": 1728
+    },
+    "2024": {
+      "rows": 6094,
+      "positives": 620
+    },
+    "2025": {
+      "rows": 2194,
+      "positives": 82
+    },
+    "2026": {
+      "rows": 83,
+      "positives": 0
+    }
+  },
+  "rankingImplementationSha256": "030b46f2e1e08e280697c1d4faa78ab3479360052aa13a39a933709affd9309e",
+  "activeTarget": {
+    "minRecall": 0.84,
+    "minPrecision": 0.53
+  },
+  "targetDefinitionSha256": "877ed7e0429917b66c3b033872c493c679cd31e5d84f42df9f48fd61545da4b2",
+  "aspirationalTarget": {
+    "minRecall": 0.85,
+    "minPrecision": 0.55
+  },
+  "mustDominateFavorite": true
+}
