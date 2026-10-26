@@ -1,5 +1,7 @@
 # Task reports
 
+- [2026-10-26 — Presentation plan 5–7 slides](2026-10-26-presentation-plan.md) — completed; added docs/presentation-guide.md with a 6-slide plan covering technical solutions, business value, ML and demo caveats; also resolves the dangling README link; docs only.
+
 - [2026-10-26 — THIRD_PARTY_NOTICES inventory](2026-10-26-third-party-notices.md) — completed; added root THIRD_PARTY_NOTICES.md listing third-party components, models, datasets, services and simulated integrations from actual manifests and lock files; docs only, no tests or push.
 
 - [2026-10-26 — Merge db-init and pre-docs into main](2026-10-26-merge-db-init-cookie-session-and-pre-docs-main.md) — completed; db-init merged into cookie-session, main created and pre-docs merged; conflicts resolved, tests explicitly deferred, local only.
