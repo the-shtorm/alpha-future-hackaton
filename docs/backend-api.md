@@ -69,7 +69,8 @@ expectedVersion; запросы сериализуются. До входа хр
 | GET | `/applications/{id}/status` | Нет | application, history, checks с причинами, decision, offer/counteroffer, договор/выдача | Участник или банк |
 | GET | `/applications/{id}/revisions/{revision}` | Нет | snapshot, snapshot_sha256, revision_no | Участник или банк |
 | GET | `/applications/{id}/requirements` | Нет | Требования продукта, включая поручительство и обеспечение | Участник или банк |
-| POST | `/applications/{id}/documents` | multipart: typeCode, file | versionId, sha256, value_status=UNKNOWN | OWNER/EDITOR; DRAFT/NEEDS_INFO |
+| GET | `/applications/{id}/documents` | Нет | Версии файлов, current, versionNo и последний результат проверки; без storage_key | Участник или BANK_APPROVER |
+| POST | `/applications/{id}/documents` | multipart: typeCode, file, опционально replacesVersionId | versionId, sha256, value_status=UNKNOWN | OWNER/EDITOR; DRAFT/NEEDS_INFO |
 | GET | `/applications/{id}/documents/{version}` | Нет | Закрытое скачивание PDF/PNG/JPEG/договора | Участник или банк |
 | GET | `/bank/applications` | page, size | Банковская очередь | BANK_APPROVER |
 | POST | `/bank/applications/{id}/assign` | Нет | assignedTo=текущий сотрудник | BANK_APPROVER |
@@ -230,3 +231,9 @@ application/problem+json содержит code/detail/fields без SQL, ток�
 | GET | `/selection-profiles/{id}/recommendations/{runId}/ranking-result` | Сходство вместе с исходными eligibilityStatus/pendingConditions | Член компании |
 
 Тело ответа команды и ошибки: [контракт обмена](ranking-exchange.md).
+
+Замена документа задаётся явно через `replacesVersionId` последней версии этого файла.
+Тип и заявка должны совпадать; устаревшая версия даёт 409. Без этого параметра
+добавляется отдельный документ. Новая подача фиксирует последние версии каждого
+документа; старые ревизии и файлы сохраняются. Проверка старой версии не меняет
+статус требования для её новой версии.

@@ -378,7 +378,7 @@ class ApplicationService {
         Instant now = Instant.now();
         var files =
                 db.sql(
-                                "SELECT id,sha256,type_code FROM credit.document_version WHERE application_id=:id AND type_code<>'CREDIT_CONTRACT' ORDER BY id")
+                                "SELECT DISTINCT ON (document_id) id,sha256,type_code FROM credit.document_version WHERE application_id=:id AND type_code<>'CREDIT_CONTRACT' ORDER BY document_id,version_no DESC")
                         .param("id", id)
                         .query()
                         .listOfRows();
@@ -925,7 +925,7 @@ class ApplicationService {
         result.put("checks", explained);
         var decisions =
                 db.sql(
-                                "SELECT id,revision_id AS \"revisionId\",decision_kind AS kind,reasoning AS reason,conditions,decided_at AS \"decidedAt\" FROM credit.credit_decision WHERE application_id=:app ORDER BY decision_number DESC LIMIT 1")
+                                "SELECT id,revision_id AS \"revisionId\",decision_kind AS kind,reasoning AS reason,conditions,decided_at AS \"decidedAt\" FROM credit.credit_decision WHERE application_id=:app AND revision_id=(SELECT active_revision_id FROM credit.loan_application WHERE id=:app) ORDER BY decision_number DESC LIMIT 1")
                         .param("app", id)
                         .query()
                         .listOfRows();
@@ -1005,6 +1005,15 @@ class ApplicationService {
         return result;
     }
 
+    List<Map<String, Object>> documentList(UUID id) {
+        get(id);
+        return db.sql(
+                        "SELECT d.id,d.document_id AS \"documentId\",d.version_no AS \"versionNo\",d.type_code AS \"typeCode\",d.original_filename AS \"filename\",d.media_type AS \"mediaType\",d.size_bytes AS \"sizeBytes\",d.sha256,NOT EXISTS(SELECT 1 FROM credit.document_version newer WHERE newer.document_id=d.document_id AND newer.version_no>d.version_no) AS \"current\",(SELECT r.result FROM credit.document_review r WHERE r.document_version_id=d.id AND r.review_kind='CONTENT' ORDER BY r.review_number DESC LIMIT 1) AS \"reviewResult\" FROM credit.document_version d WHERE d.application_id=:app ORDER BY d.created_at DESC,d.id")
+                .param("app", id)
+                .query()
+                .listOfRows();
+    }
+
     List<Map<String, Object>> requirements(UUID id) {
         get(id);
         return db.sql(
@@ -1039,10 +1048,10 @@ class ApplicationService {
     }
 
     @Transactional
-    Map<String, Object> upload(UUID id, String type, MultipartFile file) {
+    Map<String, Object> upload(UUID id, String type, MultipartFile file, UUID replacesVersionId) {
         var app = load(id, false, true, false, true);
         if (!Set.of("DRAFT", "NEEDS_INFO").contains(app.status())) throw ApiFailure.conflict();
-        var result = documents.upload(app, type, file);
+        var result = documents.upload(app, type, file, replacesVersionId);
         db.sql("UPDATE credit.loan_application SET row_version=row_version+1 WHERE id=:id")
                 .param("id", id)
                 .update();

@@ -28,7 +28,8 @@ class Documents {
         this.root = Path.of(root).toAbsolutePath().normalize();
     }
 
-    Map<String, Object> upload(ApplicationService.Draft app, String type, MultipartFile file) {
+    Map<String, Object> upload(
+            ApplicationService.Draft app, String type, MultipartFile file, UUID replacesVersionId) {
         if (type.equals("CREDIT_CONTRACT")
                 || !db.sql("SELECT EXISTS(SELECT 1 FROM credit.document_type WHERE code=:type)")
                         .param("type", type)
@@ -45,22 +46,39 @@ class Documents {
             throw new ApiFailure(413, "FILE_TOO_LARGE", "Нужен непустой файл не больше 10 MB");
         String media = detect(data);
         UUID document = UUID.randomUUID(), version = UUID.randomUUID();
+        int versionNo = 1;
+        if (replacesVersionId != null) {
+            var previous = metadata(app.id(), replacesVersionId);
+            if (!type.equals(previous.get("type_code")))
+                throw ApiFailure.invalid("replacesVersionId", "Тип документа не совпадает");
+            document = (UUID) previous.get("document_id");
+            int latest =
+                    db.sql(
+                                    "SELECT max(version_no) FROM credit.document_version WHERE document_id=:doc")
+                            .param("doc", document)
+                            .query(Integer.class)
+                            .single();
+            if (((Number) previous.get("version_no")).intValue() != latest)
+                throw ApiFailure.conflict();
+            versionNo = latest + 1;
+        }
         store(version, data);
         String filename =
                 Optional.ofNullable(file.getOriginalFilename())
                         .orElse("document")
                         .replaceAll("[^a-zA-Zа-яА-ЯёЁ0-9._ -]", "_");
         if (filename.length() > 200) filename = filename.substring(filename.length() - 200);
-        db.sql(
-                        "INSERT INTO credit.document(id,application_id,subject_party_id,type_code,title,created_by) VALUES (:id,:app,:party,:type,:title,:user)")
-                .param("id", document)
-                .param("app", app.id())
-                .param("party", app.partyId())
-                .param("type", type)
-                .param("title", filename)
-                .param("user", access.user())
-                .update();
-        insertVersion(version, document, app, type, filename, media, data);
+        if (replacesVersionId == null)
+            db.sql(
+                            "INSERT INTO credit.document(id,application_id,subject_party_id,type_code,title,created_by) VALUES (:id,:app,:party,:type,:title,:user)")
+                    .param("id", document)
+                    .param("app", app.id())
+                    .param("party", app.partyId())
+                    .param("type", type)
+                    .param("title", filename)
+                    .param("user", access.user())
+                    .update();
+        insertVersion(version, document, app, type, filename, media, data, versionNo);
         return Map.of(
                 "versionId",
                 version,
@@ -116,10 +134,23 @@ class Documents {
             String filename,
             String media,
             byte[] bytes) {
+        insertVersion(version, document, app, type, filename, media, bytes, 1);
+    }
+
+    private void insertVersion(
+            UUID version,
+            UUID document,
+            ApplicationService.Draft app,
+            String type,
+            String filename,
+            String media,
+            byte[] bytes,
+            int versionNo) {
         db.sql(
-                        "INSERT INTO credit.document_version(id,document_id,application_id,subject_party_id,type_code,version_no,storage_key,original_filename,media_type,size_bytes,sha256,uploaded_by) VALUES (:id,:doc,:app,:party,:type,1,:storage,:name,:media,:size,:hash,:user)")
+                        "INSERT INTO credit.document_version(id,document_id,application_id,subject_party_id,type_code,version_no,storage_key,original_filename,media_type,size_bytes,sha256,uploaded_by) VALUES (:id,:doc,:app,:party,:type,:versionNo,:storage,:name,:media,:size,:hash,:user)")
                 .param("id", version)
                 .param("doc", document)
+                .param("versionNo", versionNo)
                 .param("app", app.id())
                 .param("party", app.partyId())
                 .param("type", type)
@@ -155,7 +186,7 @@ class Documents {
     Map<String, Object> metadata(UUID app, UUID version) {
         return db
                 .sql(
-                        "SELECT id,type_code,original_filename,media_type,size_bytes,sha256,storage_key FROM credit.document_version WHERE application_id=:app AND id=:version")
+                        "SELECT id,document_id,version_no,type_code,original_filename,media_type,size_bytes,sha256,storage_key FROM credit.document_version WHERE application_id=:app AND id=:version")
                 .param("app", app)
                 .param("version", version)
                 .query()
@@ -192,7 +223,7 @@ class Documents {
                 .param("details", json.write(Map.of("reason", reason, "source", "BANK_APPROVER")))
                 .update();
         db.sql(
-                        "UPDATE credit.application_document_requirement r SET status=:status,row_version=row_version+1 WHERE r.application_id=:app AND EXISTS(SELECT 1 FROM credit.requirement_document rd WHERE rd.requirement_id=r.id AND rd.document_version_id=:version)")
+                        "UPDATE credit.application_document_requirement r SET status=:status,row_version=row_version+1 WHERE r.application_id=:app AND EXISTS(SELECT 1 FROM credit.requirement_document rd WHERE rd.requirement_id=r.id AND rd.document_version_id=:version) AND NOT EXISTS(SELECT 1 FROM credit.document_version current JOIN credit.document_version previous ON current.document_id=previous.document_id WHERE previous.id=:version AND current.version_no>previous.version_no)")
                 .param(
                         "status",
                         result.equals("PASS")

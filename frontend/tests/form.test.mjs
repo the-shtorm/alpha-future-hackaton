@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyAnswers, normalizeAnswers, exampleAnswers, sameAnswers } from '../src/form.ts';
-import { rate, matchesAmount } from '../src/presentation.ts';
+import { rate, matchesAmount, statusNames } from '../src/presentation.ts';
 import { validatePreliminary } from '../src/validation.ts';
 
 test('preliminary payload has fifteen fields and preserves explicit false and unknowns', () => {
@@ -152,4 +152,19 @@ test('autosave compares normalized values independently of PostgreSQL jsonb key 
   assert.ok(sameAnswers(answers, reordered));
   reordered.request.description = 'Changed';
   assert.equal(sameAnswers(answers, reordered), false);
+});
+
+// The backend workflow emits SIGNED, not CONTRACT_SIGNED. Missing labels hid the completed action.
+test('all backend workflow states have customer-facing labels', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const sql = await readFile(
+    new URL(
+      '../../backend/src/main/resources/db/migration/V2__applications_and_credit_dossier.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  );
+  const states = sql.match(/CHECK \(status IN \(([\s\S]*?)\)\)/)[1].matchAll(/'([A-Z_]+)'/g);
+  for (const [, status] of states)
+    assert.ok(statusNames[status], `Missing status label: ${status}`);
 });

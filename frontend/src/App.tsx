@@ -8,6 +8,7 @@ import { CatalogPage, ProductDetails } from './components/Catalog';
 import { SelectionResults, SavedSelections } from './components/Selections';
 import { Wizard } from './components/Wizard';
 import { ApplicationsPage } from './components/Applications';
+import { BankPage } from './components/Bank';
 import { Banner, Button, Icon, Modal } from './components/UI';
 import { Input } from '@alfalab/core-components-input';
 import type {
@@ -35,6 +36,7 @@ export function App() {
   );
   const [dictionary, setDictionary] = useState<Dictionaries>(dictionaries);
   const [authenticated, setAuthenticated] = useState(false);
+  const [bankApprover, setBankApprover] = useState(false);
   const [restoring, setRestoring] = useState(true);
   const [sessionAttempt, setSessionAttempt] = useState(0);
   const [draftNotice, setDraftNotice] = useState('');
@@ -91,6 +93,7 @@ export function App() {
     profileRef.current = null;
     saveConflict.current = false;
     setAuthenticated(false);
+    setBankApprover(false);
     setDisplayName('');
     setParties([]);
     setPartyId('');
@@ -115,7 +118,7 @@ export function App() {
     setRestoring(true);
     setSessionError('');
     const restore = async () => {
-      let me: { user: { display_name: string }; parties: Party[] };
+      let me: { user: { display_name: string }; parties: Party[]; bankApprover?: boolean };
       try {
         me = await api('/me');
       } catch (e) {
@@ -131,6 +134,7 @@ export function App() {
       const dict = await api<Dictionaries>('/forms/preliminary/dictionaries');
       if (!active) return;
       setAuthenticated(true);
+      setBankApprover(me.bankApprover === true);
       setDisplayName(me.user.display_name);
       setParties(me.parties);
       setDictionary(dict);
@@ -158,6 +162,8 @@ export function App() {
           if (!active) return;
           setSaved(data.items);
           setPage('saved');
+        } else if (view.page === 'bank' && me.bankApprover) {
+          setPage('bank');
         } else if (view.page === 'applications') {
           setApplicationId(view.applicationId);
           setPage('applications');
@@ -470,11 +476,16 @@ export function App() {
       setSelection(null);
       setSaved([]);
       setApplicationId(null);
-      const me = await api<{ user: { display_name: string }; parties: Party[] }>('/me');
+      const me = await api<{
+        user: { display_name: string };
+        parties: Party[];
+        bankApprover?: boolean;
+      }>('/me');
       const dict = await api<Dictionaries>('/forms/preliminary/dictionaries');
       const editable = me.parties.filter((p) => ['OWNER', 'EDITOR'].includes(p.access_role));
       const company = editable.find((p) => p.id === partyId) ?? editable[0];
       setAuthenticated(true);
+      setBankApprover(me.bankApprover === true);
       setDisplayName(me.user.display_name);
       setParties(me.parties);
       setDictionary(dict);
@@ -490,6 +501,7 @@ export function App() {
       setError('');
       setSessionError('');
       channel.current?.postMessage('login');
+      if (me.bankApprover) setPage('bank');
       const pending = intent;
       setIntent(null);
       try {
@@ -515,6 +527,7 @@ export function App() {
       if (signedIn) {
         await api('/auth/logout', {}).catch(() => undefined);
         setAuthenticated(false);
+        setBankApprover(false);
       }
       setLoginError(
         e instanceof ApiError && e.status === 401
@@ -626,6 +639,15 @@ export function App() {
             >
               Мои заявки
             </button>
+            {bankApprover && (
+              <button
+                aria-current={page === 'bank' ? 'page' : undefined}
+                onClick={() => navigate('bank')}
+                disabled={busy}
+              >
+                Кабинет банка
+              </button>
+            )}
           </nav>
           <div className="header-account">
             {authenticated ? (
@@ -742,6 +764,9 @@ export function App() {
             refresh={applicationRefresh}
             onStart={() => start()}
           />
+        )}
+        {page === 'bank' && authenticated && bankApprover && !restoring && (
+          <BankPage products={products} />
         )}
       </main>
       <footer className="site-footer">

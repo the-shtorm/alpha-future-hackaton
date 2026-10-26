@@ -1,11 +1,11 @@
-export type Page = 'catalog' | 'form' | 'results' | 'saved' | 'applications';
+export type Page = 'catalog' | 'form' | 'results' | 'saved' | 'applications' | 'bank';
 export type View = {
   page: Page;
   profileId: string | null;
   runId: string | null;
   applicationId: string | null;
 };
-const pages: Page[] = ['catalog', 'form', 'results', 'saved', 'applications'];
+const pages: Page[] = ['catalog', 'form', 'results', 'saved', 'applications', 'bank'];
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 export function readView(search: string): View {
   const params = new URLSearchParams(search);
