@@ -30,5 +30,6 @@
   "target-only-top10.csv": "2a17f7ca70fdfbe8cd6e94c53aebae0e8a6ad245ca852778d9303440c6e60614",
   "target-only-top10.json": "916e6e658d85a8987a307fc9e7e5aa3d8e7757be2f3fea080cb681c6ffaa5a86",
   "fixed-future-diagnostics.json": "309808a2fad45359ae00af7ad78a3e9aec70c761a8d537d80cba0b57542d0e16",
-  "fallback-summary.json": "9fe33bfd681f17f0790083b84549a2cce9a80e86efacbd169b84aa7276c5219e"
+  "fallback-summary.json": "9fe33bfd681f17f0790083b84549a2cce9a80e86efacbd169b84aa7276c5219e",
+  "selected-model.json": "9aa7affa4a284d362010c2fef42fc60563a30c0e90cd125b3a49818b1f55a7a2"
 }

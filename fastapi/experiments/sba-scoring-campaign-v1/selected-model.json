@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "selectedBy": "user",
+  "selectedOn": "2026-10-26",
+  "selectedRank": 5,
+  "id": "mixed-v1-0051",
+  "status": "selected_research_model",
+  "runtimeActivated": false,
+  "threshold": 0.167204479067272,
+  "primaryPolicy": "bestPrecisionAtRecallFloor",
+  "config": {
+    "id": "mixed-v1-0051",
+    "stage": "mixed",
+    "family": "catboost",
+    "fold": "B",
+    "seed": 42,
+    "window": null,
+    "halfLife": null,
+    "balance": "Balanced",
+    "bundle": "original9_diagnostic_term_unconfirmed",
+    "parameters": {},
+    "splitStrategy": "random_years",
+    "splitSeed": 137,
+    "splitterSha256": "7bfce8bd49fe24f03ca4ae98e44f370c386954356a7051e6424aaa0453f1d6d2",
+    "targetDefinitionSha256": "877ed7e0429917b66c3b033872c493c679cd31e5d84f42df9f48fd61545da4b2"
+  },
+  "artifactFormat": "campaign-joblib (offline; includes model, feature builder and sigmoid calibrator)",
+  "localSnapshot": "fastapi/models/sba-scoring-selected-mixed-v1-0051",
+  "sourceArtifact": "fastapi/scoring_training/runs/recall90-precision60-campaign-v1/trials/mixed-v1-0051/model.joblib",
+  "snapshotFiles": {
+    "model.joblib": "1df3fa6e9e5579889c1aa83c133c55b946e36664fb82cce28b891f5793a26cce",
+    "selection.json": "288d3c912a82125b995f2f0ede65aa2b3fe1f6cf8df9d48fac120488de576238",
+    "result.json": "c0d655cb216ad15b14f16b369dc2f1a0a99d0a9d8c8fcd1266cd15d44549d533"
+  },
+  "dependencies": {
+    "catboost": "1.2.10",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "joblib": "1.6.0"
+  },
+  "validation": {
+    "approvalFY": 2023,
+    "evaluationKind": "previously inspected historical validation",
+    "metrics": {
+      "threshold": 0.167204479067272,
+      "rows": 9963,
+      "positives": 1728,
+      "tp": 1211,
+      "fp": 843,
+      "fn": 517,
+      "tn": 7392,
+      "precision": 0.5895813047711782,
+      "recall": 0.7008101851851852,
+      "f1": 0.6404019037546271,
+      "f2": 0.6753290207450368,
+      "falsePositiveRate": 0.10236794171220401,
+      "flaggedCount": 2054,
+      "flaggedShare": 0.20616280236876444,
+      "recallDefined": true
+    }
+  },
+  "originalFavorite": {
+    "id": "sba-scoring-v1",
+    "threshold": 0.15283707537791144,
+    "metrics": {
+      "threshold": 0.15283707537791144,
+      "rows": 9963,
+      "positives": 1728,
+      "tp": 759,
+      "fp": 787,
+      "fn": 969,
+      "tn": 7448,
+      "precision": 0.4909443725743855,
+      "recall": 0.4392361111111111,
+      "f1": 0.4636530238240684,
+      "f2": 0.4486876330101679,
+      "falsePositiveRate": 0.09556769884638737,
+      "flaggedCount": 1546,
+      "flaggedShare": 0.15517414433403592
+    },
+    "preserved": true
+  },
+  "deltaVsFavorite": {
+    "precision": 0.0986369321967927,
+    "recall": 0.2615740740740741,
+    "f1": 0.1767488799305587
+  },
+  "historicalRandomTest": {
+    "threshold": 0.167204479067272,
+    "rows": 34737,
+    "positives": 3251,
+    "tp": 2807,
+    "fp": 5098,
+    "fn": 444,
+    "tn": 26388,
+    "precision": 0.35509171410499685,
+    "recall": 0.8634266379575515,
+    "f1": 0.5032269630692005,
+    "f2": 0.6712420488784734,
+    "falsePositiveRate": 0.16191323127739313,
+    "flaggedCount": 7905,
+    "flaggedShare": 0.22756714742205716
+  },
+  "goal85Recall55PrecisionReached": false,
+  "tolerance84Recall53PrecisionReached": false,
+  "verification": {
+    "copiedArtifactChecksumPassed": true,
+    "frozenSelectionChecksumPassed": true,
+    "serializedPredictionReplayPassed": true,
+    "exactConfusionCountsPassed": true,
+    "favoriteAndBackupChecksumsPassed": true
+  },
+  "limitations": [
+    "TermInMonths historical availability is unconfirmed.",
+    "FY2023 was previously inspected; this is not a fresh independent test.",
+    "Research artifact is not yet converted to the runtime sba-package-1 format; active API model and threshold are unchanged."
+  ],
+  "laterHistoricalDiagnostics": {
+    "2024": {
+      "threshold": 0.167204479067272,
+      "rows": 6094,
+      "positives": 620,
+      "tp": 320,
+      "fp": 539,
+      "fn": 300,
+      "tn": 4935,
+      "precision": 0.37252619324796277,
+      "recall": 0.5161290322580645,
+      "f1": 0.43272481406355645,
+      "f2": 0.47918538484576223,
+      "falsePositiveRate": 0.09846547314578005,
+      "flaggedCount": 859,
+      "flaggedShare": 0.14095831965868066,
+      "recallDefined": true
+    },
+    "2025": {
+      "threshold": 0.167204479067272,
+      "rows": 2194,
+      "positives": 82,
+      "tp": 8,
+      "fp": 225,
+      "fn": 74,
+      "tn": 1887,
+      "precision": 0.034334763948497854,
+      "recall": 0.0975609756097561,
+      "f1": 0.050793650793650794,
+      "f2": 0.07130124777183601,
+      "falsePositiveRate": 0.10653409090909091,
+      "flaggedCount": 233,
+      "flaggedShare": 0.10619872379216044,
+      "recallDefined": true
+    },
+    "2026": {
+      "threshold": 0.167204479067272,
+      "rows": 83,
+      "positives": 0,
+      "tp": 0,
+      "fp": 8,
+      "fn": 0,
+      "tn": 75,
+      "precision": 0.0,
+      "recall": null,
+      "f1": 0.0,
+      "f2": 0.0,
+      "falsePositiveRate": 0.0963855421686747,
+      "flaggedCount": 8,
+      "flaggedShare": 0.0963855421686747,
+      "recallDefined": false
+    }
+  }
+}
