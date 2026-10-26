@@ -87,7 +87,13 @@ jobs:
       - name: Real offline tests in Linux
         run: |
           docker build --target test -t alpha-future-recsys:tests ./fastapi
-          docker run --rm --network none --memory 2g --read-only --tmpfs /tmp:size=64m -e RUN_REAL_MODEL_TESTS=1 -e RUN_FINETUNED_MODEL_TESTS=1 -e MODEL_LOCAL_PATH=/models/multilingual-e5-small -e FINETUNED_MODEL_LOCAL_PATH=/models/e5-credit-finetune-v1/final -v "$PWD/fastapi/models/multilingual-e5-small:/models/multilingual-e5-small:ro" -v "$PWD/fastapi/models/selected-model:/models/e5-credit-finetune-v1/final:ro" alpha-future-recsys:tests python -m pytest -o addopts='' -v
+          docker run --rm --network none --memory 2g --read-only \
+            --tmpfs /tmp:size=64m \
+            -e RUN_REAL_MODEL_TESTS=1 \
+            -e RUN_FINETUNED_MODEL_TESTS=1 \
+            -v "$PWD/fastapi/models/multilingual-e5-small:/app/models/multilingual-e5-small:ro" \
+            -v "$PWD/fastapi/models/selected-model:/app/models/e5-credit-finetune-v1/final:ro" \
+            alpha-future-recsys:tests python -m pytest -o addopts='' -v
       - uses: actions/upload-artifact@v4
         if: always()
         with:
