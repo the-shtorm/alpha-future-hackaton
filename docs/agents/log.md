@@ -1,5 +1,7 @@
 # Task reports
 
+- [2026-10-26 — GitHub push DNS diagnosis](2026-10-26-github-push-dns-diagnosis.md) — completed; current DNS resolution and SSH read access passed, retry original push; no configuration changes or push.
+
 - [2026-10-26 — Complete draft persistence and HTTPS checks](2026-10-26-complete-draft-persistence-and-https-checks.md) — completed on cookie-session; guest transfer and final autosave/F5/conflict checks, 33 frontend tests, full Java/frontend Docker builds and real TLS/Secure-cookie acceptance passed; uncommitted.
 
 - [2026-10-26 — Cookie session implementation](2026-10-26-cookie-session-implementation.md) — completed on cookie-session; HttpOnly/CSRF, reload and draft restoration; 57 Java + 22 frontend tests and live browser/Java→FastAPI checks passed; uncommitted for review.
