@@ -1,5 +1,13 @@
 # Task reports
 
+- [2026-10-26 — Merge db-init and pre-docs into main](2026-10-26-merge-db-init-cookie-session-and-pre-docs-main.md) — completed; db-init merged into cookie-session, main created and pre-docs merged; conflicts resolved, tests explicitly deferred, local only.
+
+- [2026-10-26 — Documentation unification and hackathon launch](2026-10-26-documentation-unification-and-hackathon-launch.md) — completed; merged f5c2a33 into pre-docs first, unified current docs, added setup/start and judges guide; stock Compose, real E5/SBA four outcomes, PDF replacement and restart/session persistence passed; isolated test stack cleaned up.
+
+- [2026-10-26 — Merge cookie-session into pre-docs and verify](2026-10-26-merge-cookie-session-into-pre-docs-and-verify.md) — completed; clean merge of 1116793, 70 Java/564 FastAPI/33 frontend tests plus real E5/SBA tests, HTTPS and four actual cookie-auth credit outcomes passed; local merge, no push; UI and main .env limits recorded.
+
+- [2026-10-26 — Credit pipeline state audit](2026-10-26-credit-pipeline-state-audit.md) — completed; backend demo workflow confirmed by 57 tests, 33 frontend tests/build passed; missing bank/post-decision UI and local Compose configuration blockers documented; original verify blocked by CRLF/Spotless.
+
 - [2026-10-26 — GitHub push DNS diagnosis](2026-10-26-github-push-dns-diagnosis.md) — completed; current DNS resolution and SSH read access passed, retry original push; no configuration changes or push.
 
 - [2026-10-26 — Complete draft persistence and HTTPS checks](2026-10-26-complete-draft-persistence-and-https-checks.md) — completed on cookie-session; guest transfer and final autosave/F5/conflict checks, 33 frontend tests, full Java/frontend Docker builds and real TLS/Secure-cookie acceptance passed; uncommitted.

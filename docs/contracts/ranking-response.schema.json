@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Recsys response — Query/Passage MVP 1",
+  "title": "Recsys response — Query/Passage MVP 2",
   "type": "object",
   "additionalProperties": false,
   "required": ["requestId", "metadata", "results"],

@@ -1,33 +1,32 @@
 erDiagram
-    app_user ||--o{ party_membership : "доступ"
-    party ||--o{ party_membership : "участники кабинета"
-    party ||--o{ loan_application : "заемщик"
-    app_user ||--o{ loan_application : "создает"
-    preliminary_profile ||--o{ recommendation_run : "снимок подбора"
-    recommendation_run ||--o{ recommendation_item : "результат"
-    credit_product ||--o{ credit_product_version : "условия"
-    credit_product_version ||--o{ recommendation_item : "рекомендуется"
-    credit_product_version ||--o{ loan_application : "фиксируется"
-    loan_application ||--o{ application_party : "субъекты"
-    party ||--o{ application_party : "участвует"
-    loan_application ||--o{ application_revision : "отправки"
-    application_revision ||--o{ revision_document : "файловый комплект"
-    application_party ||--o{ document : "документы субъекта"
-    document ||--o{ document_version : "версии файла"
-    document_version ||--o{ revision_document : "зафиксирована"
-    document_version ||--o{ document_review : "проверяется"
-    loan_application ||--o{ application_document_requirement : "нужные документы"
-    application_document_requirement ||--o{ requirement_document : "подтверждается"
-    document_version ||--o{ requirement_document : "выполняет"
-    application_party ||--o{ consent : "согласия субъекта"
-    consent ||--o| consent_revocation : "отзыв"
-    consent o|--o{ external_request : "основание доступа"
-    application_revision ||--o{ application_check_requirement : "план проверок"
-    application_check_requirement ||--o{ check_run : "результаты"
-    application_revision ||--o{ assessment_run : "скоринг и нечеткая логика"
-    application_revision ||--o{ credit_decision : "решения"
-    credit_decision ||--o{ loan_offer : "предложения"
-    loan_offer ||--o| loan_contract : "принято и подписано"
-    loan_contract ||--o| disbursement : "первая демо-выдача"
-    loan_application ||--o{ application_status_history : "переходы"
-    loan_application ||--o{ outbox_event : "фоновые задания"
+  app_user ||--o{ api_session : authenticates
+  app_user ||--o{ party_membership : belongs
+  party ||--o{ party_membership : contains
+  party ||--o{ preliminary_profile : owns
+  credit_product ||--o{ credit_product_version : versions
+  preliminary_profile ||--o{ recommendation_run : snapshots
+  recommendation_run ||--o{ recommendation_item : checks
+  recommendation_run ||--o| manual_ranking_result : ranking
+  recommendation_run ||--o{ recommendation_attempt : attempts
+  credit_product_version ||--o{ recommendation_item : eligible
+  party ||--o{ loan_application : requests
+  credit_product_version ||--o{ loan_application : selected
+  loan_application ||--o{ application_revision : submits
+  loan_application ||--o{ application_document_requirement : requires
+  loan_application ||--o{ document : contains
+  document ||--o{ document_version : versions
+  document_version ||--o{ document_review : reviewed
+  application_revision ||--o{ revision_document : includes
+  document_version ||--o{ revision_document : pinned
+  loan_application ||--o{ application_financial_evidence : supports
+  application_financial_evidence ||--o{ financial_evidence_review : verified
+  application_revision ||--o{ check_run : checked
+  application_revision ||--o{ assessment_run : scored
+  application_revision ||--o{ credit_decision : decided
+  assessment_run ||--o{ credit_decision : grounds
+  credit_decision ||--o| counteroffer_proposal : alternative
+  counteroffer_proposal ||--o| counteroffer_acceptance : accepted
+  credit_decision ||--o{ loan_offer : offers
+  loan_offer ||--o| loan_contract : signed
+  loan_contract ||--o| disbursement : disbursed
+  loan_application ||--o{ application_status_history : history

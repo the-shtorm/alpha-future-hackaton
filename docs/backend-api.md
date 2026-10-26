@@ -1,6 +1,6 @@
-> Актуальная схема: [Preliminary Form 2.0 / Data Policy 3.0](backend-fields-v3.md). Изменены поля; алгоритм ML 3.0 не реализован.
+# REST API кредитного кабинета
 
-# REST API: Data Policy 2.1 и Preliminary Form 2.0
+[Навигация](README.md) · [Поля](backend-fields-v3.md) · [Скоринг](credit-scoring.md)
 
 Base URL: `http://localhost:8080`, учитывайте BACKEND_PORT из .env.
 Swagger: `/swagger-ui/index.html`; OpenAPI: `/v3/api-docs`.
@@ -8,8 +8,8 @@ JSON-команды: Content-Type application/json. Браузер исполь�
 same-origin `/api` на frontend; интеграционные клиенты сохраняют Bearer accessToken из `/auth/login`.
 Сессия действует 12 часов с момента входа, в БД хранится SHA-256; logout отзывает текущую сессию.
 Автоматического бессрочного продления нет. Состояние сессий общее для Java-реплик в PostgreSQL;
-HttpSession/JSESSIONID и sticky sessions не используются. Миграция БД не требуется.
-Все успешные операции ниже возвращают 200. Health/login/CSRF/catalog/Swagger доступны без входа.
+HttpSession/JSESSIONID и sticky sessions не используются. Схема БД управляется Flyway V1–V11.
+JSON-команды возвращают 200; скачивание передаёт бинарное содержимое. Health/login/CSRF/catalog/Swagger доступны без входа.
 
 Браузерный вход:
 1. `GET /api/auth/csrf` с `credentials: same-origin`: сервер выставит HttpOnly CSRF-cookie,
@@ -77,7 +77,7 @@ expectedVersion; запросы сериализуются. До входа хр
 | GET | `/applications/{id}/documents/{version}` | Нет | Закрытое скачивание PDF/PNG/JPEG/договора | Участник или банк |
 | GET | `/bank/applications` | page, size | Банковская очередь | BANK_APPROVER |
 | POST | `/bank/applications/{id}/assign` | Нет | assignedTo=текущий сотрудник | BANK_APPROVER |
-| POST | `/bank/applications/{id}/process` | Нет | APPROVED/COUNTEROFFERED/DECLINED/REQUEST_INFO либо UNDER_REVIEW; положительные автоматические исходы только DEMO | Назначенный BANK_APPROVER |
+| POST | `/bank/applications/{id}/process` | Нет | APPROVED/COUNTEROFFERED/DECLINED/REQUEST_INFO либо UNDER_REVIEW; положительные автоматические исходы для синтетических DEMO-продуктов | Назначенный BANK_APPROVER |
 | POST | `/bank/applications/{id}/decisions` | kind, reason, missingFields | Ручное решение; не обходит документы, бюджет, оценку или жесткий отказ | Назначенный BANK_APPROVER |
 | POST | `/bank/applications/{id}/documents/{version}/review` | result=PASS/FAIL/UNKNOWN, reason | Ручная CONTENT-проверка | BANK_APPROVER; DRAFT/SUBMITTED/NEEDS_INFO |
 | POST | `/applications/{id}/offers/accept` | offerId, confirmed=true | OFFER_ACCEPTED | OWNER |
@@ -257,13 +257,15 @@ application/problem+json содержит code/detail/fields без SQL, ток�
 503 — недоступный файл. Машинные причины бизнес-проверок — conditions.reasonCode и eligibility.reasons.
 
 
-Новый сценарий ручного обмена и форма 2.0: [Query/Passage MVP — реализация](ranking-exchange.md).
+Автоматический подбор и технический обмен: [Query/Passage MVP — реализация](ranking-exchange.md).
 
 
-## Ручное ранжирование MVP
+## Ранжирование E5
 
 | Метод | Endpoint | Результат | Доступ |
 |---|---|---|---|
+| POST | `/selection-profiles/{id}/automatic-selection` | Проверка применимости, E5 и сохранение результата | OWNER/EDITOR |
+| POST | `/selection-profiles/{id}/recommendations/{runId}/retry` | Повтор автоматического обмена текущего подбора | OWNER/EDITOR |
 | GET | `/forms/preliminary/dictionaries` | Общие словари целей, отраслей, использования и readiness | Авторизованный пользователь |
 | GET | `/selection-profiles/{id}/recommendations/{runId}/ranking-export` | Снимок формы, queryFields, допустимые версии и предупреждения | Член компании |
 | POST | `/selection-profiles/{id}/recommendations/{runId}/ranking-result` | Проверка и неизменяемое сохранение внешнего порядка/similarityScore | OWNER/EDITOR |

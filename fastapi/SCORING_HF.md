@@ -1,93 +1,92 @@
-# Загрузка SBA CatBoost из HF или локальной папки
+# Загрузка и проверка SBA CatBoost
 
-Рабочая версия `sba-scoring-v2` берётся из публичного репозитория
-https://huggingface.co/thedauns/sba-scoring-v2. Токен для неё не требуется.
-Веса, калибровка, operating threshold и контракт `sba-scoring-1` сохранены.
-RecSys/E5 сохраняет `MODEL_PATH`: local/HF/S3 из cookie-session. Для скоринга
-используется отдельная `SCORING_MODEL_PATH`, поддерживающая local/HF.
+[Документация проекта](../docs/README.md) · [Политика решения](../docs/credit-scoring.md) · [Обучение](scoring_training/README.md)
 
-Источник скоринга задаётся одной переменной. В корневом `.env` для Compose:
+## Штатный Compose
+
+Настройки задаются в корневом `.env`:
 
 ```dotenv
 SCORING_ENABLED=true
 SCORING_MODEL_PATH=thedauns/sba-scoring-v2
-HF_TOKEN=
 HF_LOCAL_FILES_ONLY=false
+HF_TOKEN=
 ```
 
-Короткое имя использует immutable HF commit из `config/scoring-hf.lock.json`.
-Допустима полная запись:
-`hf://thedauns/sba-scoring-v2@5a0049417dae97bdc8a341c89c705d7505563645/model`.
-Для другого HF repo требуется явный полный commit SHA. `main` отвергается.
-Адрес определяет источник; runtime manifest и все SHA должны соответствовать
-`config/scoring-model.lock.json`. Смена адреса не отключает проверку модели.
+Пакет опубликован в `thedauns/sba-scoring-v2` и доступен для анонимной загрузки.
+Короткое имя разрешается через `config/scoring-hf.lock.json` в закреплённый commit:
 
-Локальные альтернативы: `SCORING_MODEL_PATH=C:/models/scoring` или
-`SCORING_MODEL_PATH=/srv/models/scoring`. При прямом запуске Python читается
-`fastapi/.env`; относительные пути считаются от `fastapi/`. В Docker путь должен
-быть контейнерным: папка `fastapi/models/custom-scoring` доступна как
-`SCORING_MODEL_PATH=/scoring-models/custom-scoring`. Отдельный HF_TOKEN используется
-только при необходимости доступа к private repo. S3 в этом scoring-загрузчике
-не реализован; URI других схем отвергаются.
+```dotenv
+SCORING_MODEL_PATH=hf://thedauns/sba-scoring-v2@5a0049417dae97bdc8a341c89c705d7505563645/model
+```
 
-Первый запуск скачивает шесть runtime-файлов в writable кэш. В Linux snapshot
-может содержать symlinks; загрузчик создаёт атомарную копию обычных файлов для
-строгой проверки manifest. Затем native CatBoost загружается один раз в RAM.
-Повторные inference-запросы не скачивают пакет и не создают новый classifier.
-После перезапуска модель снова читается из дискового кэша.
+Полный HF-адрес должен содержать immutable commit SHA. Runtime manifest и SHA
+файлов сверяются с `config/scoring-model.lock.json`: версия `sba-scoring-v2`,
+manifest SHA-256 `5d5498e8d3339ffbbce3d5f117f52692cee9986067a3bf6df8524c5e4c8c53ac`.
+Модель, калибровка и operating threshold проверяются как единый пакет.
 
-В Compose настроен постоянный `recsys_model_cache:/model-cache`; не удаляйте его,
-если хотите сохранить скачанные файлы. HF_HOME и HF_XET_CACHE также направлены
-в этот writable volume. `HF_LOCAL_FILES_ONLY=true` допускает только готовый кэш.
-Не задавайте внешний `HF_HUB_OFFLINE=1` перед первой сетевой загрузкой.
+При первом запуске загружаются шесть runtime-файлов. Кэш хранится в
+`recsys_model_cache` (`/model-cache`); загрузчик создаёт проверенную обычную
+папку из HF snapshot. Native CatBoost загружается один раз в RAM.
+Для каждого запроса используется уже загруженный classifier.
 
-Проверка пакета без E5, переобучения и рабочего API-ключа, из `fastapi/`:
+## Проверка готового сервиса
 
-```powershell
-uv sync --frozen --python 3.11
+Из корня после запуска:
+
+```sh
+docker compose exec -T fastapi python -m scripts.prepare_scoring_model --smoke
+```
+
+Результат содержит `verified=true`, модель, калибровку, порог и контрольный прогноз.
+Для штатного примера вероятность `0.2525274156209339`, score `75`.
+Внутренние endpoints защищены Bearer-ключом из `RECSYS_API_KEY`:
+
+| Endpoint | Назначение |
+|---|---|
+| `GET /api/v1/scoring/ready` | Готовность SBA |
+| `GET /api/v1/scoring/model-info` | Модель, признаки, калибровка и runtime |
+| `POST /api/v1/scoring/evaluate` | Inference по `sba-scoring-1` |
+
+`/health/ready` проверяет готовность рекомендательной E5; у скоринга есть
+собственная readiness. Полный клиентский сценарий проверяет обе модели.
+
+## Локальная папка и прямой Python-запуск
+
+Источник поддерживает HF и локальную папку. В Docker каталог
+`fastapi/models/custom-scoring` доступен как `/scoring-models/custom-scoring`:
+
+```dotenv
+SCORING_MODEL_PATH=/scoring-models/custom-scoring
+```
+
+При прямом запуске используется `fastapi/.env`; относительные пути считаются
+от `fastapi/`. Установите Python 3.11 и выполните из `fastapi/`:
+
+```sh
+uv sync --frozen
 uv run --frozen python -m scripts.prepare_scoring_model --smoke
 uv run --frozen python -m scripts.prepare_scoring_model --local-files-only --smoke
 ```
 
-Для HTTP-сервиса по-прежнему требуются E5 и общий внутренний ключ Java/FastAPI.
-Scoring endpoints защищены внутренним Bearer. `/api/v1/scoring/ready` показывает
-готовность скоринга; общая readiness RecSys от неё независима. При сбое
-скачивания/manifest скоринг остаётся 503, автоматического fallback на v1 нет.
+`--model-path` и `--cache-dir` позволяют явно проверить другой путь и кэш.
+Локальный пакет проходит ту же проверку manifest и SHA. Для самого HTTP-сервиса
+также нужны настроенная E5 и внутренний ключ Java/FastAPI.
 
-```powershell
-docker compose up -d --build --no-deps fastapi
-```
+## Интеграционные проверки
 
-Пакеты v1/v2 больше не отслеживаются в Git и удалены из `fastapi/models/sba-*`.
-Перед миграцией сохранена игнорируемая локальная резервная копия; веса v2 также
-проверены на HF по исходному manifest SHA. История Git не переписывалась.
-После слияния в cookie-session ни E5, ни scoring weights не отслеживаются Git/LFS;
-кэши и локальные пакеты остаются вне Git. E5 получается через MODEL_PATH.
+`RUN_SCORING_INTEGRATION=1` включает `tests/integration/test_scoring_v2_package.py`
+после подготовки кэша. Обычные unit-тесты используют маленькие fitted fixtures.
 
-Полная проверка нативного пакета opt-in: после подготовки кэша задайте
-`RUN_SCORING_INTEGRATION=1` и запустите `tests/integration/test_scoring_v2_package.py`.
-Историческая проверка v1 требует отдельной `SCORING_V1_MODEL_PATH`; v1 не
-скачивается автоматически. Обычные unit-тесты используют маленькие fitted fixtures.
+Из `fastapi/` скрипт `python -m scripts.scoring_stack_acceptance --help`
+описывает изолированный Docker-прогон с реальными пакетами. После подготовки E5
+и сборки указанных в скрипте образов запуск без `--source-smoke` проверяет
+четыре исхода и положительные пути до учебной выдачи; `--cookie-auth`
+проверяет их через nginx с отдельными owner/bank cookie jars и CSRF.
+`ML_TEST_MODEL_PATH` задаёт абсолютный host-путь к E5 для тестового bind mount.
+Штатный сервис использует `MODEL_PATH`.
 
-Изолированная проверка Java/БД/frontend и совместной работы со штатной E5:
-после сборки образов, указанных в `scripts.scoring_stack_acceptance`, запустите
-`python -m scripts.scoring_stack_acceptance --source-smoke --output reports/scoring-source.json`.
-Она проверяет два сценария: отказ с настоящей оценкой v2 и запрос недостающих данных,
-а также scoring HTTP под нагрузкой E5. Это проверка интеграции источника модели.
-Запуск без `--source-smoke` проверяет все четыре исхода, включая подписание и выдачу
-для APPROVED/COUNTEROFFERED. Fixture одобрения обновлена для v2: существующий P07,
-500000 RUB, 60 месяцев, обеспечение и собственный взнос 20%; остальные исходы
-проверяются на P01. Все четыре исхода прошли настоящий HTTP-прогон. Это синтетические
-проверки ветвей интеграции, не независимая оценка ML-качества. Модель и Java policy
-для получения ожидаемых исходов не менялись.
-
-На cookie-session добавьте `--cookie-auth`, чтобы прогнать те же исходы через
-nginx с отдельными owner/bank cookie jars и CSRF. В тестовом HTTP-стенде Secure
-отключён явно; отдельный `scripts/check_cookie_https.py` проверяет Secure cookies
-через TLS. Если E5 подготовлена в другой папке, задайте host-путь
-`ML_TEST_MODEL_PATH` перед запуском acceptance (например, `models/selected-model`
-после `scripts.verify_model --copy-to models/selected-model`). Эта переменная
-относится к тестовому bind mount; production по-прежнему использует MODEL_PATH.
-
-Модель остаётся демонстрационной US SBA → RU. Известные метрики/ограничения,
-OOD-предупреждения и Java risk/PTI-правила этой миграцией не пересматриваются.
+Схемы, версии, метрики и происхождение SBA описаны в
+[credit-scoring.md](../docs/credit-scoring.md) и
+[индексе исследований](experiments/README.md). Веса, кэши и исходные CSV
+хранятся вне Git; для запуска используется готовый HF-пакет.
