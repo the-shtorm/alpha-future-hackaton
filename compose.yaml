@@ -19,6 +19,13 @@ services:
       - no-new-privileges:true
     restart: unless-stopped
 
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/api/health']
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 24
+
   backend:
     build:
       context: .
@@ -78,6 +85,7 @@ services:
       HF_HOME: /model-cache/hf-home
       HF_XET_CACHE: /model-cache/xet
       HF_LOCAL_FILES_ONLY: ${HF_LOCAL_FILES_ONLY:-false}
+      HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-true}
       HF_TOKEN: ${HF_TOKEN:-}
       S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-}
@@ -108,8 +116,8 @@ services:
       test: ["CMD", "python", "-m", "app.healthcheck"]
       interval: 10s
       timeout: 3s
-      start_period: 90s
-      retries: 3
+      start_period: 30m
+      retries: 6
     restart: unless-stopped
 
   postgres:

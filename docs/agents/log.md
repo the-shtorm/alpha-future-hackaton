@@ -1,5 +1,7 @@
 # Task reports
 
+- [2026-10-26 — Documentation unification and hackathon launch](2026-10-26-documentation-unification-and-hackathon-launch.md) — completed; merged f5c2a33 into pre-docs first, unified current docs, added setup/start and judges guide; stock Compose, real E5/SBA four outcomes, PDF replacement and restart/session persistence passed; isolated test stack cleaned up.
+
 - [2026-10-26 — Merge cookie-session into pre-docs and verify](2026-10-26-merge-cookie-session-into-pre-docs-and-verify.md) — completed; clean merge of 1116793, 70 Java/564 FastAPI/33 frontend tests plus real E5/SBA tests, HTTPS and four actual cookie-auth credit outcomes passed; local merge, no push; UI and main .env limits recorded.
 
 - [2026-10-26 — Credit pipeline state audit](2026-10-26-credit-pipeline-state-audit.md) — completed; backend demo workflow confirmed by 57 tests, 33 frontend tests/build passed; missing bank/post-decision UI and local Compose configuration blockers documented; original verify blocked by CRLF/Spotless.

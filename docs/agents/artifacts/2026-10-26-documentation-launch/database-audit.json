@@ -1,0 +1,10 @@
+{
+  "applications": 4,
+  "assessments": 4,
+  "linkedDecisions": 3,
+  "models": [
+    "sba-scoring-v2"
+  ],
+  "disbursements": 2,
+  "migrations": 13
+}

@@ -1,104 +1,31 @@
-# Сохранённые ML-эксперименты
+# Индекс ML-экспериментов
 
-**Новая цель recall >=90%, precision >=60%: [план дообучения](../../docs/scoring-retraining-recall90-precision60-plan.md).**
-Предложены 480 комбинаций основной сетки и до 1 122 обучений с уточнениями и
-альтернативными моделями; они ещё не запускались. Текущий baseline под оба
-ограничения: `sba-scoring-retraining-plan-v1/current-model-business-targets.json`.
+[Документация проекта](../../docs/README.md) · [E5: запуск и идентичность](../MODEL_HANDOFF.md) · [SBA: эксплуатация](../../docs/credit-scoring.md)
 
-**SBA-скоринг: [перебор порогов с акцентом на recall](sba-scoring-recall-thresholds-v1/README.md).**
-41 892 точных порога; F1/F2 и ограничения recall на FY2017, затем фиксированная
-оценка на FY2018–2019/FY2020–2026. Кандидат 0.054874 даёт recall 92,29%/65,97%;
-ограничение переноса по времени описано в отчёте. Действующая политика не менялась.
+## Модели, используемые приложением
 
-`e5-credit-finetune-v1.json` фиксирует идентичность локальной дообученной модели,
-контрольные суммы её файлов и архива, параметры обучения, отдельный порог и результаты
-на calibration/development/final test. Модель и полный пакет хранятся на Hugging
-Face; локальные веса, tokenizer, manifest и окружения больше не отслеживаются Git.
+| Модель | Рабочая версия и источник | Назначение |
+|---|---|---|
+| E5 | `e5-credit-finetune-v1`, HF `e93f86ce54f0a6d2b3da24dac803e50ee92bbb2b` | Семантическое ранжирование |
+| SBA CatBoost | `sba-scoring-v2`, HF `5a0049417dae97bdc8a341c89c705d7505563645` | Оценка списания для демонстрационной политики |
 
-**Передача и запуск модели: [MODEL_HANDOFF.md](../MODEL_HANDOFF.md).**
-Выберите MODEL_PATH (локальный путь, hf:// или s3://) в fastapi/.env, затем выполните из fastapi/
-`uv run --frozen python -m scripts.verify_model --smoke`.
+Пакеты модели, веса и большие датасеты не входят в Git. Штатный Compose загружает
+закреплённые пакеты в постоянный кэш. Для inference обучение повторять не требуется.
 
-Сохранённая модель: `fastapi/models/e5-credit-finetune-v1/final/`.
-Переносимый архив: `fastapi/models/exports/e5-credit-finetune-v1-116acca8c002.zip`.
-Рядом лежит файл `.zip.sha256`; внутри архива — `final/` с manifest,
-`training-summary.json` и исторический `selection-policy.json`. ZIP остаётся
-локальной резервной копией. Готовый пакет передаётся через приватный HF-репозиторий
-thedauns/e5-credit-finetune-v1, GitHub хранит только код и небольшие ресурсы.
+## Сохранённые исследования
 
-Проверка архива из PowerShell в `fastapi/`:
+- [e5-credit-finetune-v1.json](e5-credit-finetune-v1.json): состав обучения, checkpoint и метрики дообученного E5.
+- [sba-scoring-campaign-v1](sba-scoring-campaign-v1/README.md): кампания выбора SBA v2, конфигурации и сравнение кандидатов.
+- [target-only-README.md](sba-scoring-campaign-v1/target-only-README.md): отдельный срез кампании.
+- [fallback-report.md](sba-scoring-campaign-v1/fallback-report.md): сохранённое решение по выбору модели.
+- [sba-scoring-recall-thresholds-v1](sba-scoring-recall-thresholds-v1/README.md): историческое сравнение порогов SBA v1.
+- [План 90/60](../../docs/scoring-retraining-recall90-precision60-plan.md): историческая постановка исследования.
+- [Обучение и воспроизводимость](../scoring_training/README.md): команды подготовки и экспериментов.
 
-```powershell
-Get-FileHash models/exports/e5-credit-finetune-v1-116acca8c002.zip -Algorithm SHA256
-Get-Content models/exports/e5-credit-finetune-v1-116acca8c002.zip.sha256
-```
+Датированные отчёты `2026-10-*.md` в этой папке фиксируют конкретные проверки
+и этапы передачи моделей: состояние, команды и результаты на дату отчёта.
+Сохранённые research README и JSON сохраняют исходную provenance. Для текущего
+запуска используйте эксплуатационные документы по ссылкам выше.
 
-Обучение из `fastapi/` в отдельном CUDA-окружении Windows/Python 3.11:
-
-```powershell
-uv sync --project training --python 3.11
-./training/.venv/Scripts/python.exe -m scripts.train_e5 --smoke --output models/e5-credit-smoke-new
-./training/.venv/Scripts/python.exe -m scripts.train_e5 --output models/e5-credit-finetune-new
-```
-
-Нужны заранее подготовленные базовые веса с revision из `config/model.lock.json`.
-Каждому повторному обучению нужен новый output. Историческая оценка с повторной
-калибровкой F0.5:
-
-```powershell
-$env:ENVIRONMENT='test'
-$env:ML_INTERNAL_API_KEY='local-finetune-evaluation'
-$env:HF_HUB_OFFLINE='1'
-$env:TRANSFORMERS_OFFLINE='1'
-./.venv/Scripts/python.exe -m scripts.evaluate_finetune
-```
-
-Разделение: train 1500, development 180, calibration 180, новый final test 90.
-Запросы и familyId между группами не пересекаются; каталог из 15 продуктов общий.
-Разметка синтетическая и требует проверки. Финальный тест нельзя использовать для
-следующей настройки модели или порога, продолжая считать его независимым.
-
-Работающий API и Compose по умолчанию используют дообученную E5:
-`MODEL_VARIANT=finetuned`, `config/finetuned-model.lock.json` и
-`config/finetuned-selection-policy.json`. В model-info и metadata возвращается
-`local/e5-credit-finetune-v1`, а revision — полный SHA-256 артефакта, отличный от
-Git revision базовой E5. Порог дообученной модели имеет другую шкалу и привязан
-к её идентификатору. Исходный архив checkpoint не изменяется.
-
-Текущая политика выбрана по максимуму micro F1 на calibration: similarity
-не ниже `0.47622181475162506`, то есть distance не выше `0.5237781852483749`.
-Исторические метрики и порог F0.5 в записи обучения относятся к первоначальному
-эксперименту; актуальный runtime-порог задаёт файл политики.
-
-Compose монтирует `models/e5-credit-finetune-v1/final` read-only. Для явного
-возврата на базовую модель нужно согласованно задать в корневом `.env`:
-
-```dotenv
-RECSYS_MODEL_VARIANT=base
-RECSYS_MODEL_PATH=./fastapi/models/multilingual-e5-small
-```
-
-При запуске Python напрямую используется `MODEL_VARIANT=base`; путь к базовой
-модели выбирается автоматически, если `MODEL_LOCAL_PATH` не задан. Несовпадение
-identity/revision/manifest прекращает startup, автоматической подмены нет.
-Для каждого варианта загружается собственный калибровочный порог. Явный
-`RECOMMENDATION_MAX_COSINE_DISTANCE` переопределяет его.
-
-Проверка всей Java-цепочки с сохранённым checkpoint в отдельном временном стеке:
-
-```powershell
-./.venv/Scripts/python.exe -m scripts.java_acceptance --model-variant finetuned
-```
-
-Для этого образ должен быть собран из текущего кода и локальная модель подготовлена
-из HF-пакета. Ручные CI model-package/real-java скачивают pinned HF revision и
-требуют MODEL_PATH в Variables и соответствующий токен в Secrets.
-Для полного локального pytest с обоими checkpoint задаются
-RUN_REAL_MODEL_TESTS=1 и RUN_FINETUNED_MODEL_TESTS=1.
-
-Текущий F1-порог проверяется без перенастройки через
-`uv run --frozen python -m scripts.evaluate_active_model`; дополнительные 15
-диагностических примеров — через `--dataset evaluation/diagnostic-15.json`.
-
-Новые подборы используют текущую модель. Ранее сохранённые результаты Java
-неизменяемы и сохраняют собственную metadata; для пересчёта нужен новый подбор.
+Новые результаты ранжирования сохраняют текущую metadata. Ранее сохранённые
+подборы неизменяемы и продолжают ссылаться на свои версии модели и шаблонов.

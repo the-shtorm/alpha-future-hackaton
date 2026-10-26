@@ -1,106 +1,59 @@
-> Обновление 24.10.2026: текущие поля — [контракт 3.0](backend-fields-v3.md).
-> Ниже описаны технические endpoints ручного обмена для разработчиков; пользовательский
-> фронтенд с таким сценарием приостановлен и подлежит переделке. Автоматический адаптер
-> находится в незавершённой предыдущей задаче; Recsys HTTP-адрес отсутствует.
+# Обмен рекомендациями Java и FastAPI
 
-# Ручной обмен рекомендациями — Query/Passage MVP 2
+[Навигация](README.md) · [Query/Passage](query_passage_mvp.md) · [E5](../fastapi/MODEL_HANDOFF.md)
 
-Основание: [исходные новые условия](query_passage_mvp.md).
-Это реализованный контракт ручного обмена, согласованный в коде backend/frontend.
-Тексты query/passage, E5, эмбеддинги и ранжирование реализует другая команда.
-FastAPI в этом репозитории пока содержит только healthcheck; Spring не вызывает модель.
+## Автоматический путь
 
-## Процесс
+Frontend вызывает `POST /selection-profiles/{id}/automatic-selection`. Spring
+создаёт снимок проверки применимости, передаёт допустимых кандидатов в
+`POST /api/v1/recommendations/rank-java` и сохраняет проверенный ответ.
+`rankingStatus=READY` означает доступность ранжированного результата.
+История содержит версии формы, продуктов, модели и текстовых шаблонов.
 
-1. Войти через `POST /auth/login`, использовать Bearer `accessToken`.
-2. Получить общие словари `GET /forms/preliminary/dictionaries`.
-3. Сохранить предварительную форму `POST /selection-profiles` с `partyId` и `answers`.
-4. Проверить ограничения: `POST /selection-profiles/{id}/eligibility` → `runId`.
-5. Скачать `GET /selection-profiles/{id}/recommendations/{runId}/ranking-export`.
-6. Самостоятельно передать JSON другой команде. Приложение ничего ей не отправляет.
-7. Команда возвращает JSON указанного ниже формата.
-8. Загрузить его через `POST /selection-profiles/{id}/recommendations/{runId}/ranking-result`.
-9. Получить сохранённый результат тем же URL методом GET; выбрать продукт обычным
-   `PUT /selection-profiles/{id}/selected-product` с исходным `runId`.
+Повтор вызова для существующего runId:
+`POST /selection-profiles/{id}/recommendations/{runId}/retry`. Состояния попыток
+хранятся в `recommendation_attempt`. После изменения формы требуется новый подбор.
+Клиент выбирает версию продукта через `PUT /selection-profiles/{id}/selected-product`
+с `expectedVersion`, `runId` и `productVersionId`; затем создаёт заявку.
 
-Доступ — по членству в компании. Экспорт/чтение доступны VIEWER; импорт, сохранение
-и проверка формы — OWNER/EDITOR. Другой пользователь получает 404. Анонимный — 401.
-В UI весь процесс доступен после входа в кабинет. После перезагрузки можно войти
-и восстановить подбор из ранее скачанного пакета: форма, условия и предупреждения
-заново читаются с сервера, содержимому загруженного файла UI не доверяет.
+Java использует `RECSYS_URL`, таймаут `RECSYS_TIMEOUT_MS` и внутренний Bearer
+`RECSYS_API_KEY`. FastAPI и Java получают один и тот же ключ из `.env`.
+Сервис работает на CPU; ML-порт доступен внутри Compose-сети.
 
-## Предварительная форма 2.0
+## Запрос
 
-15 полей по [новому контракту](backend-fields-v3.md). Семантическая часть:
+`schemaVersion=query-passage-mvp-2`, `semanticsVersion=synthetic-semantics-1`.
 
-| Поле | JSON-тип | Правило |
-|---|---|---|
-| `request.usageMode` | enum string | ONE_TIME / IN_PARTS / ACCOUNT_RESERVE / UNKNOWN; ответ нужен для экспорта |
-| `request.description` | string или null | До 500 символов, без HTML; необязательное уточнение |
-| `security.collateralReady` | enum string или null | YES / NO / DISCUSS / UNKNOWN, заменяет boolean |
-| `security.guarantorReady` | enum string или null | YES / NO / DISCUSS / UNKNOWN, заменяет boolean |
-| `business.sector` | enum string или null | Словарь `/forms/preliminary/dictionaries`; UNKNOWN допустим |
-| `request.purpose` | enum string | Общий словарь целей формы и каталога; нужен для экспорта |
-
-Частичный черновик по-прежнему разрешён. Перед экспортом обязательны цель и ответ
-о способе использования; UNKNOWN допустим только для способа использования.
-`null`/UNKNOWN не равны NO. При обязательном обеспечении YES даёт PASS, NO — FAIL,
-DISCUSS — REVIEW, UNKNOWN/null — UNKNOWN. YES означает готовность к обсуждению,
-а не наличие проверенного залога/поручителя. Ограничения по МСП по-прежнему boolean.
-Данные полной заявки, долги, просрочки и стоимость обеспечения в форму не добавляются.
-При сборке query другая команда должна пропускать неизвестные значения, а описание
-использовать только как текст, без исполнения инструкций и без изменения правил.
-
-## Экспорт
-
-`schemaVersion = query-passage-mvp-2`, `semanticsVersion = synthetic-semantics-1`.
-В пакете находятся:
-
-| Поле | Смысл |
+| Поле | Содержание |
 |---|---|
-| `requestId`, `profileId` | UUID запроса Recsys (= runId проверки) и формы |
-| `profileVersion` | Целочисленная версия формы на момент проверки |
-| `profile` | Полный снимок разрешённых предварительных ответов; числовые проверки уже выполнены Spring |
-| `queryFields` | Только sector, purpose, usageMode, description, collateralReady, guarantorReady |
-| `dictionaries` | Версия и русские подписи общих кодов |
-| `candidates` | Все ELIGIBLE/CONDITIONAL; productId, productVersion, product, eligibilityStatus, pendingConditions, checks |
-| `topK` | В MVP 3; выделяются первые min(topK, N), максимум три |
-| `scoreMeaning` | COSINE_SIMILARITY_NOT_APPROVAL_PROBABILITY |
+| `requestId` | UUID проверки, совпадает с runId |
+| `profileId`, `profileVersion` | Источник и версия формы |
+| `profile` | Снимок предварительных ответов |
+| `queryFields` | sector, purpose, usageMode, description, collateralReady, guarantorReady |
+| `dictionaries` | Версия и подписи общих кодов |
+| `candidates` | Все ELIGIBLE/CONDITIONAL с productId, productVersion, product, checks, pendingConditions |
+| `topK` | 3 |
+| `scoreMeaning` | `COSINE_SIMILARITY_NOT_APPROVAL_PROBABILITY` |
 
-`candidates[].product` соответствует смысловым полям документа: `id` (UUID продукта),
-`version` (UUID версии), `code`, `name`, `type`, `purposes`, `usageModes`, `targetScenario`,
-`targetSectors`, `specialization`, `collateralRequirement`, `guarantorRequirement`,
-`securityNote`, `synthetic`.
+`product` содержит закреплённые смысловые поля: код, название, тип, цели,
+способы использования, сценарий, отрасли, специализацию и условия обеспечения.
+Ограничения суммы, срока, выручки и статуса бизнеса проверяет Spring.
 
-Смысловой слой вручную описан только для существующих 15 **синтетических** продуктов.
-Это описание каталога, а не реальные предложения Альфа-Банка. Механизм и требования
-обеспечения берутся из правил; поручительство и имущественный залог разделены.
-У mixed IP/LLC-продукта поручительство CONDITIONAL с явным пояснением по форме бизнеса.
-Отраслевые исключения не превращаются в специализацию. INVESTMENT удалён; DEVELOPMENT — единая цель развития/инвестиций.
-При добавлении реального/неописанного продукта нужно сначала согласовать семантику.
-
-Снимок сохраняет смысловые поля, проверенные ограничения и дату проверки. Изменение
-шаблонов другой командой требует новой `templateVersion`; изменение нашего смыслового
-каталога требует новой `semanticsVersion` и повторного экспорта из нового подбора.
-Ни числовые диапазоны, ни выручка, ни тарифы не входят в `queryFields` или смысловые
-поля продукта: их проверяет Spring. При нуле кандидатов пакет содержит пустой список;
-Recsys возвращает `results: []`, backend принимает его; UI показывает причины исключения из исходной проверки.
-
-## Ответ команды
+## Ответ и проверки
 
 ```json
 {
-  "requestId": "UUID_FROM_EXPORT",
+  "requestId": "UUID_FROM_REQUEST",
   "metadata": {
-    "model": "intfloat/multilingual-e5-small",
-    "modelVersion": "YOUR_MODEL_REVISION",
-    "queryTemplateVersion": "query-1",
-    "passageTemplateVersion": "passage-1"
+    "model": "local/e5-credit-finetune-v1",
+    "modelVersion": "ACTUAL_MODEL_VERSION",
+    "queryTemplateVersion": "ACTUAL_QUERY_TEMPLATE",
+    "passageTemplateVersion": "ACTUAL_PASSAGE_TEMPLATE"
   },
   "results": [
     {
-      "productId": "CANDIDATE_PRODUCT_ID",
-      "productVersion": "CANDIDATE_PRODUCT_VERSION",
+      "productId": "CANDIDATE_PRODUCT_UUID",
+      "productVersion": "CANDIDATE_VERSION_UUID",
       "rank": 1,
       "similarityScore": 0.8123456789,
       "isRecommended": true,
@@ -111,69 +64,33 @@ Recsys возвращает `results: []`, backend принимает его; UI
 }
 ```
 
-Пример условный: UUID и применимость нужно скопировать из своего экспорта, metadata
-заполнить действительными версиями. Поля metadata — непустые строки до 120 символов.
-`requestId` равен `requestId` экспортированного пакета (= UUID runId в URL backend).
-`productId` и `productVersion` — UUID продукта и его неизменяемой версии, не код P01.
+Пример содержит placeholders; реальные UUID, версии, статусы и условия берутся
+из текущего запроса. `metadata` заполняется runtime-моделью и шаблонами.
 
-`similarityScore` — конечное **JSON-число** в [-1,1], cosine similarity нормализованных
-эмбеддингов. Сохраняется Decimal без округления. На экране 4 знака, **не проценты**:
-ни backend, ни frontend не умножают score на 100. Это не вероятность одобрения.
-`rank` — положительное целое JSON-число; строки и дробные ранги отвергаются.
-Нужно вернуть **всех** кандидатов ровно по одному разу: ранги 1..N, оценка не возрастает
-при увеличении ранга. Равные оценки допустимы, их порядок задаёт Recsys. Порядок
-элементов JSON-массива может быть любым: сервер сортирует по rank.
+Результат включает каждого кандидата ровно один раз. Ранги — целые `1..N`,
+score — конечное JSON-число в `[-1,1]`, не возрастающее с ростом ранга.
+`eligibilityStatus` и `pendingConditions` возвращаются без изменения, включая
+порядок условий. Флаг рекомендации выделяет подходящие первые результаты,
+максимум `topK=3`, с учётом активного порога cosine distance. Пустой список
+кандидатов допускает `results: []`. UI показывает score с четырьмя знаками.
 
-`isRecommended` — JSON-boolean, true ровно у первых min(topK, N) результатов, максимум
-трёх. Остальные кандидаты тоже возвращаются и отображаются. `topK=3` сохраняется
-в снимке запроса Java. Это выделение по смысловому соответствию, не кредитное решение.
+Схема ответа: [ranking-response.schema.json](contracts/ranking-response.schema.json).
+Полнота кандидатов, эхо применимости, ранги и актуальность дополнительно
+проверяются Java. Сохранённый ответ неизменяем: эквивалентный повтор идемпотентен,
+другой ответ для того же runId возвращает `RANKING_ALREADY_IMPORTED`.
+Изменение формы даёт `SELECTION_STALE`, изменение активного каталога — `CATALOG_STALE`.
+Исторический результат можно читать с `current=false`.
 
-`eligibilityStatus` и `pendingConditions` возвращаются **без изменений** из соответствующего
-кандидата Java, включая порядок и все поля объектов условий. pendingConditions — массив
-исходных проверок UNKNOWN/REVIEW: code, field, result, message, actual, expected.
-Recsys не перепроверяет доступность продукта и не редактирует ограничения. При изменении
-этих полей backend возвращает 400, не сохраняет ответ и сохраняет исходные проверки.
-Пустой входной список допускает `results: []` с requestId и metadata.
-Текстовые комментарии, объяснения или решения Recsys не входят в контракт и отвергаются
-как неизвестные поля. Шаблон ответа в UI содержит `similarityScore: null` как незаполненное
-место: перед отправкой команда должна заменить его числом и выставить настоящий порядок.
+## Технический экспорт и импорт
 
-JSON Schema: [ranking-response.schema.json](contracts/ranking-response.schema.json).
-Полнота списка, соответствие идентификаторов, эхо применимости, непрерывность рангов,
-порядок score и флаги topK дополнительно проверяются сервером. Непереданный/INELIGIBLE
-продукт нельзя вернуть даже с высокой оценкой. GET результата дополняет results карточкой
-product и исходными checks для UI; ответ самой Recsys этих дополнительных полей не содержит.
+Для интеграции доступны те же снимки и строгие проверки:
 
-Один результат на requestId неизменяем. Повтор эквивалентного ответа возвращает прежний
-результат. Другой ответ — 409 RANKING_ALREADY_IMPORTED; для нового ответа создайте новый
-подбор. Изменение формы — 409 SELECTION_STALE, даже при возврате к прежним значениям.
-Изменение активной версии продукта — 409 CATALOG_STALE; снятый продукт — 404.
-История доступна GET с current=false при изменённой форме. Выбор продукта сам по себе
-не делает результат устаревшим. Передача остаётся ручной: backend не вызывает Recsys.
-
-## Postman: проверки нового сценария
-
-Сохраните переменные token, partyId, profileId, runId (= requestId), profileVersion. Сохранение формы
-и проверка — как в [основной инструкции](postman-testing.md), с новыми enum и usageMode.
-
-| Действие | Ожидаемый результат |
+| Метод | URL после `/selection-profiles/{id}/recommendations/{runId}` |
 |---|---|
-| DISCUSS по обязательному поручителю | CONDITIONAL, предупреждение GUARANTOR_REQUIRED с REVIEW |
-| Экспорт после проверки | 200; список не содержит INELIGIBLE; queryFields не содержит сумму/выручку/заявку |
-| Отсутствует usageMode | Черновик сохраняется, экспорт 400 INVALID_INPUT |
-| Полный валидный ответ | 200; порядок по rank, исходные pendingConditions/checks сохранены |
-| Повтор того же ответа | 200, тот же результат |
-| Изменение сохранённого ответа | 409 RANKING_ALREADY_IMPORTED |
-| Неизвестный/исключённый UUID, повтор кандидата | 400; результат не сохраняется |
-| Пропуск кандидата, повтор/пропуск ранга | 400; частичный импорт невозможен |
-| similarityScore >1, <-1, null, строка или неупорядоченные оценки | 400 |
-| Несовпадающий requestId | 400 |
-| Изменение eligibilityStatus/pendingConditions, неверные флаги topK или комментарий | 400; исходные условия недоступны для замены |
-| Изменение формы, затем импорт старого ответа | 409 SELECTION_STALE |
-| GET старого сохранённого результата | 200, current=false; предупреждения сохранены |
-| Другой пользователь / нет Bearer | 404 / 401 |
-| Загрузка ранее экспортированного пакета в UI | Подбор восстанавливается только после чтения с сервера с проверкой доступа |
+| GET | `/ranking-export` |
+| POST | `/ranking-result` |
+| GET | `/ranking-result` |
 
-Миграция V10 нормализует boolean readiness только в текущих формах, увеличивает
-rowVersion и сбрасывает их старый выбор продукта. UNKNOWN для usageMode не выдумывается:
-пользователь должен ответить. Исторические снимки/заявки не переписываются. V1–V9 сохранены.
+Экспорт/чтение разрешены участникам компании, импорт — OWNER/EDITOR.
+JSON неизвестных полей, чужих кандидатов или изменённых условий отклоняется.
+Штатный пользовательский путь выполняет обмен автоматически.

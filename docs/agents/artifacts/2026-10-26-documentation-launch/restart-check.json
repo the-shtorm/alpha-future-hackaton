@@ -1,0 +1,8 @@
+{
+  "stop": "docker compose down (without --volumes)",
+  "start": "docker compose up --detach --wait --wait-timeout 2400",
+  "exitCode": 0,
+  "browserSessionRestored": true,
+  "queueApplicationCount": 4,
+  "disbursedEntriesVisible": 2
+}

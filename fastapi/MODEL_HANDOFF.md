@@ -1,8 +1,10 @@
 # Передача и запуск дообученной E5
 
+[Документация проекта](../docs/README.md) · [Запуск Docker](../docs/hackathon-start.md)
+
 ## Хранение
 
-HF-репозиторий: `thedauns/e5-credit-finetune-v1` (private, организация thedauns).
+HF-репозиторий: `thedauns/e5-credit-finetune-v1`.
 В HF `model/` содержит 10 неизменённых inference-файлов; `service/` — код,
 словарь, контракты, примеры, синтетические данные, параметры и lock-файлы обучения.
 `package-manifest.json` фиксирует SHA переданных файлов. Секреты, окружения, кэши
@@ -11,7 +13,8 @@ HF-репозиторий: `thedauns/e5-credit-finetune-v1` (private, орган
 
 ## Одна переменная MODEL_PATH
 
-Источник определяется только значением MODEL_PATH в fastapi/.env или в переменных
+В штатном Docker Compose MODEL_PATH задаётся в корневом `.env`. При прямом
+запуске Python источник определяется MODEL_PATH в fastapi/.env или в переменных
 процесса. Переменные процесса имеют приоритет. Примеры альтернативных значений:
 
 ```dotenv
@@ -23,7 +26,7 @@ MODEL_PATH=hf://thedauns/e5-credit-finetune-v1@e93f86ce54f0a6d2b3da24dac803e50ee
 # MODEL_PATH=C:/models/e5-credit-finetune-v1/final
 # Локальный диск Linux:
 # MODEL_PATH=/srv/models/e5-credit-finetune-v1/final
-# S3 на будущее — существующий bucket/prefix с содержимым model/:
+# S3 — существующий bucket/prefix с содержимым model/:
 # MODEL_PATH=s3://bucket/e5-credit-finetune-v1
 ```
 
@@ -141,14 +144,5 @@ uv run --frozen hf upload thedauns/e5-credit-finetune-v1 models/hf-export-new . 
 CI contracts работает без весов. Ручные model-package / real-java требуют GitHub
 Variable MODEL_PATH и соответствующие Secrets HF_TOKEN / AWS credentials. Они проверяют download,
 SHA, CPU smoke и Java-цепочку. Git LFS для нового checkout не нужен.
-В старых коммитах остались LFS pointers: история не переписывается. Чтобы будущий
-push кода не загружал старые веса, оператор может выполнить:
-
-```powershell
-$env:GIT_LFS_SKIP_PUSH='1'
-git push origin fast_api
-Remove-Item Env:GIT_LFS_SKIP_PUSH
-```
-
-Агент ничего в GitHub не пушит. Исходная E5 и model card checkpoint помечены MIT;
+Исходная E5 и model card checkpoint помечены MIT;
 источник базы закреплён Git SHA в lock-файле.

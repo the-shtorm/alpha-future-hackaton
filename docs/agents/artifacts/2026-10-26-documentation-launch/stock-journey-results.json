@@ -1,0 +1,46 @@
+{
+  "compose": "compose.yaml",
+  "project": "judge-docs-20261026",
+  "cookieCsrf": true,
+  "actualPdfUploadDownloadAndReplacement": true,
+  "outcomes": [
+    {
+      "decision": "APPROVED",
+      "productCode": "P07",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.006003678384059744,
+      "finalRiskScore": 0.006003678384059744,
+      "pti": 0.00690473,
+      "selectedVariant": "ORIGINAL",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "COUNTEROFFERED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 2,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.4,
+      "selectedVariant": "ALTERNATIVE",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "DECLINED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.0270809,
+      "selectedVariant": "ORIGINAL"
+    },
+    {
+      "decision": "REQUEST_INFO",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 0
+    }
+  ]
+}

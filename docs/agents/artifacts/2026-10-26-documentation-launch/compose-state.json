@@ -1,0 +1,32 @@
+[
+  {
+    "Service": "backend",
+    "State": "running",
+    "Health": "",
+    "ExitCode": 0
+  },
+  {
+    "Service": "fastapi",
+    "State": "running",
+    "Health": "healthy",
+    "ExitCode": 0
+  },
+  {
+    "Service": "frontend",
+    "State": "running",
+    "Health": "healthy",
+    "ExitCode": 0
+  },
+  {
+    "Service": "pgadmin",
+    "State": "running",
+    "Health": "",
+    "ExitCode": 0
+  },
+  {
+    "Service": "postgres",
+    "State": "running",
+    "Health": "healthy",
+    "ExitCode": 0
+  }
+]
