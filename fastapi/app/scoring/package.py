@@ -24,6 +24,11 @@ class Manifest(PackageDTO):
     modelVersion: str = Field(min_length=1, max_length=120)
     featureVersion: Literal["sba-features-1"]
     calibrationVersion: str = Field(min_length=1, max_length=120)
+    # Legacy packages predate explicit provenance and used FY2017 only.
+    calibrationYears: list[Annotated[int, Field(ge=2010, le=2100, strict=True)]] | None = Field(
+        default=None, min_length=2, max_length=2
+    )
+    operatingThreshold: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
     featureOrder: list[str]
     positiveClass: Literal[1]
     modelType: Literal["logistic", "catboost"]
@@ -98,7 +103,12 @@ class ScoringPackage:
                 raise ValueError("Scoring file integrity check failed")
         self.calibration = Sigmoid.model_validate_json((path / "calibration.json").read_bytes())
         self.domain = Domain.model_validate_json((path / "domain.json").read_bytes())
-        if self.calibration.version != manifest.calibrationVersion or self.calibration.years != [2017, 2017]:
+        expected_years = manifest.calibrationYears if manifest.calibrationYears is not None else [2017, 2017]
+        if (
+            expected_years[0] > expected_years[1]
+            or self.calibration.version != manifest.calibrationVersion
+            or self.calibration.years != expected_years
+        ):
             raise ValueError("Calibration provenance mismatch")
         if set(self.domain.numeric) != set(NUMERIC) or set(self.domain.categorical) != set(CATEGORICAL):
             raise ValueError("Incomplete applicability domain")

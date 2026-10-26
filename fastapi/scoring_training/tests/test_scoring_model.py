@@ -236,6 +236,29 @@ def test_rare_categories_and_unreleased_package(package_fixture):
         Bounds(min=2, max=1)
 
 
+def test_explicit_calibration_provenance_and_frozen_operating_point(package_fixture):
+    package, data, _, manifest = package_fixture
+    calibration = train.read_json(package / "calibration.json")
+    calibration["years"] = [2012, 2012]
+    train.write_json(package / "calibration.json", calibration)
+    manifest["files"]["calibration.json"] = digest(package / "calibration.json")
+    # A changed, correctly hashed calibration still needs explicit pinned provenance.
+    train.write_json(package / "manifest.json", manifest)
+    with pytest.raises(ValueError, match="Calibration provenance"):
+        ScoringPackage(package, digest(package / "manifest.json"))
+    manifest.update(calibrationYears=[2012, 2012], operatingThreshold=0.167204479067272)
+    train.write_json(package / "manifest.json", manifest)
+    scorer = ScoringPackage(package, digest(package / "manifest.json"))
+    assert scorer.calibration.years == [2012, 2012]
+    assert scorer.manifest.operatingThreshold == 0.167204479067272
+    assert np.isfinite(scorer.predict_frame(train.view(data, manifest["naicsMode"]))).all()
+    for years in ([2012, 2013], [2013, 2012], [], [2012], [2012, 2012, 2012]):
+        manifest["calibrationYears"] = years
+        train.write_json(package / "manifest.json", manifest)
+        with pytest.raises(ValueError):
+            ScoringPackage(package, digest(package / "manifest.json"))
+
+
 def test_candidates_selection_and_metrics():
     configs = list(train.configurations())
     assert len(configs) == 32
