@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { Textarea } from '@alfalab/core-components-textarea';
-import type { Answers, Dictionaries, Party, Product } from '../types';
+import type { Answers, Dictionaries, Product } from '../types';
 import { money, purposeNames } from '../presentation';
 import { validatePreliminary } from '../validation';
 import { Banner, Button, Field, Icon, Select } from './UI';
@@ -9,9 +9,7 @@ const labels = ['О компании', 'Ваша задача', 'Проверк�
 export function Wizard({
   answers,
   setAnswers,
-  parties,
-  partyId,
-  onParty,
+  businessKindLocked,
   onBack,
   onSubmit,
   busy,
@@ -20,9 +18,7 @@ export function Wizard({
 }: {
   answers: Answers;
   setAnswers: Dispatch<SetStateAction<Answers>>;
-  parties: Party[];
-  partyId: string;
-  onParty: (id: string) => void;
+  businessKindLocked: boolean;
   onBack: () => void;
   onSubmit: () => void;
   busy: boolean;
@@ -137,16 +133,6 @@ export function Wizard({
               </div>
               {step === 0 && (
                 <>
-                  {!!parties.length && (
-                    <Select
-                      label="Компания"
-                      value={partyId}
-                      onChange={onParty}
-                      options={Object.fromEntries(
-                        parties.map((p) => [p.id, p.name.replace(/^DEMO:\s*/, '')]),
-                      )}
-                    />
-                  )}
                   <div className="business-kind">
                     <span>Форма бизнеса</span>
                     <div role="group" aria-label="Форма бизнеса">
@@ -158,7 +144,7 @@ export function Wizard({
                           type="button"
                           aria-pressed={value('registration.borrowerKind') === key}
                           key={key}
-                          disabled={!!parties.length}
+                          disabled={businessKindLocked}
                           onClick={() =>
                             setAnswers({
                               ...answers,

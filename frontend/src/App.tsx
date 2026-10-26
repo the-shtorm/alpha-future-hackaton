@@ -379,28 +379,6 @@ export function App() {
     setError('');
     setPage('form');
   };
-  const changeParty = (id: string) => {
-    sessionGeneration.current++;
-    profileRef.current = null;
-    saveConflict.current = false;
-    setProfile(null);
-    setSelection(null);
-    setDraftNotice('');
-    setPartyId(id);
-    const company = writable.find((p) => p.id === id);
-    if (company)
-      setAnswers((old) => ({
-        ...old,
-        registration: { ...old.registration, borrowerKind: company.party_kind },
-        business: {
-          ...old.business,
-          taxRegime:
-            company.party_kind === 'LLC' && ['PSN', 'NPD'].includes(String(old.business.taxRegime))
-              ? 'UNKNOWN'
-              : old.business.taxRegime,
-        },
-      }));
-  };
   const submit = async (company: Party, current: Answers) => {
     const next = {
       ...current,
@@ -740,9 +718,7 @@ export function App() {
           <Wizard
             answers={answers}
             setAnswers={setAnswers}
-            parties={writable}
-            partyId={partyId}
-            onParty={changeParty}
+            businessKindLocked={writable.length > 0}
             dictionary={dictionary}
             products={products}
             onBack={() => setPage('catalog')}
