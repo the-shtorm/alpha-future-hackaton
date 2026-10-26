@@ -25,7 +25,7 @@
     "targetDefinitionSha256": "877ed7e0429917b66c3b033872c493c679cd31e5d84f42df9f48fd61545da4b2"
   },
   "artifactFormat": "campaign-joblib (offline; includes model, feature builder and sigmoid calibrator)",
-  "localSnapshot": "fastapi/models/sba-scoring-selected-mixed-v1-0051",
+  "localSnapshot": "fastapi/scoring_training/runs/recall90-precision60-campaign-v1/trials/mixed-v1-0051",
   "sourceArtifact": "fastapi/scoring_training/runs/recall90-precision60-campaign-v1/trials/mixed-v1-0051/model.joblib",
   "snapshotFiles": {
     "model.joblib": "1df3fa6e9e5579889c1aa83c133c55b946e36664fb82cce28b891f5793a26cce",
@@ -173,5 +173,6 @@
   "primaryPackage": "fastapi/models/sba-scoring-v2",
   "primaryManifestSha256": "5d5498e8d3339ffbbce3d5f117f52692cee9986067a3bf6df8524c5e4c8c53ac",
   "primaryConfigured": true,
-  "runtimeDeploymentStatus": "Repository default and pin switched; verified local API. Docker daemon is not running."
+  "runtimeDeploymentStatus": "Repository default and pin switched; verified local API. Docker daemon is not running.",
+  "sourceCopyNote": "Redundant models snapshot removed by user request; identical original research trial retained outside models."
 }

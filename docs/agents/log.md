@@ -30,3 +30,4 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-26 — Selected scoring model5](2026-10-26-scoring-selected-model-0051.md) — completed; mixed-v1-0051 preserved separately, copied model replay/checksums verified; runtime unchanged, local commit only.
 - [2026-10-26 — Primary sba-scoring-v2 promotion](2026-10-26-scoring-v2-primary.md) — completed; native export/replay, primary pin/defaults,320 scoring-training and16 API checks; v1 preserved, Docker deployment not run.
 - [2026-10-26 — sba-scoring-v2 readiness review](2026-10-26-scoring-v2-readiness-review.md) — completed; native demo inference verified again, no running containers; deployment and real banking validity not established.
+- [2026-10-26 — Model directory cleanup](2026-10-26-scoring-model-directory-cleanup.md) — completed; only E5/SBA v1/v2 remain, redundant copy removed; source export/replay and package hashes verified.
