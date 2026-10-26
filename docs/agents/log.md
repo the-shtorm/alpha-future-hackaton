@@ -29,3 +29,4 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-26 — Verified scoring fallback execution](2026-10-26-scoring-fallback-execution.md) — completed; full1489 records,0 failures; target unmet,10 verified substantial improvements retained; favorite preserved, local commits only.
 - [2026-10-26 — Selected scoring model5](2026-10-26-scoring-selected-model-0051.md) — completed; mixed-v1-0051 preserved separately, copied model replay/checksums verified; runtime unchanged, local commit only.
 - [2026-10-26 — Primary sba-scoring-v2 promotion](2026-10-26-scoring-v2-primary.md) — completed; native export/replay, primary pin/defaults,320 scoring-training and16 API checks; v1 preserved, Docker deployment not run.
+- [2026-10-26 — sba-scoring-v2 readiness review](2026-10-26-scoring-v2-readiness-review.md) — completed; native demo inference verified again, no running containers; deployment and real banking validity not established.
