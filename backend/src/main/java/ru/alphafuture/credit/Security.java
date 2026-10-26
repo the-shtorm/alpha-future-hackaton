@@ -13,11 +13,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.*;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/** Сессии Bearer хранятся только в виде SHA-256; все операции проверяют доступ. */
+/** Cookie/Bearer сессии хранятся только в виде SHA-256; все операции проверяют доступ. */
 @Configuration
 class Security {
     @Bean
@@ -26,37 +27,53 @@ class Security {
     }
 
     @Bean
-    SecurityFilterChain chain(HttpSecurity http, JdbcClient db) throws Exception {
+    SecurityFilterChain chain(HttpSecurity http, JdbcClient db, BrowserSessions sessions)
+            throws Exception {
         var filter =
                 new OncePerRequestFilter() {
                     @Override
                     protected void doFilterInternal(
                             HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                             throws ServletException, IOException {
-                        String header = req.getHeader("Authorization");
-                        if (header != null && header.startsWith("Bearer ")) {
+                        var credential = sessions.credential(req);
+                        if (credential != null) {
                             var users =
                                     db.sql(
                                                     "SELECT u.id FROM credit.api_session s JOIN credit.app_user u ON u.id=s.user_id WHERE s.token_hash=:hash AND s.revoked_at IS NULL AND s.expires_at>now() AND u.status='ACTIVE'")
-                                            .param("hash", Json.hash(header.substring(7)))
+                                            .param("hash", Json.hash(credential.token()))
                                             .query(UUID.class)
                                             .list();
-                            if (!users.isEmpty())
+                            if (!users.isEmpty()) {
+                                req.setAttribute(BrowserSessions.CREDENTIAL, credential);
                                 SecurityContextHolder.getContext()
                                         .setAuthentication(
                                                 new UsernamePasswordAuthenticationToken(
                                                         users.getFirst(), null, List.of()));
+                            } else if (credential.browser()) {
+                                sessions.clear(res);
+                            }
                         }
                         chain.doFilter(req, res);
                     }
                 };
-        return http.csrf(c -> c.disable())
+        return http.csrf(
+                        c ->
+                                c.csrfTokenRepository(sessions.csrf)
+                                        .requireCsrfProtectionMatcher(sessions::requiresCsrf)
+                                        // Authentication is resolved on every stateless request;
+                                        // rotate CSRF only on actual login/logout in Accounts.
+                                        .sessionAuthenticationStrategy(
+                                                (auth, request, response) -> {}))
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .requestCache(c -> c.disable())
+                .logout(c -> c.disable())
                 .authorizeHttpRequests(
                         c ->
                                 c.requestMatchers(
                                                 "/health",
                                                 "/auth/login",
+                                                "/auth/session",
+                                                "/auth/csrf",
                                                 "/products",
                                                 "/products/**",
                                                 "/v3/api-docs/**",
@@ -67,15 +84,25 @@ class Security {
                                         .authenticated())
                 .exceptionHandling(
                         c ->
-                                c.authenticationEntryPoint(
-                                        (req, res, ex) -> {
-                                            res.setStatus(401);
-                                            res.setContentType("application/problem+json");
-                                            res.getWriter()
-                                                    .write(
-                                                            "{\"status\":401,\"code\":\"UNAUTHORIZED\"}");
-                                        }))
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                                c.accessDeniedHandler(
+                                                (req, res, ex) -> {
+                                                    res.setStatus(403);
+                                                    res.setContentType("application/problem+json");
+                                                    res.getWriter()
+                                                            .write(
+                                                                    ex instanceof CsrfException
+                                                                            ? "{\"status\":403,\"code\":\"CSRF_INVALID\",\"detail\":\"Обновите защиту запроса и повторите действие\"}"
+                                                                            : "{\"status\":403,\"code\":\"FORBIDDEN\"}");
+                                                })
+                                        .authenticationEntryPoint(
+                                                (req, res, ex) -> {
+                                                    res.setStatus(401);
+                                                    res.setContentType("application/problem+json");
+                                                    res.getWriter()
+                                                            .write(
+                                                                    "{\"status\":401,\"code\":\"UNAUTHORIZED\"}");
+                                                }))
+                .addFilterBefore(filter, CsrfFilter.class)
                 .build();
     }
 }

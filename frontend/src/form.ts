@@ -60,6 +60,20 @@ export function normalizeAnswers(form: Answers): Answers {
   );
 }
 
+/** PostgreSQL jsonb may reorder keys; compare normalized values without treating order as an edit. */
+export function sameAnswers(left: Answers, right: Answers): boolean {
+  const key = (answers: Answers) =>
+    JSON.stringify(
+      Object.entries(normalizeAnswers(answers))
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([section, fields]) => [
+          section,
+          Object.entries(fields).sort(([a], [b]) => a.localeCompare(b)),
+        ]),
+    );
+  return key(left) === key(right);
+}
+
 export function exampleAnswers(): Answers {
   // Synthetic values only, never presented as the current user's business data.
   const end = new Date();

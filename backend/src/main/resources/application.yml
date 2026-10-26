@@ -30,6 +30,8 @@ cabinet:
   documents-path: ${DOCUMENTS_PATH:./work/documents}
   demo-password: ${DEMO_PASSWORD:}
   demo-bank-password: ${DEMO_BANK_PASSWORD:}
+  session:
+    cookie-secure: ${SESSION_COOKIE_SECURE:true}
 
   demo-assessment-enabled: ${DEMO_ASSESSMENT_ENABLED:false}
   recsys:

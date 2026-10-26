@@ -1,5 +1,6 @@
 package ru.alphafuture.credit;
 
+import jakarta.servlet.http.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.*;
@@ -7,6 +8,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /** Вход существующих клиентов, отзыв сессий и сведения о компаниях. */
@@ -20,15 +23,22 @@ class Accounts {
     private final Access access;
     private final Json json;
     private final String dummy;
+    private final BrowserSessions sessions;
     private final Map<String, Attempts> limits = new ConcurrentHashMap<>();
 
     private record Attempts(long minute, int count) {}
 
-    Accounts(JdbcClient db, PasswordEncoder passwords, Access access, Json json) {
+    Accounts(
+            JdbcClient db,
+            PasswordEncoder passwords,
+            Access access,
+            Json json,
+            BrowserSessions sessions) {
         this.db = db;
         this.passwords = passwords;
         this.access = access;
         this.json = json;
+        this.sessions = sessions;
         this.dummy = passwords.encode(Json.token());
     }
 
@@ -40,6 +50,42 @@ class Accounts {
 
     @PostMapping("/auth/login")
     Map<String, Object> login(@Valid @RequestBody Login input) {
+        var session = issue(input);
+        return Map.of(
+                "accessToken",
+                session.token(),
+                "tokenType",
+                "Bearer",
+                "expiresAt",
+                session.expiresAt());
+    }
+
+    record Session(String token, Instant expiresAt) {}
+
+    @GetMapping("/auth/csrf")
+    Map<String, String> csrf(CsrfToken token) {
+        return Map.of("headerName", token.getHeaderName(), "token", token.getToken());
+    }
+
+    @PostMapping("/auth/session")
+    @Transactional
+    Map<String, Object> browserLogin(
+            @Valid @RequestBody Login input,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        var session = issue(input);
+        String previous = sessions.cookieToken(request);
+        if (previous != null)
+            db.sql(
+                            "UPDATE credit.api_session SET revoked_at=now() WHERE token_hash=:hash AND revoked_at IS NULL")
+                    .param("hash", Json.hash(previous))
+                    .update();
+        sessions.set(response, session.token(), Duration.ofSeconds(43200));
+        sessions.csrf.saveToken(null, request, response);
+        return Map.of("status", "ok", "expiresAt", session.expiresAt());
+    }
+
+    private Session issue(Login input) {
         if (input.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
             throw ApiFailure.invalid("password", "Максимум 72 байта UTF-8");
         long minute = Instant.now().getEpochSecond() / 60;
@@ -80,16 +126,23 @@ class Accounts {
                 .param("user", account.get().get("id"))
                 .param("expiry", java.sql.Timestamp.from(expiry))
                 .update();
-        return Map.of("accessToken", token, "tokenType", "Bearer", "expiresAt", expiry);
+        return new Session(token, expiry);
     }
 
     @PostMapping("/auth/logout")
-    Map<String, String> logout(@RequestHeader("Authorization") String header) {
+    @Transactional
+    Map<String, String> logout(HttpServletRequest request, HttpServletResponse response) {
+        var credential =
+                (BrowserSessions.Credential) request.getAttribute(BrowserSessions.CREDENTIAL);
         db.sql(
                         "UPDATE credit.api_session SET revoked_at=now() WHERE token_hash=:hash AND user_id=:user")
-                .param("hash", Json.hash(header.substring(7)))
+                .param("hash", Json.hash(credential.token()))
                 .param("user", access.user())
                 .update();
+        if (credential.browser()) {
+            sessions.clear(response);
+            sessions.csrf.saveToken(null, request, response);
+        }
         return Map.of("status", "ok");
     }
 

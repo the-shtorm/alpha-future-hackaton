@@ -1,6 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError } from './api';
-import { emptyAnswers, normalizeAnswers } from './form';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { api, ApiError, clearApiSession } from './api';
+import { readView, viewSearch, type Page } from './view';
+import { emptyAnswers, normalizeAnswers, sameAnswers } from './form';
+import { browserDraftStorage, readGuestDraft, writeGuestDraft, clearGuestDraft } from './drafts';
 import { dictionaries } from './presentation';
 import { CatalogPage, ProductDetails } from './components/Catalog';
 import { SelectionResults, SavedSelections } from './components/Selections';
@@ -19,7 +21,6 @@ import type {
   Selection,
 } from './types';
 
-type Page = 'catalog' | 'form' | 'results' | 'saved' | 'applications';
 type Intent = 'submit' | 'saved' | 'applications' | null;
 
 export function App() {
@@ -29,9 +30,22 @@ export function App() {
   const [catalogError, setCatalogError] = useState('');
   const [catalogAttempt, setCatalogAttempt] = useState(0);
   const [details, setDetails] = useState<Product | null>(null);
-  const [answers, setAnswers] = useState<Answers>(() => structuredClone(emptyAnswers));
+  const [answers, setAnswers] = useState<Answers>(
+    () => readGuestDraft(browserDraftStorage()) ?? structuredClone(emptyAnswers),
+  );
   const [dictionary, setDictionary] = useState<Dictionaries>(dictionaries);
-  const [token, setToken] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [restoring, setRestoring] = useState(true);
+  const [sessionAttempt, setSessionAttempt] = useState(0);
+  const [draftNotice, setDraftNotice] = useState('');
+  const [sessionError, setSessionError] = useState('');
+  const sessionGeneration = useRef(0);
+  const profileRef = useRef<Profile | null>(null);
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const saveConflict = useRef(false);
+  const channel = useRef<BroadcastChannel | null>(null);
+  const acting = useRef(false);
+  const applicationSave = useRef<(() => Promise<void>) | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [parties, setParties] = useState<Party[]>([]);
   const [partyId, setPartyId] = useState('');
@@ -46,7 +60,8 @@ export function App() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [working, setBusy] = useState(false);
+  const busy = working || restoring;
   const writable = parties.filter((p) => ['OWNER', 'EDITOR'].includes(p.access_role));
 
   useEffect(() => {
@@ -71,7 +86,249 @@ export function App() {
     };
   }, [catalogAttempt]);
 
+  function clearProtected(keepGuest = false) {
+    sessionGeneration.current++;
+    profileRef.current = null;
+    saveConflict.current = false;
+    setAuthenticated(false);
+    setDisplayName('');
+    setParties([]);
+    setPartyId('');
+    setProfile(null);
+    setSelection(null);
+    setSaved([]);
+    setApplicationId(null);
+    if (!keepGuest) clearGuestDraft(browserDraftStorage());
+    setAnswers(
+      (keepGuest ? readGuestDraft(browserDraftStorage()) : null) ?? structuredClone(emptyAnswers),
+    );
+    setDraftNotice('');
+    setPassword('');
+    setIntent(null);
+    setPage('catalog');
+    clearApiSession();
+  }
+
+  useEffect(() => {
+    let active = true;
+    const view = readView(window.location.search);
+    setRestoring(true);
+    setSessionError('');
+    const restore = async () => {
+      let me: { user: { display_name: string }; parties: Party[] };
+      try {
+        me = await api('/me');
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 401) {
+          if (active) {
+            clearProtected(true);
+            if (view.page === 'form' && !view.profileId) setPage('form');
+          }
+          return;
+        }
+        throw e;
+      }
+      const dict = await api<Dictionaries>('/forms/preliminary/dictionaries');
+      if (!active) return;
+      setAuthenticated(true);
+      setDisplayName(me.user.display_name);
+      setParties(me.parties);
+      setDictionary(dict);
+      setPartyId(me.parties.find((p) => ['OWNER', 'EDITOR'].includes(p.access_role))?.id ?? '');
+      try {
+        if (['form', 'results'].includes(view.page) && view.profileId) {
+          const p = await api<Profile>(`/selection-profiles/${view.profileId}`);
+          if (!active) return;
+          profileRef.current = p;
+          saveConflict.current = false;
+          setProfile(p);
+          setPartyId(p.partyId);
+          setAnswers(normalizeAnswers(p.answers));
+          setPage('form');
+          if (view.page === 'results' && view.runId) {
+            const result = await api<Selection>(
+              `/selection-profiles/${p.id}/recommendations/${view.runId}/view`,
+            );
+            if (!active) return;
+            setSelection(result);
+            setPage('results');
+          }
+        } else if (view.page === 'saved') {
+          const data = await api<{ items: SavedSelection[] }>('/selections');
+          if (!active) return;
+          setSaved(data.items);
+          setPage('saved');
+        } else if (view.page === 'applications') {
+          setApplicationId(view.applicationId);
+          setPage('applications');
+        } else {
+          if (view.page === 'form') {
+            const guest = readGuestDraft(browserDraftStorage());
+            const company = me.parties.find((p) => ['OWNER', 'EDITOR'].includes(p.access_role));
+            if (guest)
+              setAnswers({
+                ...guest,
+                registration: {
+                  ...guest.registration,
+                  ...(company ? { borrowerKind: company.party_kind } : {}),
+                },
+              });
+          }
+          setPage(view.page === 'form' ? 'form' : 'catalog');
+        }
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : 'Не удалось восстановить страницу.');
+      }
+    };
+    void restore()
+      .catch((e) => {
+        if (active)
+          setSessionError(e instanceof Error ? e.message : 'Не удалось восстановить сессию.');
+      })
+      .finally(() => {
+        if (active) setRestoring(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [sessionAttempt]);
+
+  useEffect(() => {
+    if (restoring || sessionError) return;
+    const search = viewSearch({
+      page,
+      profileId: profile?.id ?? null,
+      runId: selection?.runId ?? null,
+      applicationId,
+    });
+    window.history.replaceState(null, '', `${window.location.pathname}${search}`);
+  }, [restoring, sessionError, page, profile?.id, selection?.runId, applicationId]);
+
+  useEffect(() => {
+    const expire = () => {
+      clearProtected();
+      setError(
+        'Сессия завершилась. Войдите снова; сохранённые формы и заявки доступны в кабинете.',
+      );
+      setLoginOpen(true);
+    };
+    window.addEventListener('alpha-session-expired', expire);
+    const messages =
+      typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('alpha-session');
+    channel.current = messages;
+    if (messages)
+      messages.onmessage = (event) => {
+        if (!['login', 'logout'].includes(event.data)) return;
+        clearProtected(event.data === 'login');
+        setLoginOpen(false);
+        setRestoring(true);
+        setSessionAttempt((n) => n + 1);
+      };
+    return () => {
+      window.removeEventListener('alpha-session-expired', expire);
+      messages?.close();
+      channel.current = null;
+    };
+  }, []);
+
+  // Serialize writes and use the version returned by the previous save. Never overwrite a conflict.
+  const saveProfile = (company: Party, current: Answers): Promise<Profile> => {
+    const generation = sessionGeneration.current;
+    const payload = normalizeAnswers(current);
+    const pending = saveQueue.current
+      .catch(() => undefined)
+      .then(async () => {
+        if (generation !== sessionGeneration.current)
+          throw new Error('Сессия изменилась. Повторите действие.');
+        if (saveConflict.current)
+          throw new Error(
+            'Форма изменена в другой вкладке. Откройте её заново из «Моих подборов».',
+          );
+        const previous = profileRef.current;
+        if (previous?.partyId === company.id && sameAnswers(previous.answers, payload))
+          return previous;
+        try {
+          const p =
+            previous?.partyId === company.id
+              ? await api<Profile>(
+                  `/selection-profiles/${previous.id}`,
+                  { expectedVersion: previous.rowVersion, answers: payload },
+                  'PATCH',
+                )
+              : await api<Profile>('/selection-profiles', {
+                  partyId: company.id,
+                  answers: payload,
+                });
+          if (generation !== sessionGeneration.current)
+            throw new Error('Сессия изменилась. Повторите действие.');
+          profileRef.current = p;
+          setProfile(p);
+          clearGuestDraft(browserDraftStorage());
+          return p;
+        } catch (e) {
+          if (generation === sessionGeneration.current && e instanceof ApiError && e.status === 409)
+            saveConflict.current = true;
+          throw e;
+        }
+      });
+    saveQueue.current = pending;
+    return pending;
+  };
+
+  useEffect(() => {
+    const company = writable.find((p) => p.id === partyId);
+    if (!authenticated || busy || page !== 'form' || !company || saveConflict.current) return;
+    if (
+      profileRef.current?.partyId === company.id &&
+      sameAnswers(profileRef.current.answers, answers)
+    ) {
+      setDraftNotice('Черновик сохранён. Можно вернуться к нему из «Моих подборов».');
+      return;
+    }
+    setDraftNotice('Есть несохранённые изменения…');
+    let active = true;
+    const timer = window.setTimeout(() => {
+      setDraftNotice('Сохраняем черновик…');
+      void saveProfile(company, answers)
+        .then(() => {
+          if (active)
+            setDraftNotice('Черновик сохранён. Можно вернуться к нему из «Моих подборов».');
+        })
+        .catch((e) => {
+          if (active)
+            setDraftNotice(e instanceof Error ? e.message : 'Не удалось сохранить черновик.');
+        });
+    }, 700);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [authenticated, busy, page, partyId, answers]);
+
+  useEffect(() => {
+    if (restoring || authenticated || page !== 'form') return;
+    const saved = writeGuestDraft(browserDraftStorage(), answers);
+    setDraftNotice(
+      saved
+        ? 'Черновик сохранён в этой вкладке на 24 часа. После входа он будет доступен в кабинете.'
+        : 'Браузер не разрешил сохранить черновик. Не закрывайте страницу до входа.',
+    );
+  }, [restoring, authenticated, page, answers]);
+
+  useEffect(() => {
+    if (!authenticated || page !== 'form' || (profile && sameAnswers(profile.answers, answers)))
+      return;
+    const protect = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', protect);
+    return () => window.removeEventListener('beforeunload', protect);
+  }, [authenticated, page, profile, answers]);
+
   const run = async (action: () => Promise<void>) => {
+    if (acting.current || restoring) return;
+    acting.current = true;
     setBusy(true);
     setError('');
     try {
@@ -79,14 +336,19 @@ export function App() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Не удалось выполнить действие.');
     } finally {
+      acting.current = false;
       setBusy(false);
     }
   };
   const start = (product?: Product) => {
-    const next = structuredClone(emptyAnswers);
+    if (busy || acting.current) return;
+    sessionGeneration.current++;
+    const next =
+      (!product ? readGuestDraft(browserDraftStorage()) : null) ?? structuredClone(emptyAnswers);
     const company = writable.find((p) => p.id === partyId) ?? writable[0];
     if (company) next.registration.borrowerKind = company.party_kind;
     if (product) {
+      clearGuestDraft(browserDraftStorage());
       next.request = {
         ...next.request,
         purpose: product.purposes[0],
@@ -102,12 +364,21 @@ export function App() {
     }
     setDetails(null);
     setAnswers(next);
+    profileRef.current = null;
+    saveConflict.current = false;
+    setDraftNotice('');
     setProfile(null);
     setSelection(null);
     setError('');
     setPage('form');
   };
   const changeParty = (id: string) => {
+    sessionGeneration.current++;
+    profileRef.current = null;
+    saveConflict.current = false;
+    setProfile(null);
+    setSelection(null);
+    setDraftNotice('');
     setPartyId(id);
     const company = writable.find((p) => p.id === id);
     if (company)
@@ -123,52 +394,50 @@ export function App() {
         },
       }));
   };
-  const submit = async (auth: string, company: Party, current: Answers) => {
+  const submit = async (company: Party, current: Answers) => {
     const next = {
       ...current,
       registration: { ...current.registration, borrowerKind: company.party_kind },
     };
-    const p = await api<Profile>('/selection-profiles', auth, {
-      partyId: company.id,
-      answers: normalizeAnswers(next),
-    });
+    const p = await saveProfile(company, next);
     setProfile(p);
     setPartyId(company.id);
     setAnswers(next);
-    const result = await api<Selection>(
-      `/selection-profiles/${p.id}/automatic-selection`,
-      auth,
-      {},
-    );
+    const result = await api<Selection>(`/selection-profiles/${p.id}/automatic-selection`, {});
     setSelection(result);
     setPage('results');
   };
-  const loadSaved = async (auth: string) => {
-    const data = await api<{ items: SavedSelection[] }>('/selections', auth);
+  const loadSaved = async () => {
+    const data = await api<{ items: SavedSelection[] }>('/selections');
     setSaved(data.items);
     setPage('saved');
   };
   const navigate = (target: Page) => {
     setError('');
-    if (target === 'catalog') {
-      setPage('catalog');
-      return;
-    }
-    if (!token) {
+    if (!authenticated && target !== 'catalog') {
       setIntent(target as 'saved' | 'applications');
       setLoginError('');
       setLoginOpen(true);
       return;
     }
-    if (target === 'saved') void run(() => loadSaved(token));
-    else {
-      setApplicationId(null);
-      setPage(target);
-      setApplicationRefresh((n) => n + 1);
-    }
+    void run(async () => {
+      if (page === 'applications') await applicationSave.current?.();
+      if (page === 'form' && authenticated) {
+        const company = writable.find((p) => p.id === partyId);
+        if (company) await saveProfile(company, answers);
+      }
+      if (target === 'saved') await loadSaved();
+      else {
+        if (target === 'applications') {
+          setApplicationId(null);
+          setApplicationRefresh((n) => n + 1);
+        }
+        setPage(target);
+      }
+    });
   };
   const showResults = () => {
-    if (!token) {
+    if (!authenticated) {
       setIntent('submit');
       setLoginError('');
       setLoginOpen(true);
@@ -179,24 +448,33 @@ export function App() {
       setError('Нет компании с правом сохранения формы.');
       return;
     }
-    void run(() => submit(token, company, answers));
+    void run(() => submit(company, answers));
   };
   const authenticate = async (event: FormEvent) => {
     event.preventDefault();
+    if (acting.current || restoring) return;
+    acting.current = true;
     setBusy(true);
     setLoginError('');
-    let auth = '';
+    let signedIn = false;
     try {
-      const session = await api<{ accessToken: string }>('/auth/login', '', {
+      await api('/auth/session', {
         login: login.trim(),
         password,
       });
-      auth = session.accessToken;
-      const me = await api<{ user: { display_name: string }; parties: Party[] }>('/me', auth);
-      const dict = await api<Dictionaries>('/forms/preliminary/dictionaries', auth);
+      signedIn = true;
+      sessionGeneration.current++;
+      profileRef.current = null;
+      saveConflict.current = false;
+      setProfile(null);
+      setSelection(null);
+      setSaved([]);
+      setApplicationId(null);
+      const me = await api<{ user: { display_name: string }; parties: Party[] }>('/me');
+      const dict = await api<Dictionaries>('/forms/preliminary/dictionaries');
       const editable = me.parties.filter((p) => ['OWNER', 'EDITOR'].includes(p.access_role));
       const company = editable.find((p) => p.id === partyId) ?? editable[0];
-      setToken(auth);
+      setAuthenticated(true);
       setDisplayName(me.user.display_name);
       setParties(me.parties);
       setDictionary(dict);
@@ -209,13 +487,23 @@ export function App() {
       }
       setPassword('');
       setLoginOpen(false);
+      setError('');
+      setSessionError('');
+      channel.current?.postMessage('login');
       const pending = intent;
       setIntent(null);
       try {
+        const guest = readGuestDraft(browserDraftStorage());
+        if (guest && company && pending !== 'submit') {
+          await saveProfile(company, {
+            ...guest,
+            registration: { ...guest.registration, borrowerKind: company.party_kind },
+          });
+        }
         if (pending === 'submit') {
           if (!company) throw new Error('Нет компании с правом сохранения формы.');
-          await submit(auth, company, answers);
-        } else if (pending === 'saved') await loadSaved(auth);
+          await submit(company, answers);
+        } else if (pending === 'saved') await loadSaved();
         else if (pending === 'applications') {
           setApplicationId(null);
           setPage('applications');
@@ -224,7 +512,10 @@ export function App() {
         setError(e instanceof Error ? e.message : 'Не удалось продолжить.');
       }
     } catch (e) {
-      if (auth) await api('/auth/logout', auth, {}).catch(() => undefined);
+      if (signedIn) {
+        await api('/auth/logout', {}).catch(() => undefined);
+        setAuthenticated(false);
+      }
       setLoginError(
         e instanceof ApiError && e.status === 401
           ? 'Неверный логин или пароль. Проверьте данные и попробуйте снова.'
@@ -233,26 +524,25 @@ export function App() {
             : 'Не удалось войти.',
       );
     } finally {
+      acting.current = false;
       setBusy(false);
     }
   };
   const logout = () =>
     void run(async () => {
-      await api('/auth/logout', token, {});
-      setToken('');
-      setParties([]);
-      setPartyId('');
-      setDisplayName('');
-      setSaved([]);
-      setAnswers(structuredClone(emptyAnswers));
-      setProfile(null);
-      setSelection(null);
-      setApplicationId(null);
-      setPage('catalog');
+      if (page === 'applications') await applicationSave.current?.().catch(() => undefined);
+      await api('/auth/logout', {});
+      channel.current?.postMessage('logout');
+      clearProtected();
+      setLoginOpen(false);
     });
   const openSaved = (item: SavedSelection) =>
     void run(async () => {
-      const p = await api<Profile>(`/selection-profiles/${item.id}`, token);
+      await saveQueue.current.catch(() => undefined);
+      sessionGeneration.current++;
+      const p = await api<Profile>(`/selection-profiles/${item.id}`);
+      profileRef.current = p;
+      saveConflict.current = false;
       setProfile(p);
       setPartyId(p.partyId);
       setAnswers(normalizeAnswers(p.answers));
@@ -260,7 +550,6 @@ export function App() {
         setSelection(
           await api<Selection>(
             `/selection-profiles/${item.id}/recommendations/${item.run_id}/view`,
-            token,
           ),
         );
         setPage('results');
@@ -276,7 +565,6 @@ export function App() {
       ) {
         p = await api<Profile>(
           `/selection-profiles/${p.id}/selected-product`,
-          token,
           {
             expectedVersion: p.rowVersion,
             runId: selection.runId,
@@ -284,9 +572,11 @@ export function App() {
           },
           'PUT',
         );
+        profileRef.current = p;
+        saveConflict.current = false;
         setProfile(p);
       }
-      const draft = await api<{ id: string }>('/applications', token, {
+      const draft = await api<{ id: string }>('/applications', {
         profileId: p.id,
         expectedProfileVersion: p.rowVersion,
         answers: {},
@@ -338,7 +628,7 @@ export function App() {
             </button>
           </nav>
           <div className="header-account">
-            {token ? (
+            {authenticated ? (
               <>
                 <span className="account-name">{displayName}</span>
                 <Button view="secondary" size={40} disabled={busy} onClick={logout}>
@@ -364,6 +654,28 @@ export function App() {
         </div>
       </header>
       <main id="content" className="site-main">
+        {restoring && (
+          <div className="loading-panel" role="status">
+            Восстанавливаем сессию…
+          </div>
+        )}
+        {sessionError && (
+          <Banner tone="error">
+            {sessionError}{' '}
+            <button
+              className="text-action"
+              disabled={busy}
+              onClick={() => setSessionAttempt((n) => n + 1)}
+            >
+              Повторить восстановление
+            </button>
+          </Banner>
+        )}
+        {page === 'form' && (
+          <p role="status" className="fine-print">
+            {draftNotice}
+          </p>
+        )}
         {error && (
           <div className="page-error">
             <Banner tone="error">{error}</Banner>
@@ -404,7 +716,6 @@ export function App() {
                 setSelection(
                   await api<Selection>(
                     `/selection-profiles/${selection.profileId}/recommendations/${selection.runId}/retry`,
-                    token,
                     {},
                   ),
                 );
@@ -419,9 +730,12 @@ export function App() {
         {page === 'saved' && (
           <SavedSelections items={saved} onOpen={openSaved} onStart={() => start()} busy={busy} />
         )}
-        {page === 'applications' && token && (
+        {page === 'applications' && authenticated && !restoring && (
           <ApplicationsPage
-            token={token}
+            externalBusy={busy}
+            registerSave={(save) => {
+              applicationSave.current = save;
+            }}
             products={products}
             applicationId={applicationId}
             onOpen={setApplicationId}

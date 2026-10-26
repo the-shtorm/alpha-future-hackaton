@@ -1,0 +1,8 @@
+{
+  "tls_certificate_validated": true,
+  "untrusted_certificate_rejected": true,
+  "secure_host_cookie_policy": true,
+  "secure_cookie_not_sent_over_http": true,
+  "csrf_and_consecutive_cookie_writes": true,
+  "logout_deletes_secure_cookie": true
+}

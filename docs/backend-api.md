@@ -4,9 +4,42 @@
 
 Base URL: `http://localhost:8080`, учитывайте BACKEND_PORT из .env.
 Swagger: `/swagger-ui/index.html`; OpenAPI: `/v3/api-docs`.
-JSON-команды: Content-Type application/json; Bearer accessToken из /auth/login.
-Сессия действует 12 часов, в БД хранится SHA-256; logout отзывает токен.
-Все успешные операции ниже возвращают 200. No Auth требуется только health/login/catalog/Swagger.
+JSON-команды: Content-Type application/json. Браузер использует HttpOnly-cookie через
+same-origin `/api` на frontend; интеграционные клиенты сохраняют Bearer accessToken из `/auth/login`.
+Сессия действует 12 часов с момента входа, в БД хранится SHA-256; logout отзывает текущую сессию.
+Автоматического бессрочного продления нет. Состояние сессий общее для Java-реплик в PostgreSQL;
+HttpSession/JSESSIONID и sticky sessions не используются. Миграция БД не требуется.
+Все успешные операции ниже возвращают 200. Health/login/CSRF/catalog/Swagger доступны без входа.
+
+Браузерный вход:
+1. `GET /api/auth/csrf` с `credentials: same-origin`: сервер выставит HttpOnly CSRF-cookie,
+   JSON вернёт `headerName: X-XSRF-TOKEN` и маскированный `token`.
+2. `POST /api/auth/session` с JSON `login/password`, cookie и заголовком `X-XSRF-TOKEN`
+   из шага 1. Ответ содержит `status/expiresAt`, идентификатор сессии передаётся только в HttpOnly-cookie.
+3. После входа снова получить `/auth/csrf`: при входе/выходе CSRF меняется. Все изменяющие
+   запросы с cookie, включая multipart, отправляют этот заголовок; без него — 403 `CSRF_INVALID`.
+   Обычные GET и Bearer-запросы к API не требуют CSRF; `/auth/session` защищён всегда.
+4. При загрузке страницы вызвать `/me`. 401 означает завершение сессии; сетевой сбой
+   не считается logout. Фронтенд хранит в URL только экран и UUID ресурсов, секреты в Web Storage не пишет.
+5. `POST /auth/logout` с CSRF отзывает сессию и удаляет cookie. Повторный вход меняет
+   идентификатор и отзывает предыдущую cookie-сессию, неверный пароль её не отзывает.
+
+Cookie имеют Path=/, HttpOnly, SameSite=Lax, без Domain. По умолчанию Java использует
+Secure и префикс `__Host-` (`__Host-ALPHA_SESSION`, `__Host-ALPHA_CSRF`).
+Локальный HTTP Compose явно задаёт `SESSION_COOKIE_SECURE=false` (`ALPHA_SESSION`, `ALPHA_CSRF`).
+При размещении за HTTPS задайте `SESSION_COOKIE_SECURE=true`; фронтенд и `/api` должны
+быть на одном origin. Смена режима Secure потребует повторного входа. При одновременной
+передаче Authorization и cookie выбирается только Authorization, даже если он невалиден.
+
+Браузер автоматически сохраняет обе формы после входа через существующие POST/PATCH с
+expectedVersion; запросы сериализуются. До входа хранится только предварительная форма
+в текущей вкладке, до 24 часов, без токенов/паролей/идентификаторов ресурсов. После
+успешного переноса на сервер или выхода локальный черновик удаляется. Конфликт 409
+не перезаписывается автоматически. Незавершённое сохранение защищено предупреждением
+при закрытии/обновлении; переходы по разделам дожидаются записи. Отправка заявки
+остаётся отдельным явным действием и требует подтверждения.
+Локальная проверка Secure-cookie/TLS: `python3 scripts/check_cookie_https.py` после
+сборки штатных backend/frontend образов; скрипт удаляет только собственный тестовый стек.
 
 [Типы и расчеты](data-dictionary.md), [источники требований](data-policy.md),
 [предварительная форма](preliminary_form.md), [Postman](postman-testing.md).
@@ -15,6 +48,8 @@ JSON-команды: Content-Type application/json; Bearer accessToken из /aut
 |---|---|---|---|---|
 | GET | `/health` | Нет | 200 status=ok после запроса к БД | No Auth |
 | POST | `/auth/login` | login, password | 200 accessToken, tokenType, expiresAt | No Auth |
+| GET | `/auth/csrf` | Нет | CSRF cookie и JSON headerName/token | No Auth |
+| POST | `/auth/session` | login, password + CSRF | HttpOnly session cookie, status, expiresAt | No Auth + CSRF |
 | POST | `/auth/logout` | Нет | 200; токен отозван | Любой пользователь |
 | GET | `/me` | Нет | Пользователь, parties, bankApprover | Любой пользователь |
 | GET | `/companies/{id}/profile` | Нет | Сведения доступной компании | Участник компании |

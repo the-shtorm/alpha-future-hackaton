@@ -33,6 +33,7 @@ services:
       DEMO_PASSWORD: ${DEMO_PASSWORD:-}
       DEMO_BANK_PASSWORD: ${DEMO_BANK_PASSWORD:-}
       DEMO_ASSESSMENT_ENABLED: ${DEMO_ASSESSMENT_ENABLED:-false}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       DOCUMENTS_PATH: /app/documents
       RECSYS_URL: ${RECSYS_URL:-http://fastapi:8000/api/v1/recommendations/rank-java}
       RECSYS_API_KEY: ${RECSYS_API_KEY:?Set RECSYS_API_KEY}

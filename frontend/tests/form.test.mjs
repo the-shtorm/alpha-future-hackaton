@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyAnswers, normalizeAnswers, exampleAnswers } from '../src/form.ts';
+import { emptyAnswers, normalizeAnswers, exampleAnswers, sameAnswers } from '../src/form.ts';
 import { rate, matchesAmount } from '../src/presentation.ts';
 import { validatePreliminary } from '../src/validation.ts';
 
@@ -140,4 +140,16 @@ test('final form validation catches invalid dates, periods and earlier amount ed
   a.financial.periodFrom = '2026-09-01';
   a.financial.periodTo = '2025-10-31';
   assert.ok(validatePreliminary(a, catalogBounds, 2)['financial.periodTo']);
+});
+
+test('autosave compares normalized values independently of PostgreSQL jsonb key ordering', () => {
+  const answers = exampleAnswers();
+  const reordered = Object.fromEntries(
+    Object.entries(answers)
+      .reverse()
+      .map(([section, fields]) => [section, Object.fromEntries(Object.entries(fields).reverse())]),
+  );
+  assert.ok(sameAnswers(answers, reordered));
+  reordered.request.description = 'Changed';
+  assert.equal(sameAnswers(answers, reordered), false);
 });

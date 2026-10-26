@@ -57,6 +57,7 @@ class BackendIntegrationTest {
         r.add("cabinet.documents-path", STORAGE::toString);
         r.add("cabinet.demo-assessment-enabled", () -> true);
         r.add("cabinet.recsys.url", () -> "");
+        r.add("cabinet.session.cookie-secure", () -> false);
     }
 
     @Autowired MockMvc http;
@@ -78,6 +79,244 @@ class BackendIntegrationTest {
                         .query(UUID.class)
                         .single();
         macro("10.00000");
+    }
+
+    record Browser(
+            jakarta.servlet.http.Cookie session, jakarta.servlet.http.Cookie csrf, String token) {}
+
+    Browser browserLogin(jakarta.servlet.http.Cookie previous) throws Exception {
+        var bootstrap =
+                http.perform(
+                                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                        .get("/auth/csrf"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse();
+        var req =
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                "/auth/session")
+                        .cookie(bootstrap.getCookie("ALPHA_CSRF"))
+                        .header(
+                                "X-XSRF-TOKEN",
+                                mapper.readTree(bootstrap.getContentAsString())
+                                        .path("token")
+                                        .asText())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                mapper.writeValueAsString(
+                                        Map.of("login", "demo-owner", "password", PASSWORD)));
+        if (previous != null) req.cookie(previous);
+        var login = http.perform(req).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(mapper.readTree(login.getContentAsString()).has("accessToken")).isFalse();
+        var session = login.getCookie("ALPHA_SESSION");
+        assertThat(session).isNotNull();
+        assertThat(session.isHttpOnly()).isTrue();
+        assertThat(session.getMaxAge()).isEqualTo(43200);
+        assertThat(session.getAttribute("SameSite")).isEqualTo("Lax");
+        assertThat(login.getCookie("JSESSIONID")).isNull();
+        assertThat(login.getCookie("ALPHA_CSRF").getMaxAge()).isZero();
+        var csrf =
+                http.perform(
+                                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                        .get("/auth/csrf")
+                                        .cookie(session))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse();
+        return new Browser(
+                session,
+                csrf.getCookie("ALPHA_CSRF"),
+                mapper.readTree(csrf.getContentAsString()).path("token").asText());
+    }
+
+    @Test
+    void browserLoginAndCookieMutationsRequireCsrfButBearerClientsRemainCompatible()
+            throws Exception {
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/auth/session")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        mapper.writeValueAsString(
+                                                Map.of(
+                                                        "login",
+                                                        "demo-owner",
+                                                        "password",
+                                                        PASSWORD))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
+        var browser = browserLogin(null);
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/me")
+                                .cookie(browser.session()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.login").value("demo-owner"))
+                .andExpect(
+                        header().string(
+                                        "Cache-Control",
+                                        org.hamcrest.Matchers.containsString("no-store")));
+        var payload = mapper.writeValueAsString(Map.of("partyId", party, "answers", Map.of()));
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/selection-profiles")
+                                .cookie(browser.session())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/selection-profiles")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", "incorrect")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isForbidden());
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/auth/session")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        mapper.writeValueAsString(
+                                                Map.of(
+                                                        "login",
+                                                        "demo-owner",
+                                                        "password",
+                                                        "incorrect-password"))))
+                .andExpect(status().isUnauthorized());
+        var created =
+                request(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/selection-profiles")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload),
+                        200);
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/selection-profiles/" + created.path("id").asText())
+                                .cookie(browser.session()))
+                .andExpect(status().isOk());
+        // A normal authenticated request must not rotate/delete CSRF, or subsequent writes break.
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch(
+                                        "/selection-profiles/" + created.path("id").asText())
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        mapper.writeValueAsString(
+                                                Map.of(
+                                                        "expectedVersion",
+                                                        created.path("rowVersion").asLong(),
+                                                        "answers",
+                                                        Map.of()))))
+                .andExpect(status().isOk())
+                .andExpect(cookie().doesNotExist("ALPHA_CSRF"));
+        // CSRF does not replace bank role checks.
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/bank/macroeconomic-contexts")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        mapper.writeValueAsString(
+                                                Map.of(
+                                                        "keyRatePct",
+                                                        "10.0",
+                                                        "validFrom",
+                                                        Instant.now().minusSeconds(1).toString(),
+                                                        "expiresAt",
+                                                        Instant.now().plusSeconds(3600).toString(),
+                                                        "sourceCode",
+                                                        "TEST"))))
+                .andExpect(status().isForbidden());
+        post("/selection-profiles", owner, Map.of("partyId", party, "answers", Map.of()));
+        for (String authorization : List.of("Bearer invalid", "Basic invalid"))
+            http.perform(
+                            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                            "/me")
+                                    .cookie(browser.session())
+                                    .header("Authorization", authorization))
+                    .andExpect(status().isUnauthorized());
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/me")
+                                .cookie(browser.session())
+                                .header("Authorization", "Bearer " + bank))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.login").value("demo-bank"));
+    }
+
+    @Test
+    void browserSessionRotationLogoutAndExpiryInvalidateOldCookies() throws Exception {
+        var old = browserLogin(null);
+        var browser = browserLogin(old.session());
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/me")
+                                .cookie(old.session()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(cookie().maxAge("ALPHA_SESSION", 0));
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/auth/logout")
+                                .cookie(browser.session()))
+                .andExpect(status().isForbidden());
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/auth/logout")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token()))
+                .andExpect(status().isOk())
+                .andExpect(cookie().maxAge("ALPHA_SESSION", 0))
+                .andExpect(cookie().maxAge("ALPHA_CSRF", 0));
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/me")
+                                .cookie(browser.session()))
+                .andExpect(status().isUnauthorized());
+        var expired = browserLogin(null);
+        db.sql(
+                        "UPDATE credit.api_session SET expires_at=now()-interval '1 second' WHERE token_hash=:hash")
+                .param("hash", Json.hash(expired.session().getValue()))
+                .update();
+        http.perform(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                                        "/me")
+                                .cookie(expired.session()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(cookie().maxAge("ALPHA_SESSION", 0));
+        get("/me", owner);
+    }
+
+    @Test
+    void browserMultipartUploadUsesTheSameCsrfProtection() throws Exception {
+        var app = draft(TestData.preliminary(), TestData.additions());
+        var browser = browserLogin(null);
+        String path = "/applications/" + app.path("id").asText() + "/documents";
+        var file =
+                new MockMultipartFile(
+                        "file", "statement.pdf", "application/pdf", "%PDF-1.7\nfixture".getBytes());
+        http.perform(
+                        multipart(path)
+                                .file(file)
+                                .param("typeCode", "BANK_STATEMENT")
+                                .cookie(browser.session()))
+                .andExpect(status().isForbidden());
+        http.perform(
+                        multipart(path)
+                                .file(file)
+                                .param("typeCode", "BANK_STATEMENT")
+                                .cookie(browser.session(), browser.csrf())
+                                .header("X-XSRF-TOKEN", browser.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.versionId").exists());
     }
 
     String login(String name) throws Exception {

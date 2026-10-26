@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { api, upload } from '../api';
-import { normalizeAnswers } from '../form';
+import { useEffect, useRef, useState } from 'react';
+import { api, upload, ApiError } from '../api';
+import { sameAnswers } from '../form';
+import { DraftWriter } from '../drafts';
 import { date, dictionaries, money, purposeNames, statusNames } from '../presentation';
 import type { Answers, Application, Journey, Product } from '../types';
 import { Banner, Button, Empty, Field, Icon, Select } from './UI';
@@ -19,19 +20,21 @@ const documentNames: Record<string, string> = {
 };
 
 export function ApplicationsPage({
-  token,
   products,
   applicationId,
   onOpen,
   refresh,
   onStart,
+  registerSave,
+  externalBusy,
 }: {
-  token: string;
   products: Product[];
   applicationId: string | null;
   onOpen: (id: string | null) => void;
   refresh: number;
   onStart: () => void;
+  externalBusy: boolean;
+  registerSave: (save: (() => Promise<void>) | null) => void;
 }) {
   const [items, setItems] = useState<Application[]>([]),
     [journey, setJourney] = useState<Journey | null>(null);
@@ -41,10 +44,23 @@ export function ApplicationsPage({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [notice, setNotice] = useState('');
+  const writer = useRef<DraftWriter<Journey['application']> | null>(null);
+  const acting = useRef(false);
+  const [saving, setSaving] = useState(0);
+  const [draftError, setDraftError] = useState('');
+  const pendingSubmission = useRef<{ id: string; version: number; key: string } | null>(null);
+  const [submissionUncertain, setSubmissionUncertain] = useState(false);
   const [confirmed, setConfirmed] = useState(false),
     [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
+    let loadedWriter: DraftWriter<Journey['application']> | null = null;
+    writer.current?.dispose();
+    writer.current = null;
+    setSaving(0);
+    setDraftError('');
+    pendingSubmission.current = null;
+    setSubmissionUncertain(false);
     setLoading(true);
     setError('');
     setNotice('');
@@ -53,16 +69,24 @@ export function ApplicationsPage({
     const load = async () => {
       if (applicationId) {
         const [result, docs] = await Promise.all([
-          api<Journey>(`/applications/${applicationId}/journey`, token),
-          api<Requirement[]>(`/applications/${applicationId}/requirements`, token),
+          api<Journey>(`/applications/${applicationId}/journey`),
+          api<Requirement[]>(`/applications/${applicationId}/requirements`),
         ]);
         if (active) {
+          loadedWriter = new DraftWriter(result.application, (current, payload) =>
+            api<Journey['application']>(
+              `/applications/${applicationId}`,
+              { expectedVersion: current.rowVersion, answers: payload },
+              'PATCH',
+            ),
+          );
+          writer.current = loadedWriter;
           setJourney(result);
           setAnswers(result.application.answers);
           setRequirements(docs);
         }
       } else {
-        const data = await api<{ content: Application[] }>('/applications?page=0&size=50', token);
+        const data = await api<{ content: Application[] }>('/applications?page=0&size=50');
         if (active) setItems(data.content);
       }
     };
@@ -75,12 +99,14 @@ export function ApplicationsPage({
       });
     return () => {
       active = false;
+      loadedWriter?.dispose();
     };
-  }, [token, applicationId, refresh, attempt]);
+  }, [applicationId, refresh, attempt]);
   const set = (path: string, value: string | number | boolean | null) => {
     const [section, key] = path.split('.');
     setAnswers((old) => ({ ...old, [section]: { ...old[section], [key]: value } }));
     setNotice('');
+    setConfirmed(false);
   };
   const value = (path: string) => {
     const [section, key] = path.split('.');
@@ -104,19 +130,68 @@ export function ApplicationsPage({
       onChange={(v) => set(path, v)}
     />
   );
+  const editable = journey && ['DRAFT', 'NEEDS_INFO'].includes(journey.application.status);
+  const dirty = !!editable && !sameAnswers(journey.application.answers, answers);
   const save = async () => {
-    if (!journey || !applicationId) throw new Error('Заявка не загружена');
-    const updated = await api<Journey['application']>(
-      `/applications/${applicationId}`,
-      token,
-      { expectedVersion: journey.application.rowVersion, answers: normalizeAnswers(answers) },
-      'PATCH',
-    );
-    setJourney({ ...journey, application: updated });
-    setAnswers(updated.answers);
-    return updated;
+    const current = writer.current;
+    if (!current || !applicationId) throw new Error('Заявка не загружена');
+    if (pendingSubmission.current) throw new Error('Сначала проверьте результат отправки заявки.');
+    setSaving((n) => n + 1);
+    try {
+      const updated = await current.save(answers);
+      if (writer.current !== current) throw new Error('Эта форма уже закрыта.');
+      setJourney((old) =>
+        old?.application.id === updated.id ? { ...old, application: updated } : old,
+      );
+      setDraftError('');
+      return updated;
+    } catch (e) {
+      if (writer.current === current)
+        setDraftError(
+          current.blocked
+            ? 'Заявка изменена в другой вкладке. Загрузите актуальную версию, прежде чем продолжить.'
+            : e instanceof Error
+              ? e.message
+              : 'Не удалось сохранить изменения.',
+        );
+      throw e;
+    } finally {
+      if (writer.current === current) setSaving((n) => Math.max(0, n - 1));
+    }
   };
+  useEffect(() => {
+    if (loading || busy || !editable || !dirty || writer.current?.blocked || submissionUncertain)
+      return;
+    const timer = window.setTimeout(() => {
+      void save().catch(() => undefined);
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [answers, loading, busy, applicationId, journey?.application.status, submissionUncertain]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const protect = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', protect);
+    return () => window.removeEventListener('beforeunload', protect);
+  }, [dirty]);
+
+  useEffect(() => {
+    registerSave(
+      editable
+        ? async () => {
+            await save();
+          }
+        : null,
+    );
+    return () => registerSave(null);
+  }, [editable, answers, applicationId]);
+
   const perform = async (action: () => Promise<void>) => {
+    if (acting.current) return;
+    acting.current = true;
     setBusy(true);
     setError('');
     setNotice('');
@@ -125,6 +200,7 @@ export function ApplicationsPage({
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Не удалось выполнить действие');
     } finally {
+      acting.current = false;
       setBusy(false);
     }
   };
@@ -135,24 +211,54 @@ export function ApplicationsPage({
     });
   const submit = () =>
     void perform(async () => {
-      const draft = await save();
-      await api(
-        `/applications/${applicationId}/submit`,
-        token,
-        { expectedVersion: draft.rowVersion, confirmed: true },
-        'POST',
-        { 'Idempotency-Key': crypto.randomUUID() },
-      );
-      const updated = await api<Journey>(`/applications/${applicationId}/journey`, token);
-      setJourney(updated);
-      setNotice('Заявка отправлена. Статус рассмотрения появится в этом кабинете.');
+      let pending = pendingSubmission.current;
+      if (!pending) {
+        const draft = await save();
+        pending = { id: draft.id, version: draft.rowVersion, key: crypto.randomUUID() };
+        pendingSubmission.current = pending;
+      }
+      let submitted = false;
+      try {
+        await api(
+          `/applications/${pending.id}/submit`,
+          { expectedVersion: pending.version, confirmed: true },
+          'POST',
+          { 'Idempotency-Key': pending.key },
+        );
+        submitted = true;
+        const updated = await api<Journey>(`/applications/${pending.id}/journey`);
+        setJourney(updated);
+        if (writer.current) writer.current.current = updated.application;
+        pendingSubmission.current = null;
+        setSubmissionUncertain(false);
+        setNotice('Заявка отправлена. Статус рассмотрения появится в этом кабинете.');
+      } catch (e) {
+        if (!submitted && e instanceof ApiError && e.status > 0 && e.status < 500) {
+          pendingSubmission.current = null;
+          setSubmissionUncertain(false);
+        } else {
+          setSubmissionUncertain(true);
+          setNotice(
+            'Сервис не подтвердил результат. Повторите отправку: она будет проверена без создания дубликата.',
+          );
+        }
+        throw e;
+      }
     });
-  const editable = journey && ['DRAFT', 'NEEDS_INFO'].includes(journey.application.status);
   const product = products.find((p) => p.versionId === journey?.application.productVersionId);
   return (
     <section className="account-page">
       {applicationId && (
-        <button className="back-link" onClick={() => onOpen(null)} disabled={busy}>
+        <button
+          className="back-link"
+          onClick={() =>
+            void perform(async () => {
+              if (editable) await save();
+              onOpen(null);
+            })
+          }
+          disabled={busy}
+        >
           <Icon name="back" size={17} />
           Мои заявки
         </button>
@@ -182,6 +288,27 @@ export function ApplicationsPage({
             </button>
           )}
         </Banner>
+      )}
+      {draftError && (
+        <Banner tone="error">
+          {draftError}{' '}
+          <button
+            className="text-action"
+            disabled={busy || saving > 0}
+            onClick={() => setAttempt((n) => n + 1)}
+          >
+            Загрузить актуальную версию
+          </button>
+        </Banner>
+      )}
+      {editable && (
+        <p role="status" className="fine-print">
+          {dirty
+            ? saving > 0
+              ? 'Сохраняем изменения…'
+              : 'Есть несохранённые изменения…'
+            : 'Все изменения сохранены автоматически.'}
+        </p>
       )}
       {notice && <Banner tone="success">{notice}</Banner>}
       {loading ? (
@@ -252,7 +379,7 @@ export function ApplicationsPage({
                   submit();
                 }}
               >
-                <fieldset disabled={!editable || busy}>
+                <fieldset disabled={!editable || busy || externalBusy || submissionUncertain}>
                   <h2>Финансовые сведения</h2>
                   <p className="muted">
                     Ноль означает известное отсутствие обязательств. Если сведений нет, оставьте
@@ -349,6 +476,16 @@ export function ApplicationsPage({
                     </>
                   )}
                 </fieldset>
+                {submissionUncertain && (
+                  <Button
+                    view="secondary"
+                    type="button"
+                    disabled={busy || externalBusy}
+                    onClick={submit}
+                  >
+                    Проверить отправку
+                  </Button>
+                )}
               </form>
               <section className="documents-panel">
                 <h2>Документы</h2>
@@ -392,16 +529,13 @@ export function ApplicationsPage({
                                   const body = new FormData();
                                   body.set('typeCode', doc.type_code);
                                   body.set('file', file);
-                                  await upload(
-                                    `/applications/${applicationId}/documents`,
-                                    token,
-                                    body,
-                                  );
+                                  await save();
+                                  await upload(`/applications/${applicationId}/documents`, body);
                                   const updated = await api<Journey>(
                                     `/applications/${applicationId}/journey`,
-                                    token,
                                   );
                                   setJourney(updated);
+                                  if (writer.current) writer.current.current = updated.application;
                                   setNotice('Документ загружен и ожидает проверки.');
                                 });
                               }}
@@ -431,7 +565,12 @@ export function ApplicationsPage({
                 <button
                   className="text-action"
                   disabled={busy}
-                  onClick={() => setAttempt((n) => n + 1)}
+                  onClick={() =>
+                    void perform(async () => {
+                      if (editable && !pendingSubmission.current) await save();
+                      setAttempt((n) => n + 1);
+                    })
+                  }
                 >
                   Обновить статус
                 </button>

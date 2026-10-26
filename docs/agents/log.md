@@ -1,5 +1,11 @@
 # Task reports
 
+- [2026-10-26 — Complete draft persistence and HTTPS checks](2026-10-26-complete-draft-persistence-and-https-checks.md) — completed on cookie-session; guest transfer and final autosave/F5/conflict checks, 33 frontend tests, full Java/frontend Docker builds and real TLS/Secure-cookie acceptance passed; uncommitted.
+
+- [2026-10-26 — Cookie session implementation](2026-10-26-cookie-session-implementation.md) — completed on cookie-session; HttpOnly/CSRF, reload and draft restoration; 57 Java + 22 frontend tests and live browser/Java→FastAPI checks passed; uncommitted for review.
+
+- [2026-10-26 — Auth architecture comparison](2026-10-26-auth-options-comparison.md) — completed; compared browser Bearer persistence with HttpOnly server sessions, scaling and renewal; sources checked, no implementation.
+
 - [2026-10-25 — Finish git pull rebase](2026-10-25-finish-fast-api-pull-rebase.md) — restored the verified resolution after pull rebased the integration commit; application tree unchanged from the tested merge, no push.
 
 - [2026-10-25 — Resolve merge with origin/fast_api](2026-10-25-merge-origin-fast-api.md) — completed; both conflicts resolved preserving model-source and SELinux support; 201 FastAPI tests, 11 frontend tests/build, real CPU model and Java/draft acceptance passed; local merge, no push.
