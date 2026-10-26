@@ -36,8 +36,11 @@ ENV HF_CACHE_DIR=/model-cache \
     HF_XET_CACHE=/model-cache/xet
 
 FROM base AS test
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 RUN uv sync --frozen --no-install-project --no-cache
 COPY tests ./tests
+COPY scoring_training ./scoring_training
 CMD ["python", "-m", "pytest"]
 
 FROM base AS runtime

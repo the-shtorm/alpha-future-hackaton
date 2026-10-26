@@ -1,0 +1,79 @@
+{
+  "kind": "existing_model_development_reference_not_retraining",
+  "modelVersion": "sba-scoring-v1",
+  "split": "calibration",
+  "years": [
+    2017,
+    2017
+  ],
+  "newTrainingRun": false,
+  "independentEvaluation": false,
+  "curveSha256": "87736aa1fca1f9e710412033b17ccfaddadcc889f6d0209810c2c92ea292e69f",
+  "originalSelectionSha256": "1064ef9254207f78760d563c8c2cea811fdff5db69eef090123efe5a0bcbf641",
+  "selectorImplementationCommit": "f0781e5",
+  "selectorSha256": "0e9a7f94ba1c4c46df4f7afe9949bc94b1bae00fcaf51469de4c3894737d42b5",
+  "result": {
+    "status": "infeasible",
+    "constraints": {
+      "minPrecision": 0.6,
+      "minRecall": 0.9
+    },
+    "candidateCount": 41892,
+    "feasibleCount": 0,
+    "objective": "maximum F1 under both floors; ties prefer recall, then precision, then threshold",
+    "optimal": null,
+    "bestRecallAtPrecisionFloor": {
+      "threshold": 0.2106468479225842,
+      "rows": 43456,
+      "positives": 3952,
+      "tp": 3443,
+      "fp": 2295,
+      "fn": 509,
+      "tn": 37209,
+      "precision": 0.6000348553502963,
+      "recall": 0.8712044534412956,
+      "f1": 0.7106295149638803,
+      "f2": 0.7989882112689131,
+      "falsePositiveRate": 0.058095382746051034,
+      "flaggedCount": 5738,
+      "flaggedShare": 0.13204160530191458
+    },
+    "bestPrecisionAtRecallFloor": {
+      "threshold": 0.15283707537791144,
+      "rows": 43456,
+      "positives": 3952,
+      "tp": 3557,
+      "fp": 2818,
+      "fn": 395,
+      "tn": 36686,
+      "precision": 0.5579607843137255,
+      "recall": 0.9000506072874493,
+      "f1": 0.6888738258932894,
+      "f2": 0.8017400712257133,
+      "falsePositiveRate": 0.07133454840016201,
+      "flaggedCount": 6375,
+      "flaggedShare": 0.14670011045655376
+    },
+    "unconstrainedMaximumF1": {
+      "threshold": 0.38752706815165333,
+      "rows": 43456,
+      "positives": 3952,
+      "tp": 3080,
+      "fp": 1373,
+      "fn": 872,
+      "tn": 38131,
+      "precision": 0.6916685380642263,
+      "recall": 0.7793522267206477,
+      "f1": 0.7328970850684117,
+      "f2": 0.7600809436849119,
+      "falsePositiveRate": 0.03475597407857432,
+      "flaggedCount": 4453,
+      "flaggedShare": 0.10247146539027982
+    },
+    "metricsAreAveraged": false
+  },
+  "limitations": [
+    "FY2017 already fitted the sigmoid calibrator; this is optimistic development evidence.",
+    "No metrics for any proposed new training combination have been measured."
+  ]
+}

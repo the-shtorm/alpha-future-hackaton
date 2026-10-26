@@ -15,6 +15,9 @@ dependencies = [
   "huggingface-hub>=0.28,<2",
   "psutil>=6,<8",
   "boto3>=1.35,<2",
+  "catboost==1.2.10",
+  "pandas==2.3.3",
+  "scikit-learn==1.9.1",
 ]
 
 [dependency-groups]
@@ -32,7 +35,7 @@ torch = { index = "pytorch-cpu" }
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'", "sys_platform == 'win32' and platform_machine == 'AMD64'"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "scoring_training/tests"]
 markers = ["integration: requires explicitly prepared real model (never downloads)"]
 addopts = "-q --cov=app --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-fail-under=95"
 

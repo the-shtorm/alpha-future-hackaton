@@ -23,3 +23,9 @@ models/
 coverage.xml
 htmlcov/
 fastapi/reports/
+data/scoring/raw/*
+!data/scoring/raw/.gitkeep
+data/scoring/prepared/*
+!data/scoring/prepared/.gitkeep
+fastapi/scoring_training/runs/
+# Scoring packages, downloaded snapshots and runtime caches stay outside Git.

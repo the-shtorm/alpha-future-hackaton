@@ -509,7 +509,13 @@ class ApplicationService {
                 revision.get("submitted_at") instanceof Timestamp time
                         ? time.toInstant()
                         : ((java.time.OffsetDateTime) revision.get("submitted_at")).toInstant();
-        var result = review(answers, snapshot.path("preliminaryContext"), product, asOf);
+        var result =
+                review(
+                        answers,
+                        snapshot.path("preliminaryContext"),
+                        product,
+                        asOf,
+                        snapshot.path("policyVersion").asText(LegacyDataPolicy.VERSION));
         var missing = documents.missing(id, app.activeRevisionId());
         if (!missing.isEmpty() && result.kind() != DataPolicy.Kind.DECLINED) {
             var conditions = new LinkedHashMap<>(result.conditions());
@@ -605,6 +611,7 @@ class ApplicationService {
         boolean positive =
                 result.kind() == DataPolicy.Kind.APPROVED
                         || result.kind() == DataPolicy.Kind.COUNTEROFFERED;
+        UUID selectedAssessmentId = persistAssessments(app, result);
         recordCheck(
                 app,
                 "DECISION",
@@ -635,10 +642,11 @@ class ApplicationService {
                         ? "COUNTEROFFER"
                         : result.kind().name();
         db.sql(
-                        "INSERT INTO credit.credit_decision(id,application_id,revision_id,decision_kind,decided_by,reasoning,approved_amount,approved_term_months,annual_rate_pct,conditions,valid_until) VALUES (:id,:app,:revision,:kind,:user,:reason,:amount,:term,:rate,CAST(:conditions AS jsonb),:expires)")
+                        "INSERT INTO credit.credit_decision(id,application_id,revision_id,assessment_id,decision_kind,decided_by,reasoning,approved_amount,approved_term_months,annual_rate_pct,conditions,valid_until) VALUES (:id,:app,:revision,:assessment,:kind,:user,:reason,:amount,:term,:rate,CAST(:conditions AS jsonb),:expires)")
                 .param("id", decision)
                 .param("app", id)
                 .param("revision", app.activeRevisionId())
+                .param("assessment", selectedAssessmentId)
                 .param("kind", storedKind)
                 .param("user", access.user())
                 .param("reason", result.reason())
@@ -701,8 +709,15 @@ class ApplicationService {
 
     private DataPolicy.Review review(
             JsonNode answers, JsonNode context, Catalog.Product product, Instant asOf) {
-        var result = policy.review(answers, product, asOf);
-        if (result.kind() == DataPolicy.Kind.DECLINED) return result;
+        return review(answers, context, product, asOf, DataPolicy.VERSION);
+    }
+
+    private DataPolicy.Review review(
+            JsonNode answers,
+            JsonNode context,
+            Catalog.Product product,
+            Instant asOf,
+            String version) {
         if (!context.has("answers"))
             return new DataPolicy.Review(
                     DataPolicy.Kind.REQUEST_INFO,
@@ -711,34 +726,51 @@ class ApplicationService {
                             "missingFields",
                             List.of("preliminaryProfile"),
                             "policyVersion",
-                            DataPolicy.VERSION,
+                            version,
                             "reasonCode",
                             "PRELIMINARY_CONTEXT_REQUIRED"));
         var selection = FormPolicy.selectionContext(context.path("answers"), answers);
-        form.validatePreliminary(selection);
+        try {
+            form.validatePreliminary(selection);
+        } catch (ApiFailure ex) {
+            return new DataPolicy.Review(
+                    DataPolicy.Kind.REQUEST_INFO,
+                    "Неверные данные предварительной формы",
+                    Map.of(
+                            "missingFields",
+                            ex.fields,
+                            "policyVersion",
+                            version,
+                            "reasonCode",
+                            "INVALID_APPLICATION_DATA"));
+        }
         var applicable = eligibility.evaluate(product, selection, asOf);
-        var conditions = new LinkedHashMap<>(result.conditions());
-        conditions.put("eligibility", applicable);
+        var initial = new LinkedHashMap<String, Object>();
+        initial.put("policyVersion", version);
+        initial.put("eligibility", applicable);
+        initial.put("missingFields", List.of());
         if (applicable.status() == Eligibility.Status.INELIGIBLE) {
-            conditions.put("reasonCode", "PRODUCT_INELIGIBLE");
+            initial.put("reasonCode", "PRODUCT_INELIGIBLE");
             return new DataPolicy.Review(
                     DataPolicy.Kind.DECLINED,
                     "Ограничения выбранного продукта не выполнены",
-                    conditions);
+                    initial);
         }
         if (!applicable.missingFields().isEmpty()) {
-            var missing = new LinkedHashSet<String>();
-            for (var field : (List<?>) conditions.get("missingFields"))
-                if (!field.equals("scoring")) missing.add(field.toString());
-            applicable.missingFields().forEach(field -> missing.add("preliminary." + field));
-            conditions.put("missingFields", List.copyOf(missing));
-            conditions.put("reasonCode", "PRELIMINARY_DATA_REQUIRED");
+            initial.put(
+                    "missingFields",
+                    applicable.missingFields().stream()
+                            .map(field -> "preliminary." + field)
+                            .toList());
+            initial.put("reasonCode", "PRELIMINARY_DATA_REQUIRED");
             return new DataPolicy.Review(
-                    DataPolicy.Kind.REQUEST_INFO,
-                    "Нужно дополнить предварительную форму",
-                    conditions);
+                    DataPolicy.Kind.REQUEST_INFO, "Нужно дополнить предварительную форму", initial);
         }
+        var result = policy.review(answers, product, asOf, version);
+        var conditions = new LinkedHashMap<>(result.conditions());
+        conditions.put("eligibility", applicable);
         if (result.kind() != DataPolicy.Kind.REQUEST_INFO
+                && result.kind() != DataPolicy.Kind.DECLINED
                 && applicable.reasons().stream()
                         .anyMatch(reason -> reason.result() == Eligibility.Outcome.REVIEW)) {
             conditions.put("requiresManualReview", true);
@@ -753,6 +785,33 @@ class ApplicationService {
         }
         return new DataPolicy.Review(
                 result.kind(), result.reason(), conditions, result.alternativeTerms());
+    }
+
+    private UUID persistAssessments(Draft app, DataPolicy.Review review) {
+        Object raw = review.conditions().get("scoringAssessments");
+        if (!(raw instanceof List<?> assessments) || assessments.isEmpty()) return null;
+        var ids = new ArrayList<UUID>();
+        for (Object value : assessments) {
+            var assessment = (ScoringExchange.Assessment) value;
+            var input = json.tree(assessment.request());
+            var normalized = (com.fasterxml.jackson.databind.node.ObjectNode) input.deepCopy();
+            normalized.remove("requestId");
+            UUID id = UUID.randomUUID();
+            db.sql(
+                            "INSERT INTO credit.assessment_run(id,application_id,revision_id,assessment_kind,model_version,feature_version,input_sha256,input_manifest,output,is_synthetic) VALUES (:id,:app,:revision,'SCORING',:model,:features,:hash,CAST(:input AS jsonb),CAST(:output AS jsonb),true)")
+                    .param("id", id)
+                    .param("app", app.id())
+                    .param("revision", app.activeRevisionId())
+                    .param("model", assessment.response().modelVersion())
+                    .param("features", assessment.response().featureVersion())
+                    .param("hash", Json.hash(json.canonical(normalized)))
+                    .param("input", json.write(input))
+                    .param("output", json.write(assessment.response()))
+                    .update();
+            ids.add(id);
+        }
+        review.conditions().put("assessmentIds", List.copyOf(ids));
+        return ids.get("ALTERNATIVE".equals(review.conditions().get("selectedVariant")) ? 1 : 0);
     }
 
     @Transactional
@@ -826,7 +885,14 @@ class ApplicationService {
                 .param("app", app.id())
                 .param("revision", app.activeRevisionId())
                 .param("code", "DATA_POLICY_" + gate)
-                .param("version", DataPolicy.VERSION)
+                .param(
+                        "version",
+                        db.sql(
+                                        "SELECT coalesce(snapshot->>'policyVersion','data-policy-2.1') FROM credit.application_revision WHERE application_id=:app AND id=:revision")
+                                .param("app", app.id())
+                                .param("revision", app.activeRevisionId())
+                                .query(String.class)
+                                .single())
                 .param("result", result)
                 .param("hash", hash)
                 .param("evidence", json.write(evidence))

@@ -138,10 +138,15 @@ process выполняется для SUBMITTED (или продолжает UND
 и NEEDS_INFO. Проверенное расхождение операций и выручки или короткая история могут
 дать UNDER_REVIEW без окончательного Decision; причины находятся в journey.checks[].evidence.
 
-При отключенном DEMO или реальном продукте оценка отсутствует: REQUEST_INFO/scoring.
-При включенном DEMO с полными проверками возможны четыре исхода, все с явными
-mode=DEMO/isSimulated и версией фиксированной оценки. Отсутствие макроконтекста —
-REQUEST_INFO/macroeconomic.key_rate_pct. Коэффициенты не обучены и не рандомизированы.
+Новые ревизии используют `data-policy-3.0-sba-annuity-1` и обученный SBA CatBoost.
+`conditions` содержит `sbaDefaultProbability`, `finalRiskScore`, `pti`, `selectedVariant`,
+версии, `warnings`, `scoringAssessments` и `assessmentIds`; FK решения указывает
+на выбранную оценку. Риск политики не является автоматически калиброванной PD.
+При сбое модели или попытке использовать её для несинтетического продукта —
+REQUEST_INFO/ASSESSMENT_UNAVAILABLE, подробный код в `scoringErrorCode`.
+Отсутствие макроконтекста — REQUEST_INFO/macroeconomic.key_rate_pct.
+Исторические ревизии сохраняют 2.1, старые решения/предложения не пересчитываются.
+Контракт и правила: [кредитный скоринг](credit-scoring.md).
 
 Ручное решение:
 

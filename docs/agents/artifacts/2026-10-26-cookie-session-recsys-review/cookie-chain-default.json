@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "model": {
+    "modelId": "local/e5-credit-finetune-v1",
+    "revision": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+    "revisionType": "artifact_sha256",
+    "baseModelId": "intfloat/multilingual-e5-small",
+    "baseRevision": "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+  },
+  "maxCosineDistance": 0.5237781852483749,
+  "transport": "real Java HTTP gateway -> CPU E5 -> Java immutable import",
+  "checks": {
+    "savedSelectionsAndViews": true,
+    "productChoiceAndDraftApplication": true,
+    "staleImportRejected": true,
+    "retryAndImportIdempotent": true
+  },
+  "cases": [
+    {
+      "variant": "conditional",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 3
+    },
+    {
+      "variant": "unknown_context",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 3
+    },
+    {
+      "variant": "logistics",
+      "status": "READY",
+      "candidateCount": 4,
+      "recommendedCount": 3
+    },
+    {
+      "variant": "empty",
+      "status": "EMPTY",
+      "candidateCount": 0,
+      "recommendedCount": 0
+    }
+  ],
+  "mlContainerStats": {
+    "BlockIO": "57.3kB / 0B",
+    "CPUPerc": "38.49%",
+    "Container": "9375a80e3efead0be5df99517a3b218ee7f92650df39cd1b6eac2b15f6450223",
+    "ID": "9375a80e3efe",
+    "MemPerc": "36.18%",
+    "MemUsage": "740.9MiB / 2GiB",
+    "Name": "recsys-java-9c5d064a6a-fastapi-1",
+    "NetIO": "46kB / 19.8kB",
+    "PIDs": "10"
+  }
+}

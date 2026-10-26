@@ -1,0 +1,10 @@
+{
+  "commit": "2e88bd9",
+  "cookieChecks": {
+    "cookieLoginThroughNginxNoTokenInJson": true,
+    "legacyBearerStillWorks": true,
+    "mlRequiresSeparateInternalKey": true,
+    "logoutAndMissingCsrf": true
+  },
+  "transport": "nginx /api -> Java cookie+CSRF -> FastAPI internal Bearer -> E5 -> Java import"
+}

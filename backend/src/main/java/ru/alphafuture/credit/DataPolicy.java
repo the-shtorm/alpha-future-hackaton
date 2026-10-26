@@ -5,12 +5,13 @@ import java.math.*;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/** Политика 2.1: проверяемые ограничения, платежный бюджет и явно маркированный DEMO-маршрут. */
+/** Политика SBA 3.0: точный аннуитет, ML-риск, повторная оценка контрпредложения. */
 @Component
 class DataPolicy {
-    static final String VERSION = "data-policy-2.1";
+    static final String VERSION = "data-policy-3.0-sba-annuity-1";
 
     enum Kind {
         APPROVED,
@@ -30,17 +31,57 @@ class DataPolicy {
 
     private final FormPolicy form;
     private final Payments payments;
-    private final DemoAssessment demo;
     private final MacroContext macro;
+    private final ScoringGateway scoring;
+    private final LegacyDataPolicy legacy;
+    private final boolean legacyDefault;
 
+    @Autowired
+    DataPolicy(
+            FormPolicy form,
+            Payments payments,
+            MacroContext macro,
+            ScoringGateway scoring,
+            LegacyDataPolicy legacy) {
+        this.form = form;
+        this.payments = payments;
+        this.macro = macro;
+        this.scoring = scoring;
+        this.legacy = legacy;
+        this.legacyDefault = false;
+    }
+
+    /** Явный конструктор исторической политики для регрессионных тестов 2.1. */
     DataPolicy(FormPolicy form, Payments payments, DemoAssessment demo, MacroContext macro) {
         this.form = form;
         this.payments = payments;
-        this.demo = demo;
         this.macro = macro;
+        this.scoring = null;
+        this.legacy = new LegacyDataPolicy(form, payments, demo, macro);
+        this.legacyDefault = true;
     }
 
     Review review(JsonNode answers, Catalog.Product product, Instant asOf) {
+        return review(answers, product, asOf, legacyDefault ? LegacyDataPolicy.VERSION : VERSION);
+    }
+
+    Review review(JsonNode answers, Catalog.Product product, Instant asOf, String version) {
+        if (LegacyDataPolicy.VERSION.equals(version)) return legacy.review(answers, product, asOf);
+        if (!VERSION.equals(version))
+            return new Review(
+                    Kind.REQUEST_INFO,
+                    "Версия политики не поддерживается",
+                    Map.of(
+                            "policyVersion",
+                            version,
+                            "reasonCode",
+                            "POLICY_VERSION_UNSUPPORTED",
+                            "missingFields",
+                            List.of("policyVersion")));
+        return reviewNew(answers, product, asOf);
+    }
+
+    private Review reviewNew(JsonNode answers, Catalog.Product product, Instant asOf) {
         var conditions = new LinkedHashMap<String, Object>();
         conditions.put("isSimulated", product.synthetic());
         try {
@@ -179,162 +220,241 @@ class DataPolicy {
                     null);
         conditions.put("estimatedFirstMonthPayment", originalPayment.get().toPlainString());
         conditions.put("totalMonthlyPayment", originalPayment.get().add(existing).toPlainString());
-        if (!demo.enabled(product)) {
-            conditions.put("mode", "UNAVAILABLE");
-            return result(
-                    Kind.REQUEST_INFO,
-                    "ASSESSMENT_UNAVAILABLE",
-                    "Оценка сделки не подключена",
-                    conditions,
-                    List.of("scoring"),
-                    null);
-        }
         var context = macro.current();
         if (context.isEmpty())
             return result(
                     Kind.REQUEST_INFO,
                     "MACRO_CONTEXT_REQUIRED",
-                    "Не задан действующий серверный макроконтекст",
+                    "Нужен действующий макроконтекст",
                     conditions,
                     List.of("macroeconomic.key_rate_pct"),
                     null);
         conditions.put("macroeconomic", context.get());
+        conditions.put("macroContextId", context.get().id());
         conditions.put("key_rate_pct", context.get().keyRatePct());
-        conditions.put("mode", "DEMO");
+        conditions.put("fxRateRubPerUsd", ScoringExchange.FX.toPlainString());
+        conditions.put("mode", "SBA_DEMO");
+        if (!product.synthetic()) return unavailable(conditions, "SBA_DEMO_PRODUCT_REQUIRED");
         conditions.put("isSimulated", true);
-        var initial = demo.calculate(debtRatio, overdue, amountRatio, age);
-        conditions.put("assessment", initial);
-        if (originalPayment.get().compareTo(budget) <= 0
-                && amount.compareTo(maxPrincipal) <= 0
-                && new BigDecimal(initial.score()).compareTo(DemoAssessment.THRESHOLD) >= 0)
+        if (!"RUB".equals(product.currency())
+                || amount.compareTo(new BigDecimal(product.minAmount())) < 0
+                || amount.compareTo(new BigDecimal(product.maxAmount())) > 0
+                || term < product.minTermMonths()
+                || term > product.maxTermMonths())
+            return result(
+                    Kind.REQUEST_INFO,
+                    "PRODUCT_TERMS_INVALID",
+                    "Условия вне границ выбранного продукта",
+                    conditions,
+                    List.of("product"),
+                    null);
+        if (collateral.path("required").asBoolean()
+                && !"YES".equals(FormPolicy.text(answers, "security.collateralReady")))
+            return result(
+                    Kind.REQUEST_INFO,
+                    "COLLATERAL_REQUIRED",
+                    "Нужно подтверждённое обеспечение",
+                    conditions,
+                    List.of("security.collateralReady"),
+                    null);
+        var assessments = new ArrayList<ScoringExchange.Assessment>();
+        conditions.put("scoringAssessments", assessments);
+        ScoringExchange.Assessment initial;
+        try {
+            initial = assess(answers, product, asOf, amount, term, product.rate());
+        } catch (ScoringGateway.Failure failure) {
+            return unavailable(conditions, failure.code);
+        }
+        assessments.add(initial);
+        BigDecimal initialRisk = risk(initial.response(), overdue);
+        select(
+                conditions,
+                initial.response(),
+                initialRisk,
+                originalPayment.get(),
+                existing,
+                average,
+                "ORIGINAL");
+        conditions.put("initialPti", conditions.get("pti"));
+        conditions.put("initialFinalRiskScore", initialRisk);
+        if (initialRisk.compareTo(new BigDecimal("0.15")) <= 0
+                && originalPayment.get().compareTo(budget) <= 0
+                && amount.compareTo(maxPrincipal) <= 0)
             return result(
                     Kind.APPROVED,
-                    "DEMO_APPROVED",
-                    "Одобрено временными DEMO-правилами; это не результат обученной модели",
+                    "SBA_APPROVED",
+                    "Демонстрационное одобрение по модели SBA и финансовым проверкам",
                     conditions,
                     List.of(),
                     null);
-        if (!product.policy().path("counteroffer").path("allowed").asBoolean()
-                || !Eligibility.contains(
-                        product.policy().path("counteroffer").path("allowedChanges"),
-                        "AMOUNT_DECREASE")
-                || !Eligibility.contains(
-                        product.policy().path("counteroffer").path("allowedChanges"),
-                        "RATE_INCREASE")
-                || !product.policy().path("counteroffer").path("maxAnnualRatePct").isNumber())
+        if (initialRisk.compareTo(new BigDecimal("0.35")) > 0)
+            return result(
+                    Kind.DECLINED,
+                    "SBA_RISK_TOO_HIGH",
+                    "Индекс риска превышает 0.35",
+                    conditions,
+                    List.of(),
+                    null);
+        var policy = product.policy().path("counteroffer");
+        if (!policy.isObject() || !policy.path("maxAnnualRatePct").isNumber())
             return result(
                     Kind.REQUEST_INFO,
                     "COUNTEROFFER_POLICY_REQUIRED",
-                    "Продукт не разрешает автоматически рассчитывать альтернативные условия",
+                    "Не настроены ограничения контрпредложения",
                     conditions,
                     List.of("product.counterofferPolicy"),
                     null);
-        var alternative =
-                alternative(
-                        product,
-                        amount.min(maxPrincipal),
-                        term,
-                        budget,
-                        debtRatio,
-                        overdue,
-                        revenue,
-                        monthCount,
-                        age,
-                        new BigDecimal(context.get().keyRatePct()));
-        if (alternative.isEmpty())
+        BigDecimal altRate =
+                product.rate()
+                        .max(
+                                new BigDecimal(context.get().keyRatePct())
+                                        .add(new BigDecimal("5"))
+                                        .add(new BigDecimal("20").multiply(initialRisk)))
+                        .setScale(5, RoundingMode.HALF_UP);
+        if (!policy.path("allowed").asBoolean()
+                || altRate.compareTo(policy.path("maxAnnualRatePct").decimalValue()) > 0
+                || altRate.compareTo(product.rate()) > 0
+                        && !Eligibility.contains(policy.path("allowedChanges"), "RATE_INCREASE"))
             return result(
                     Kind.DECLINED,
                     "NO_ACCEPTABLE_COUNTEROFFER",
-                    "В допустимых границах продукта встречное предложение не найдено",
+                    "Допустимое встречное предложение не найдено",
                     conditions,
                     List.of(),
                     null);
-        var terms = alternative.get();
-        BigDecimal selected = new BigDecimal(terms.amount());
-        var selectedAssessment =
-                demo.calculate(
-                        debtRatio,
-                        overdue,
-                        selected.multiply(monthCount).divide(revenue, 12, RoundingMode.HALF_UP),
-                        age);
-        var payment =
-                payments.monthly(product, selected, term, new BigDecimal(terms.annualRatePct()))
-                        .orElseThrow();
-        conditions.put("alternativeAssessment", selectedAssessment);
-        conditions.put("totalMonthlyPayment", payment.add(existing).toPlainString());
-        conditions.put("alternativeMonthlyPayment", payment.toPlainString());
-        conditions.put("macroContextId", context.get().id());
+        int altTerm = term;
+        if (originalPayment.get().compareTo(budget) > 0
+                && policy.path("termChangeAllowed").asBoolean()
+                && Eligibility.contains(policy.path("allowedChanges"), "TERM_INCREASE"))
+            altTerm = Math.min(Math.min(term + 12, product.maxTermMonths()), 360);
+        BigDecimal altAmount =
+                affordable(product, amount.min(maxPrincipal), altTerm, altRate, budget);
+        if (altAmount.compareTo(new BigDecimal(product.minAmount())) < 0
+                || altAmount.compareTo(amount) < 0
+                        && !Eligibility.contains(policy.path("allowedChanges"), "AMOUNT_DECREASE")
+                || altAmount.compareTo(amount) == 0
+                        && altTerm == term
+                        && altRate.compareTo(product.rate()) == 0)
+            return result(
+                    Kind.DECLINED,
+                    "NO_ACCEPTABLE_COUNTEROFFER",
+                    "Допустимое встречное предложение не найдено",
+                    conditions,
+                    List.of(),
+                    null);
+        ScoringExchange.Assessment alternative;
+        try {
+            alternative = assess(answers, product, asOf, altAmount, altTerm, altRate);
+        } catch (ScoringGateway.Failure failure) {
+            return unavailable(conditions, failure.code);
+        }
+        assessments.add(alternative);
+        var first = initial.response();
+        var second = alternative.response();
+        if (!first.modelVersion().equals(second.modelVersion())
+                || !first.featureVersion().equals(second.featureVersion())
+                || !first.calibrationVersion().equals(second.calibrationVersion()))
+            return unavailable(conditions, "SCORING_VERSION_CHANGED");
+        var altRisk = risk(second, overdue);
+        var altPayment = payments.monthly(product, altAmount, altTerm, altRate).orElseThrow();
+        conditions.put("alternativeFinalRiskScore", altRisk);
+        conditions.put("alternativeMonthlyPayment", altPayment.toPlainString());
+        if (altRisk.compareTo(new BigDecimal("0.35")) > 0 || altPayment.compareTo(budget) > 0)
+            return result(
+                    Kind.DECLINED,
+                    "COUNTEROFFER_RISK_TOO_HIGH",
+                    "Альтернативные условия не прошли повторную оценку",
+                    conditions,
+                    List.of(),
+                    null);
+        select(conditions, second, altRisk, altPayment, existing, average, "ALTERNATIVE");
         return result(
                 Kind.COUNTEROFFERED,
-                "DEMO_COUNTEROFFERED",
-                "DEMO: доступны меньшая сумма и повышенная ставка; требуется согласие клиента",
+                "SBA_COUNTEROFFERED",
+                "Демонстрационное контрпредложение: требуется согласие клиента",
                 conditions,
                 List.of(),
-                terms);
+                new Terms(altAmount.toPlainString(), altTerm, altRate.toPlainString()));
     }
 
-    private Optional<Terms> alternative(
+    private ScoringExchange.Assessment assess(
+            JsonNode answers,
+            Catalog.Product product,
+            Instant asOf,
+            BigDecimal amount,
+            int term,
+            BigDecimal rate) {
+        if (scoring == null) throw new ScoringGateway.Failure("SCORING_UNAVAILABLE");
+        var request = ScoringExchange.input(answers, product, asOf, amount, term, rate);
+        return new ScoringExchange.Assessment(request, scoring.evaluate(request));
+    }
+
+    private BigDecimal risk(ScoringExchange.Output response, BigDecimal overdue) {
+        return response.sbaDefaultProbability()
+                .add(new BigDecimal("0.50").multiply(overdue))
+                .min(BigDecimal.ONE);
+    }
+
+    private void select(
+            Map<String, Object> conditions,
+            ScoringExchange.Output response,
+            BigDecimal risk,
+            BigDecimal payment,
+            BigDecimal existing,
+            BigDecimal average,
+            String variant) {
+        conditions.put("selectedVariant", variant);
+        conditions.put("sbaDefaultProbability", response.sbaDefaultProbability());
+        conditions.put("finalRiskScore", risk);
+        conditions.put("score", response.score());
+        conditions.put("modelVersion", response.modelVersion());
+        conditions.put("featureVersion", response.featureVersion());
+        conditions.put("calibrationVersion", response.calibrationVersion());
+        conditions.put("warnings", response.warnings());
+        conditions.put("domainStatus", response.domainStatus());
+        conditions.put("isDemo", response.isDemo());
+        conditions.put("pti", payment.add(existing).divide(average, 12, RoundingMode.HALF_UP));
+        conditions.put("totalMonthlyPayment", payment.add(existing).toPlainString());
+    }
+
+    private BigDecimal affordable(
             Catalog.Product product,
             BigDecimal upper,
             int term,
-            BigDecimal budget,
-            BigDecimal debt,
-            BigDecimal overdue,
-            BigDecimal revenue,
-            BigDecimal months,
-            long age,
-            BigDecimal keyRate) {
+            BigDecimal rate,
+            BigDecimal budget) {
         BigInteger low = BigInteger.ZERO,
-                high =
-                        upper.subtract(new BigDecimal("0.01"))
-                                .max(BigDecimal.ZERO)
-                                .setScale(2, RoundingMode.DOWN)
-                                .movePointRight(2)
-                                .toBigIntegerExact();
-        BigDecimal cap =
-                product.policy().path("counteroffer").path("maxAnnualRatePct").decimalValue();
+                high = upper.setScale(2, RoundingMode.DOWN).movePointRight(2).toBigIntegerExact();
         while (low.compareTo(high) < 0) {
             var mid = low.add(high).add(BigInteger.ONE).divide(BigInteger.TWO);
-            BigDecimal amount = new BigDecimal(mid, 2);
-            var assessment =
-                    demo.calculate(
-                            debt,
-                            overdue,
-                            amount.multiply(months).divide(revenue, 12, RoundingMode.HALF_UP),
-                            age);
-            BigDecimal rate = keyRate.add(new BigDecimal(assessment.riskMarginPct()));
-            var payment = payments.monthly(product, amount, term, rate);
-            boolean valid =
-                    new BigDecimal(assessment.score()).compareTo(DemoAssessment.THRESHOLD) >= 0
-                            && rate.compareTo(cap) <= 0
-                            && payment.isPresent()
-                            && payment.get().compareTo(budget) <= 0;
-            if (valid) low = mid;
+            var payment = payments.monthly(product, new BigDecimal(mid, 2), term, rate);
+            if (payment.isPresent() && payment.get().compareTo(budget) <= 0) low = mid;
             else high = mid.subtract(BigInteger.ONE);
         }
-        BigDecimal amount = new BigDecimal(low, 2);
-        if (amount.compareTo(new BigDecimal(product.minAmount())) <= 0) return Optional.empty();
-        var assessment =
-                demo.calculate(
-                        debt,
-                        overdue,
-                        amount.multiply(months).divide(revenue, 12, RoundingMode.HALF_UP),
-                        age);
-        BigDecimal rate = keyRate.add(new BigDecimal(assessment.riskMarginPct()));
-        if (rate.compareTo(product.rate()) <= 0) return Optional.empty();
-        return Optional.of(new Terms(amount.toPlainString(), term, rate.toPlainString()));
+        return new BigDecimal(low, 2);
+    }
+
+    private Review unavailable(Map<String, Object> conditions, String code) {
+        conditions.put("scoringErrorCode", code);
+        return result(
+                Kind.REQUEST_INFO,
+                "ASSESSMENT_UNAVAILABLE",
+                "Оценка модели недоступна; положительное решение невозможно",
+                conditions,
+                List.of("scoring"),
+                null);
     }
 
     private Review result(
             Kind kind,
-            String reasonCode,
+            String code,
             String reason,
             Map<String, Object> conditions,
             List<String> missing,
-            Terms alternative) {
+            Terms terms) {
         conditions.put("policyVersion", VERSION);
-        conditions.put("reasonCode", reasonCode);
+        conditions.put("reasonCode", code);
         conditions.put("missingFields", List.copyOf(missing));
-        return new Review(kind, reason, conditions, alternative);
+        return new Review(kind, reason, conditions, terms);
     }
 }

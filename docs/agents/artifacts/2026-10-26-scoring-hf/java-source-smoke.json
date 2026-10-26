@@ -1,0 +1,127 @@
+{
+  "passed": true,
+  "scope": "source-smoke",
+  "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
+  "cases": [
+    {
+      "decision": "DECLINED",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.0270809,
+      "selectedVariant": "ORIGINAL"
+    },
+    {
+      "decision": "REQUEST_INFO",
+      "rankingStatus": "READY",
+      "assessmentCount": 0
+    }
+  ],
+  "audit": {
+    "assessments": 1,
+    "linkedDecisions": 1,
+    "models": [
+      "sba-scoring-v2"
+    ]
+  },
+  "scoringInfo": {
+    "modelVersion": "sba-scoring-v2",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+    "isDemo": true,
+    "positiveClass": 1,
+    "outcome": "CHGOFF",
+    "naicsMode": "full",
+    "operatingThreshold": 0.167204479067272,
+    "runtime": {
+      "inferenceThreads": 1,
+      "maxInflightRequests": 4,
+      "inflightRequests": 0,
+      "completedRequests": 221,
+      "failedRequests": 0,
+      "busyRequests": 0
+    }
+  },
+  "containerStats": {
+    "frontend": {
+      "currentBytes": 15020032,
+      "peakBytes": 17350656,
+      "limitBytes": 134217728
+    },
+    "backend": {
+      "currentBytes": 251494400,
+      "peakBytes": 258306048,
+      "limitBytes": 805306368
+    },
+    "fastapi": {
+      "currentBytes": 911949824,
+      "peakBytes": 927096832,
+      "limitBytes": 2147483648
+    },
+    "postgres": {
+      "currentBytes": 105394176,
+      "peakBytes": 112713728,
+      "limitBytes": 536870912
+    }
+  },
+  "memoryBudget": {
+    "budgetBytes": 6442450944,
+    "osReserveBytes": 2147483648,
+    "sumContainerLimitsBytes": 3623878656,
+    "sumObservedPeaksBytes": 1315467264,
+    "osReserveIsMeasured": false
+  },
+  "httpBenchmark": {
+    "scoring": {
+      "modelVersion": "sba-scoring-v2",
+      "featureVersion": "sba-features-1",
+      "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+      "isDemo": true,
+      "positiveClass": 1,
+      "outcome": "CHGOFF",
+      "naicsMode": "full",
+      "operatingThreshold": 0.167204479067272,
+      "runtime": {
+        "inferenceThreads": 1,
+        "maxInflightRequests": 4,
+        "inflightRequests": 0,
+        "completedRequests": 1,
+        "failedRequests": 0,
+        "busyRequests": 0
+      }
+    },
+    "single": {
+      "requests": 50,
+      "p50Ms": 29.692449999856763,
+      "p95Ms": 33.33906000480056,
+      "p99Ms": 37.34908500220625,
+      "maxMs": 40.65340000670403
+    },
+    "concurrent": {
+      "requests": 100,
+      "p50Ms": 52.901949995430186,
+      "p95Ms": 67.90700000565266,
+      "p99Ms": 70.37818100070587,
+      "maxMs": 81.79100000415929
+    },
+    "withE5": {
+      "requests": 60,
+      "p50Ms": 55.54435001977254,
+      "p95Ms": 77.80584998690756,
+      "p99Ms": 85.33916501066415,
+      "maxMs": 86.35190001223236
+    },
+    "scoringConcurrency": 4,
+    "mixedConcurrency": "four scoring requests plus one E5 request",
+    "rankingUnchanged": true,
+    "rankingMetadata": {
+      "model": "local/e5-credit-finetune-v1",
+      "modelVersion": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+      "queryTemplateVersion": "query-v2",
+      "passageTemplateVersion": "passage-v2"
+    },
+    "isDemo": true
+  },
+  "isDemo": true
+}

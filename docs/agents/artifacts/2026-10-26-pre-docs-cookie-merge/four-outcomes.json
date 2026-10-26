@@ -1,0 +1,152 @@
+{
+  "passed": true,
+  "authMode": "cookie-csrf-through-nginx",
+  "scope": "four-decision-journey",
+  "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
+  "cases": [
+    {
+      "decision": "APPROVED",
+      "productCode": "P07",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.006003678384059744,
+      "finalRiskScore": 0.006003678384059744,
+      "pti": 0.00690473,
+      "selectedVariant": "ORIGINAL",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "COUNTEROFFERED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 2,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.4,
+      "selectedVariant": "ALTERNATIVE",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "DECLINED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.0270809,
+      "selectedVariant": "ORIGINAL"
+    },
+    {
+      "decision": "REQUEST_INFO",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 0
+    }
+  ],
+  "audit": {
+    "assessments": 4,
+    "linkedDecisions": 3,
+    "models": [
+      "sba-scoring-v2"
+    ]
+  },
+  "scoringInfo": {
+    "modelVersion": "sba-scoring-v2",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+    "isDemo": true,
+    "positiveClass": 1,
+    "outcome": "CHGOFF",
+    "naicsMode": "full",
+    "operatingThreshold": 0.167204479067272,
+    "runtime": {
+      "inferenceThreads": 1,
+      "maxInflightRequests": 4,
+      "inflightRequests": 0,
+      "completedRequests": 224,
+      "failedRequests": 0,
+      "busyRequests": 0
+    }
+  },
+  "containerStats": {
+    "frontend": {
+      "currentBytes": 18276352,
+      "peakBytes": 18276352,
+      "limitBytes": 134217728
+    },
+    "backend": {
+      "currentBytes": 269914112,
+      "peakBytes": 269914112,
+      "limitBytes": 805306368
+    },
+    "fastapi": {
+      "currentBytes": 899080192,
+      "peakBytes": 911220736,
+      "limitBytes": 2147483648
+    },
+    "postgres": {
+      "currentBytes": 111570944,
+      "peakBytes": 115445760,
+      "limitBytes": 536870912
+    }
+  },
+  "memoryBudget": {
+    "budgetBytes": 6442450944,
+    "osReserveBytes": 2147483648,
+    "sumContainerLimitsBytes": 3623878656,
+    "sumObservedPeaksBytes": 1314856960,
+    "osReserveIsMeasured": false
+  },
+  "httpBenchmark": {
+    "scoring": {
+      "modelVersion": "sba-scoring-v2",
+      "featureVersion": "sba-features-1",
+      "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+      "isDemo": true,
+      "positiveClass": 1,
+      "outcome": "CHGOFF",
+      "naicsMode": "full",
+      "operatingThreshold": 0.167204479067272,
+      "runtime": {
+        "inferenceThreads": 1,
+        "maxInflightRequests": 4,
+        "inflightRequests": 0,
+        "completedRequests": 4,
+        "failedRequests": 0,
+        "busyRequests": 0
+      }
+    },
+    "single": {
+      "requests": 50,
+      "p50Ms": 23.719099999652826,
+      "p95Ms": 24.885985000582878,
+      "p99Ms": 25.503727999603143,
+      "maxMs": 25.652099999206257
+    },
+    "concurrent": {
+      "requests": 100,
+      "p50Ms": 51.88280000038503,
+      "p95Ms": 56.34230000041498,
+      "p99Ms": 57.053139999152336,
+      "maxMs": 57.34420000044338
+    },
+    "withE5": {
+      "requests": 60,
+      "p50Ms": 57.249450001108926,
+      "p95Ms": 78.70282999892879,
+      "p99Ms": 81.33674699934998,
+      "maxMs": 84.51489999970363
+    },
+    "scoringConcurrency": 4,
+    "mixedConcurrency": "four scoring requests plus one E5 request",
+    "rankingUnchanged": true,
+    "rankingMetadata": {
+      "model": "local/e5-credit-finetune-v1",
+      "modelVersion": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+      "queryTemplateVersion": "query-v2",
+      "passageTemplateVersion": "passage-v2"
+    },
+    "isDemo": true
+  },
+  "isDemo": true
+}

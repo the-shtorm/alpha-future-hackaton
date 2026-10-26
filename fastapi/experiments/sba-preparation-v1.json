@@ -1,0 +1,133 @@
+{
+  "preparationVersion": "sba-preparation-1",
+  "datasetVersion": "sba-completed-2010-2026-v1",
+  "sourceSha256": "eb9efbe801725f70969a1e1128c4ce3b1930c4f34e8820d3d0b81c84f4951e43",
+  "featureVersion": "sba-features-1",
+  "featureOrder": [
+    "GrossApproval",
+    "InitialInterestRate",
+    "FixedorVariableInterestInd",
+    "TermInMonths",
+    "NaicsCode",
+    "BusinessType",
+    "BusinessAge",
+    "RevolverStatus",
+    "CollateralInd"
+  ],
+  "target": {
+    "column": "LoanStatus",
+    "positiveClass": 1,
+    "meaning": "CHGOFF"
+  },
+  "rowIndexBase": 0,
+  "rowCount": 461559,
+  "classCounts": {
+    "0": 424601,
+    "1": 36958
+  },
+  "columns": [
+    "GrossApproval",
+    "InitialInterestRate",
+    "FixedorVariableInterestInd",
+    "TermInMonths",
+    "NaicsCode",
+    "BusinessType",
+    "BusinessAge",
+    "RevolverStatus",
+    "CollateralInd",
+    "LoanStatus",
+    "AsOfDateDay",
+    "AsOfDateMonth",
+    "AsOfDateYear",
+    "ApprovalDateDay",
+    "ApprovalDateMonth",
+    "ApprovalDateYear",
+    "ApprovalFY",
+    "PaidInFullDateDay",
+    "PaidInFullDateMonth",
+    "PaidInFullDateYear",
+    "ChargeOffDateDay",
+    "ChargeOffDateMonth",
+    "ChargeOffDateYear"
+  ],
+  "dateColumns": {
+    "approval": [
+      "ApprovalDateYear",
+      "ApprovalDateMonth",
+      "ApprovalDateDay"
+    ],
+    "asOf": [
+      "AsOfDateYear",
+      "AsOfDateMonth",
+      "AsOfDateDay"
+    ],
+    "paidInFull": [
+      "PaidInFullDateYear",
+      "PaidInFullDateMonth",
+      "PaidInFullDateDay"
+    ],
+    "chargeOff": [
+      "ChargeOffDateYear",
+      "ChargeOffDateMonth",
+      "ChargeOffDateDay"
+    ]
+  },
+  "splits": {
+    "train": {
+      "years": [
+        2010,
+        2014
+      ],
+      "rows": 189354,
+      "positives": 13308
+    },
+    "validation": {
+      "years": [
+        2015,
+        2016
+      ],
+      "rows": 96113,
+      "positives": 7151
+    },
+    "calibration": {
+      "years": [
+        2017,
+        2017
+      ],
+      "rows": 43456,
+      "positives": 3952
+    },
+    "test": {
+      "years": [
+        2018,
+        2019
+      ],
+      "rows": 60186,
+      "positives": 5927
+    },
+    "transfer": {
+      "years": [
+        2020,
+        2026
+      ],
+      "rows": 72450,
+      "positives": 6620
+    }
+  },
+  "duplicateFeatureRowsBeyondFirst": 20700,
+  "duplicatesRemoved": 0,
+  "limitations": [
+    "Retrospective completed-loan evaluation; labels may become known after later cohort approvals.",
+    "No borrower identifier; company overlap between splits cannot be excluded.",
+    "US SBA outcomes are not validated Russian banking PD.",
+    "Historical availability of mutable TermInMonths is unconfirmed."
+  ],
+  "files": {
+    "calibration.csv": "6a2ec610fe83b2ab52cf768e9397a8ca46ad8b909d4f91c1541b5e23a3f3d240",
+    "split-index.csv": "21eea3765ebfddd36320057a8eedf3d9b9d72cdbc1b1a4bcddf6ba540bff55b2",
+    "test.csv": "31fb9e86caab1167cf0b78cf0dbff02c96d2360c06b17bb0c27bd4aac5a3afe9",
+    "train.csv": "bb8c144b6267a56300b2715723bc2af12da63c0c9bcb0ca9c2b97017f0d7c644",
+    "transfer.csv": "5df4e609c5d3c063161b10e3544b1e0146838ae257b4dd05b6f23be242c2e4a6",
+    "validation.csv": "5891a3f82f82bb26a7914b04db752d047b2c15ed558c941deccd5e499d606f76"
+  }
+}

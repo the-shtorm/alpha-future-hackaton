@@ -1,3 +1,4 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 
@@ -6,17 +7,18 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 
-from app.api.routes import health, java_recommendations, model_info, recommendations
+from app.api.routes import health, java_recommendations, model_info, recommendations, scoring
 from app.core.body_limit import BodyLimitMiddleware
 from app.core.config import Settings
 from app.core.errors import ServiceError, http_error, service_error, unexpected_error, validation_error
 from app.core.logging import configure_logging
+from app.scoring.runner import ScoringRunner
 from app.services.encoder import SentenceEncoder
 from app.services.ranker import Ranker
 from app.services.runner import RankRunner
 
 
-def create_app(settings: Settings | None = None, encoder_factory=None) -> FastAPI:
+def create_app(settings: Settings | None = None, encoder_factory=None, scoring_factory=None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app):
         try:
@@ -39,10 +41,25 @@ def create_app(settings: Settings | None = None, encoder_factory=None) -> FastAP
             config,
         )
         app.state.ready = True
+        app.state.scoring_ready = False
+        if config.scoring_enabled:
+            try:
+                scorer = await anyio.to_thread.run_sync(
+                    lambda: (scoring_factory or scoring.load_scoring)(config)
+                )
+                app.state.scoring_runner = ScoringRunner(scorer)
+                app.state.scoring_ready = True
+            except Exception:
+                logging.getLogger(__name__).warning(
+                    "Scoring initialization failed; scoring remains unavailable"
+                )
         try:
             yield
         finally:
             app.state.ready = False
+            app.state.scoring_ready = False
+            if hasattr(app.state, "scoring_runner"):
+                await app.state.scoring_runner.close()
             await app.state.runner.close()
 
     docs = settings.docs_enabled if settings else os.getenv("DOCS_ENABLED", "false").lower() == "true"
@@ -64,6 +81,7 @@ def create_app(settings: Settings | None = None, encoder_factory=None) -> FastAP
     app.include_router(recommendations.router)
     app.include_router(java_recommendations.router)
     app.include_router(model_info.router)
+    app.include_router(scoring.router)
     return app
 
 

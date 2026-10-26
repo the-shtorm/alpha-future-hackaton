@@ -1,0 +1,49 @@
+{
+  "stage": "competitors",
+  "records": 168,
+  "failures": 0,
+  "distinctModelArtifacts": 168,
+  "byFold": {
+    "B": {
+      "maximumMeasuredF1": {
+        "id": "competitor-0033",
+        "point": {
+          "threshold": 0.03997261747808091,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1602,
+          "fp": 5363,
+          "fn": 126,
+          "tn": 2872,
+          "precision": 0.23000717875089735,
+          "recall": 0.9270833333333334,
+          "f1": 0.36857241458644885,
+          "f2": 0.5772140952655473,
+          "falsePositiveRate": 0.6512446873102611,
+          "flaggedCount": 6965,
+          "flaggedShare": 0.6990866204958346
+        }
+      },
+      "closestToBothFloors": {
+        "id": "competitor-0113",
+        "point": {
+          "threshold": 0.04241672530770302,
+          "rows": 9963,
+          "positives": 1728,
+          "tp": 1552,
+          "fp": 5149,
+          "fn": 176,
+          "tn": 3086,
+          "precision": 0.2316072228025668,
+          "recall": 0.8981481481481481,
+          "f1": 0.3682524617392336,
+          "f2": 0.5700433409241167,
+          "falsePositiveRate": 0.6252580449301761,
+          "flaggedCount": 6701,
+          "flaggedShare": 0.6725885777376293
+        }
+      }
+    }
+  },
+  "metricsAreAveraged": false
+}

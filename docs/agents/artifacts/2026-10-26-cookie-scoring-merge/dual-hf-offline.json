@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "summaryRecordedFromRun": true,
+  "network": "docker --network none",
+  "source": "both HF identifiers",
+  "offlineCacheOnly": true,
+  "sameScorerInRam": true,
+  "scoringRequests": 4,
+  "rankingUnchanged": true,
+  "recsysModelId": "local/e5-credit-finetune-v1",
+  "recsysArtifactSha256": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+  "dimension": 384,
+  "scoringModelVersion": "sba-scoring-v2",
+  "scoringProbability": 0.2525274156209339,
+  "score": 75
+}
