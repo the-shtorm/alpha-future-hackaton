@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     docs_enabled: bool = False
     log_level: str = "INFO"
     scoring_enabled: bool = False
-    scoring_model_path: Path = ROOT / "models/sba-scoring-v1"
+    scoring_model_path: Path = ROOT / "models/sba-scoring-v2"
 
     @model_validator(mode="after")
     def validate_runtime(self):

@@ -1,14 +1,13 @@
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
-
 from app.core.config import ROOT
 from app.core.errors import ServiceError
 from app.core.security import require_bearer
 from app.schemas.responses import ERROR_RESPONSES
 from app.scoring.contracts import ScoringRequest, ScoringResponse
 from app.scoring.package import ScoringPackage
+from fastapi import APIRouter, Depends, Request
 
 router = APIRouter(prefix="/api/v1/scoring", tags=["scoring"], dependencies=[Depends(require_bearer)])
 
@@ -51,5 +50,6 @@ async def model_info(request: Request) -> dict:
         "positiveClass": 1,
         "outcome": "CHGOFF",
         "naicsMode": manifest.naicsMode,
+        "operatingThreshold": getattr(manifest, "operatingThreshold", None),
         "runtime": request.app.state.scoring_runner.status(),
     }

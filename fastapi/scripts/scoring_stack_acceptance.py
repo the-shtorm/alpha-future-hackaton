@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "fastapi/experiments/sba-full-stack-v1.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "fastapi/experiments/sba-full-stack-v2.json")
     args = parser.parse_args()
     project = "sba-journey-" + secrets.token_hex(5)
     env = dict(os.environ)
@@ -30,7 +30,7 @@ def main():
         ML_TEST_MODEL_VARIANT="finetuned",
         ML_TEST_MODEL_PATH=str(ROOT / "fastapi/models/e5-credit-finetune-v1/final"),
         ML_TEST_SCORING_ENABLED="true",
-        ML_TEST_SCORING_MODEL_PATH=str(ROOT / "fastapi/models/sba-scoring-v1"),
+        ML_TEST_SCORING_MODEL_PATH=str(ROOT / "fastapi/models/sba-scoring-v2"),
     )
     for name in ("API_KEY", "DB_PASSWORD", "DB_APP_PASSWORD", "DB_MIGRATOR_PASSWORD", "DEMO_PASSWORD"):
         env["ML_TEST_" + name] = secrets.token_hex(24)
@@ -191,7 +191,7 @@ def main():
                 "assessmentCount": len(conditions.get("assessmentIds", [])),
             }
             if scenario != "REQUEST_INFO":
-                assert conditions["modelVersion"] == "sba-scoring-v1"
+                assert conditions["modelVersion"] == "sba-scoring-v2"
                 assert conditions["policyVersion"] == "data-policy-3.0-sba-annuity-1"
                 assert {"TERM_HISTORY_UNCONFIRMED", "RATE_OUT_OF_RANGE", "SBA_US_TO_RU_DEMO"} <= set(
                     conditions["warnings"]
@@ -244,7 +244,7 @@ def main():
             )
         )
         assert audit["assessments"] == 4 and audit["linkedDecisions"] == 3
-        benchmark_path = ROOT / "fastapi/experiments/sba-scoring-http-acceptance-v1.json"
+        benchmark_path = ROOT / "fastapi/experiments/sba-scoring-http-acceptance-v2.json"
         subprocess.run(
             [
                 sys.executable,

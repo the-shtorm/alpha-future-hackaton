@@ -1,12 +1,37 @@
-# Кредитный скоринг SBA v1
+# Кредитный скоринг SBA v2
 
 Активная политика новых ревизий: `data-policy-3.0-sba-annuity-1`.
-Модель: `sba-scoring-v1`, native CatBoost, 1311 деревьев, полный NAICS.
+Основная модель: **`sba-scoring-v2`**, выбранная №5 (`mixed-v1-0051`), native
+CatBoost, полный NAICS. Предыдущая `sba-scoring-v1` сохранена без изменений.
 Положительный класс `LoanStatus=1` означает списание; `0` — полное погашение.
 Модель даёт вероятность списания SBA, решение принимает Java вместе с финансовыми
 и документарными проверками. Результат всегда демонстрационный.
 
 ## Данные и качество
+
+V2 — точный экспорт выбранных весов и исходного sigmoid-калибратора без нового
+обучения. Случайные целые годы, seed разбиения137, seed модели42: fit FY2011,
+2013,2014,2016,2017,2018,2020; early stopping FY2019; calibration FY2012;
+threshold FY2015; случайный исторический тест FY2010. Все development outcomes
+известны до2022-10-01. FY2023 исключён из обучения/калибровки/подбора порога.
+
+Фиксированный исследовательский порог: **p>=0.167204479067272**. На одной FY2023
+(9963 кредита,1728 списаний):
+
+| Модель | Precision | F1 | Recall |
+|---|---:|---:|---:|
+| V2, выбранная №5 | 58.958130% | 64.040190% | 70.081019% |
+| V1, прежний фаворит при t=0.15283707537791144 | 49.094437% | 46.365302% | 43.923611% |
+
+Это историческая, уже просмотренная validation, не новый независимый тест.
+Желаемые85/55 и допустимые84/53 не достигнуты. На FY2024 у V2 precision37.25%,
+F1 43.27%, recall51.61%; на FY2025 —3.43%/5.08%/9.76%; FY2026 содержит0 списаний,
+поэтому recall не определён. Эти метрики не усредняются.
+Пакет, точные счётчики и provenance: [sba-scoring-v2](../fastapi/models/sba-scoring-v2/README.md).
+Release approval в manifest означает выбранный пользователем demo-пакет с
+проверенными целостностью и воспроизведением, не одобрение для банковского production.
+
+### Сохранённая история V1
 
 Исходный CSV сохранён неизменным в `data/scoring/raw/` и исключён из Git.
 Хеш, точная схема и когорты: `fastapi/scoring_training/config/dataset.lock.json`.
@@ -40,7 +65,7 @@ git lfs pull
 git lfs fsck
 ```
 
-В Git/LFS передаётся только выбранный SBA-пакет и используемый checkpoint E5.
+В Git/LFS передаются основной SBA v2, сохранённый v1 и используемый checkpoint E5.
 Пробные модели и полный CSV не передаются. Веса E5, её SHA и пороги сохранены.
 В этой задаче созданы только локальные коммиты. До явной публикации коммитов и
 LFS-объекта SBA пакет может быть недоступен на другой машине.
@@ -49,7 +74,7 @@ LFS-объекта SBA пакет может быть недоступен на 
 
 ```dotenv
 SCORING_ENABLED=true
-SCORING_MODEL_PATH=./fastapi/models/sba-scoring-v1
+SCORING_MODEL_PATH=./fastapi/models/sba-scoring-v2
 SCORING_URL=http://fastapi:8000/api/v1/scoring/evaluate
 DEMO_ASSESSMENT_ENABLED=false
 ```
@@ -80,13 +105,16 @@ Bearer-аутентификация, ключ только на сервере:
 
 - `POST /api/v1/scoring/evaluate`: строгий `sba-scoring-1`, UUID и девять признаков.
 - `GET /api/v1/scoring/ready`: 200 или 503 MODEL_NOT_READY.
-- `GET /api/v1/scoring/model-info`: версии, класс/NAICS, counters inflight/completed/failed/busy.
+- `GET /api/v1/scoring/model-info`: версии, класс/NAICS, `operatingThreshold`, counters inflight/completed/failed/busy.
 
 OpenAPI и JSON Schema находятся в `fastapi/contracts/`. Сумма USD — decimal string
 с двумя знаками, ставка — строка в процентных пунктах (до пяти знаков), срок —
 строгий int 1..360, два Boolean строгие; неизвестные поля запрещены.
 Java переводит RUB / 90.00 один раз, `HALF_UP`. Балл = round-half-up(100*(1-p)).
 Решение использует исходную вероятность, не восстанавливает её из балла.
+Формула балла у V2 та же, что у V1:100*(1-p) с округлением HALF_UP.
+`operatingThreshold` закрепляет исследовательскую точку сравнения; финансовая
+политика Java ниже по-прежнему использует собственные границы риска/PTI.
 
 Один inference-поток, максимум четыре принятых запроса, ожидание допуска до секунды.
 Отмена HTTP не освобождает слот до завершения вычисления. Валидация — 422,
@@ -123,6 +151,12 @@ policyVersion, включая rule_version при выдаче. Историче
 
 ## Приёмка, память и откат
 
+Для v2 проверены точное воспроизведение вероятностей/решений на всей FY2023 и
+реальный native-пакет через локальный API: readiness, model-info, evaluate,
+неизменная формула балла, отказ при неверном pin и загрузка сохранённого v1.
+Полный Docker-стенд v2 пока не запускался: локальный Docker daemon не работает.
+Приведённые ниже full-stack и latency-измерения относятся к V1.
+
 [Полный HTTP-стенд](../fastapi/experiments/sba-full-stack-v1.json): nginx/frontend →
 Java 21 → реальные E5/SBA → PostgreSQL 17. Все четыре решения пройдены; APPROVED
 и COUNTEROFFERED завершились DISBURSED. Временный стенд и его том удалены.
@@ -158,3 +192,14 @@ E5 продолжит ранжирование. Новая политика ве
 fallback на DemoAssessment нет. Сохранённые оценки, решения и предложения остаются.
 Чтобы вернуть скоринг, восстановить проверенный пакет/pin и SCORING_ENABLED=true.
 Не заменять опубликованный пакет в его каталоге: новое обучение — новая версия/путь.
+
+Для возврата именно V1 сохранены `fastapi/models/sba-scoring-v1` и его pin:
+
+```sh
+cp fastapi/config/scoring-model-v1.lock.json fastapi/config/scoring-model.lock.json
+SCORING_MODEL_PATH=./fastapi/models/sba-scoring-v1 docker compose up -d --build --no-deps fastapi
+```
+
+Для standalone дополнительно задайте `SCORING_MODEL_PATH=models/sba-scoring-v1`.
+После отката путь и pin должны соответствовать одной версии: несовпадение даёт503,
+автоматической подмены модели нет. E5 и сохранённые исторические решения не меняются.

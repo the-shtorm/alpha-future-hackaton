@@ -78,7 +78,7 @@ services:
       SCORING_MODEL_PATH: /models/scoring
     volumes:
       - ${RECSYS_MODEL_PATH:-./fastapi/models/e5-credit-finetune-v1/final}:/models/active:ro
-      - ${SCORING_MODEL_PATH:-./fastapi/models/sba-scoring-v1}:/models/scoring:ro
+      - ${SCORING_MODEL_PATH:-./fastapi/models/sba-scoring-v2}:/models/scoring:ro
     networks:
       - recsys_internal
     mem_limit: 2g
