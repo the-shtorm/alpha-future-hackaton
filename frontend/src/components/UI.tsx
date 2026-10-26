@@ -104,10 +104,10 @@ export function Field({
   onChange: (value: string) => void;
   hint?: string;
   error?: string;
-  type?: 'text' | 'number' | 'date' | 'password';
+  type?: 'text' | 'number' | 'date' | 'password' | 'datetime-local';
   required?: boolean;
 }) {
-  if (type === 'date')
+  if (type === 'date' || type === 'datetime-local')
     return (
       <label className={`date-field ${error ? 'invalid' : ''}`}>
         <span>
@@ -115,12 +115,12 @@ export function Field({
           {required ? ' *' : ''}
         </span>
         <input
-          type="date"
+          type={type}
           aria-label={label}
           value={value}
           onInput={(e) => onChange(e.currentTarget.value)}
           onChange={(e) => onChange(e.target.value)}
-          max={new Date().toISOString().slice(0, 10)}
+          max={type === 'date' ? new Date().toISOString().slice(0, 10) : undefined}
           required={required}
         />
         {error && <small role="alert">{error}</small>}

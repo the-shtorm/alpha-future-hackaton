@@ -6,8 +6,18 @@ import { date, dictionaries, money, purposeNames, statusNames } from '../present
 import type { Answers, Application, Journey, Product } from '../types';
 import { Banner, Button, Empty, Field, Icon, Select } from './UI';
 
+type UploadedDocument = {
+  id: string;
+  typeCode: string;
+  filename: string;
+  versionNo: number;
+  current: boolean;
+  reviewResult: string | null;
+};
 type Requirement = { id: string; type_code: string; reason: string; status: string };
-const documentNames: Record<string, string> = {
+export const documentNames: Record<string, string> = {
+  CREDIT_CONTRACT: 'Демонстрационный договор',
+  CONTRACT: 'Демонстрационный договор',
   TITLE: 'Документы о праве собственности',
   VALUATION: 'Оценка имущества',
   GUARANTEE_CONTRACT: 'Поручительство',
@@ -40,6 +50,8 @@ export function ApplicationsPage({
     [journey, setJourney] = useState<Journey | null>(null);
   const [requirements, setRequirements] = useState<Requirement[]>([]),
     [answers, setAnswers] = useState<Answers>({});
+  const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [replacements, setReplacements] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -50,6 +62,9 @@ export function ApplicationsPage({
   const [draftError, setDraftError] = useState('');
   const pendingSubmission = useRef<{ id: string; version: number; key: string } | null>(null);
   const [submissionUncertain, setSubmissionUncertain] = useState(false);
+  const [counterConfirmed, setCounterConfirmed] = useState(false);
+  const [offerConfirmed, setOfferConfirmed] = useState(false);
+  const [signConfirmed, setSignConfirmed] = useState(false);
   const [confirmed, setConfirmed] = useState(false),
     [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -65,12 +80,18 @@ export function ApplicationsPage({
     setError('');
     setNotice('');
     setJourney(null);
+    setDocuments([]);
+    setReplacements({});
     setConfirmed(false);
+    setCounterConfirmed(false);
+    setOfferConfirmed(false);
+    setSignConfirmed(false);
     const load = async () => {
       if (applicationId) {
-        const [result, docs] = await Promise.all([
+        const [result, docs, files] = await Promise.all([
           api<Journey>(`/applications/${applicationId}/journey`),
           api<Requirement[]>(`/applications/${applicationId}/requirements`),
+          api<UploadedDocument[]>(`/applications/${applicationId}/documents`),
         ]);
         if (active) {
           loadedWriter = new DraftWriter(result.application, (current, payload) =>
@@ -84,6 +105,7 @@ export function ApplicationsPage({
           setJourney(result);
           setAnswers(result.application.answers);
           setRequirements(docs);
+          setDocuments(files);
         }
       } else {
         const data = await api<{ content: Application[] }>('/applications?page=0&size=50');
@@ -245,6 +267,19 @@ export function ApplicationsPage({
         throw e;
       }
     });
+  const acceptCounteroffer = () =>
+    void perform(async () => {
+      const proposal = journey?.counteroffer;
+      if (!applicationId || !proposal || !counterConfirmed) return;
+      const updated = await api<Journey>(`/applications/${applicationId}/counteroffers/accept`, {
+        proposalId: proposal.id,
+        termsSha256: proposal.termsSha256,
+        confirmed: true,
+      });
+      setJourney(updated);
+      setCounterConfirmed(false);
+      setNotice('Альтернативные условия приняты. Предложение сохранено в заявке.');
+    });
   const product = products.find((p) => p.versionId === journey?.application.productVersionId);
   return (
     <section className="account-page">
@@ -372,6 +407,129 @@ export function ApplicationsPage({
                 </p>
               </div>
               {journey.decision && <Banner>{journey.decision.reason}</Banner>}
+              {journey.counteroffer && journey.application.status === 'COUNTEROFFERED' && (
+                <section className="application-overview" aria-label="Встречное предложение">
+                  <h2>Встречное предложение</h2>
+                  <p>Банк предлагает изменить условия вашей заявки:</p>
+                  <p>Сумма: {money(journey.counteroffer.alternative_terms.amount)}</p>
+                  <p>Срок: {journey.counteroffer.alternative_terms.termMonths} мес.</p>
+                  <p>Ставка: {journey.counteroffer.alternative_terms.annualRatePct}% годовых</p>
+                  <p>Действует до {date(journey.counteroffer.expiresAt)}</p>
+                  {Date.parse(journey.counteroffer.expiresAt) <= Date.now() ? (
+                    <Banner>Срок предложения истёк. Обновите статус заявки.</Banner>
+                  ) : (
+                    <>
+                      <label className="confirmation">
+                        <input
+                          type="checkbox"
+                          checked={counterConfirmed}
+                          disabled={busy || externalBusy}
+                          onChange={(e) => setCounterConfirmed(e.target.checked)}
+                        />
+                        Подтверждаю согласие с указанными суммой, сроком и ставкой
+                      </label>
+                      <Button
+                        view="accent"
+                        disabled={!counterConfirmed || busy || externalBusy}
+                        onClick={acceptCounteroffer}
+                      >
+                        Принять условия
+                      </Button>
+                    </>
+                  )}
+                </section>
+              )}
+              {journey.offer && (
+                <section className="application-overview" aria-label="Предложение банка">
+                  <h2>Предложение банка</h2>
+                  <p>
+                    {money(journey.offer.terms.amount)} · {journey.offer.terms.termMonths} мес. ·{' '}
+                    {journey.offer.terms.annualRatePct}% годовых
+                  </p>
+                  {journey.offer.response === 'ACCEPTED' && <p>Условия приняты</p>}
+                  {journey.application.status === 'APPROVED' &&
+                    journey.offer.response !== 'ACCEPTED' && (
+                      <>
+                        <p>Действует до {date(journey.offer.expiresAt)}</p>
+                        <label className="confirmation">
+                          <input
+                            type="checkbox"
+                            checked={offerConfirmed}
+                            disabled={busy || externalBusy}
+                            onChange={(e) => setOfferConfirmed(e.target.checked)}
+                          />
+                          Согласен с суммой, сроком и ставкой предложения
+                        </label>
+                        <Button
+                          view="accent"
+                          disabled={
+                            !offerConfirmed ||
+                            busy ||
+                            externalBusy ||
+                            Date.parse(journey.offer.expiresAt) <= Date.now()
+                          }
+                          onClick={() =>
+                            void perform(async () => {
+                              const updated = await api<Journey>(
+                                `/applications/${applicationId}/offers/accept`,
+                                { offerId: journey.offer!.id, confirmed: true },
+                              );
+                              setJourney(updated);
+                              setOfferConfirmed(false);
+                            })
+                          }
+                        >
+                          Принять предложение
+                        </Button>
+                      </>
+                    )}
+                </section>
+              )}
+              {journey.application.status === 'OFFER_ACCEPTED' && journey.offer && (
+                <section className="application-overview">
+                  <h2>Демонстрационный договор</h2>
+                  <p>
+                    Сумма {money(journey.offer.terms.amount)}, срок {journey.offer.terms.termMonths}{' '}
+                    мес., ставка {journey.offer.terms.annualRatePct}% годовых.
+                  </p>
+                  <p>Учебная операция: не является заключением реального кредитного договора.</p>
+                  <label className="confirmation">
+                    <input
+                      type="checkbox"
+                      checked={signConfirmed}
+                      disabled={busy || externalBusy}
+                      onChange={(e) => setSignConfirmed(e.target.checked)}
+                    />
+                    Подтверждаю условия и подписание демонстрационного договора
+                  </label>
+                  <Button
+                    view="accent"
+                    disabled={!signConfirmed || busy || externalBusy}
+                    onClick={() =>
+                      void perform(async () => {
+                        setJourney(
+                          await api<Journey>(`/applications/${applicationId}/contract/sign`, {
+                            confirmed: true,
+                          }),
+                        );
+                        setSignConfirmed(false);
+                      })
+                    }
+                  >
+                    Подписать демо-договор
+                  </Button>
+                </section>
+              )}
+              {journey.contracts?.map((contract) => (
+                <Banner key={contract.id}>
+                  Демо-договор {contract.contractNumber} подписан {date(contract.signedAt)}
+                </Banner>
+              ))}
+              {journey.disbursements?.map((payment) => (
+                <Banner tone="success" key={payment.id}>
+                  Демонстрационная выдача: {money(payment.amount)} · {date(payment.executedAt)}
+                </Banner>
+              ))}
               <form
                 className="application-form"
                 onSubmit={(e) => {
@@ -514,33 +672,72 @@ export function ApplicationsPage({
                           </small>
                         </div>
                         {editable && (
-                          <label className={`upload-label ${busy ? 'disabled' : ''}`}>
-                            Добавить файл
-                            <input
-                              aria-label={`Загрузить: ${documentNames[doc.type_code] ?? doc.type_code}`}
-                              type="file"
-                              accept="application/pdf,image/png,image/jpeg"
-                              disabled={busy}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                e.target.value = '';
-                                if (!file) return;
-                                void perform(async () => {
-                                  const body = new FormData();
-                                  body.set('typeCode', doc.type_code);
-                                  body.set('file', file);
-                                  await save();
-                                  await upload(`/applications/${applicationId}/documents`, body);
-                                  const updated = await api<Journey>(
-                                    `/applications/${applicationId}/journey`,
-                                  );
-                                  setJourney(updated);
-                                  if (writer.current) writer.current.current = updated.application;
-                                  setNotice('Документ загружен и ожидает проверки.');
-                                });
+                          <fieldset
+                            style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+                            disabled={busy || externalBusy}
+                          >
+                            <Select
+                              label={`Файл для замены: ${documentNames[doc.type_code] ?? doc.type_code}`}
+                              value={replacements[doc.type_code] ?? ''}
+                              options={{
+                                '': 'Добавить отдельный документ',
+                                ...Object.fromEntries(
+                                  documents
+                                    .filter(
+                                      (file) => file.current && file.typeCode === doc.type_code,
+                                    )
+                                    .map((file) => [
+                                      file.id,
+                                      `${file.filename} · версия ${file.versionNo} · ${file.reviewResult === 'FAIL' ? 'отклонён' : file.reviewResult === 'PASS' ? 'проверен' : 'ожидает проверки'}`,
+                                    ]),
+                                ),
                               }}
+                              onChange={(version) =>
+                                setReplacements((old) => ({ ...old, [doc.type_code]: version }))
+                              }
                             />
-                          </label>
+                            <label className={`upload-label ${busy ? 'disabled' : ''}`}>
+                              Добавить файл
+                              <input
+                                aria-label={`Загрузить: ${documentNames[doc.type_code] ?? doc.type_code}`}
+                                type="file"
+                                accept="application/pdf,image/png,image/jpeg"
+                                disabled={busy}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  e.target.value = '';
+                                  if (!file) return;
+                                  void perform(async () => {
+                                    const body = new FormData();
+                                    body.set('typeCode', doc.type_code);
+                                    body.set('file', file);
+                                    if (replacements[doc.type_code])
+                                      body.set('replacesVersionId', replacements[doc.type_code]);
+                                    await save();
+                                    await upload(`/applications/${applicationId}/documents`, body);
+                                    const updated = await api<Journey>(
+                                      `/applications/${applicationId}/journey`,
+                                    );
+                                    setJourney(updated);
+                                    if (writer.current)
+                                      writer.current.current = updated.application;
+                                    const [updatedFiles, updatedRequirements] = await Promise.all([
+                                      api<UploadedDocument[]>(
+                                        `/applications/${applicationId}/documents`,
+                                      ),
+                                      api<Requirement[]>(
+                                        `/applications/${applicationId}/requirements`,
+                                      ),
+                                    ]);
+                                    setDocuments(updatedFiles);
+                                    setRequirements(updatedRequirements);
+                                    setReplacements((old) => ({ ...old, [doc.type_code]: '' }));
+                                    setNotice('Документ загружен и ожидает проверки.');
+                                  });
+                                }}
+                              />
+                            </label>
+                          </fieldset>
                         )}
                       </div>
                     ))}
@@ -552,8 +749,8 @@ export function ApplicationsPage({
                   </p>
                 )}
                 <p className="fine-print">
-                  PDF, PNG или JPEG, до 10 МБ. Загрузка документа не означает, что он прошёл
-                  проверку.
+                  Для исправления выберите заменяемый файл; остальные документы сохранятся. PDF, PNG
+                  или JPEG, до 10 МБ. Загрузка документа не означает, что он прошёл проверку.
                 </p>
               </section>
             </div>

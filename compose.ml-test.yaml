@@ -16,7 +16,7 @@ services:
       HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${ML_TEST_MODEL_PATH:-./fastapi/models/multilingual-e5-small}:/models/active:ro,z
-      - ./fastapi/models:/scoring-models:ro
+      - ./fastapi/models:/scoring-models:ro,z
       - test_model_cache:/model-cache
     ports: ["127.0.0.1::8000"]
     mem_limit: 2g

@@ -152,14 +152,20 @@ class CabinetController {
         return apps.requirements(id);
     }
 
+    @GetMapping("/applications/{id}/documents")
+    List<Map<String, Object>> documentList(@PathVariable UUID id) {
+        return apps.documentList(id);
+    }
+
     @PostMapping(
             value = "/applications/{id}/documents",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Map<String, Object> upload(
             @PathVariable UUID id,
             @RequestParam @Size(max = 64) String typeCode,
+            @RequestParam(required = false) UUID replacesVersionId,
             @RequestPart MultipartFile file) {
-        return apps.upload(id, typeCode, file);
+        return apps.upload(id, typeCode, file, replacesVersionId);
     }
 
     @GetMapping("/applications/{id}/documents/{version}")

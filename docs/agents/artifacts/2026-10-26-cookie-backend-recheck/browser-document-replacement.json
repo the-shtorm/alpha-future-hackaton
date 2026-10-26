@@ -1,0 +1,11 @@
+{
+  "cookieOwnerLogin": true,
+  "replacementUploadedThroughUI": true,
+  "bankRolePageRestored": true,
+  "latestDocumentReviewedThroughUI": true,
+  "historyPreserved": true,
+  "database": {
+    "versions": 2,
+    "latestVersion": 2
+  }
+}

@@ -119,9 +119,19 @@ export type Draft = {
   rowVersion: number;
   activeRevisionId: string | null;
 };
+export type OfferTerms = { amount: string; termMonths: number; annualRatePct: string };
 export type Journey = {
   application: Draft;
   history: { toStatus: string; createdAt: string; reason?: string }[];
   decision?: { kind: string; reason: string };
+  counteroffer?: {
+    id: string;
+    termsSha256: string;
+    expiresAt: string;
+    alternative_terms: OfferTerms;
+  };
+  offer?: { id: string; terms: OfferTerms; expiresAt: string; response: string };
+  contracts?: { id: string; contractNumber: string; signedAt: string; isSimulated: boolean }[];
+  disbursements?: { id: string; amount: string; currency: string; executedAt: string }[];
   checks?: { checkCode: string; result: string; evidence?: { missingFields?: string[] } }[];
 };

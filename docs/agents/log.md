@@ -58,3 +58,5 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-26 — Scoring v2 approval fixture](2026-10-26-scoring-v2-journey-fixture-update.md) — completed; P07 approval fixture, all four real HTTP outcomes passed, approved/counteroffered disbursed; model/threshold/Java policy preserved, no commit/push.
 - [2026-10-26 — Commit scoring HF migration](2026-10-26-commit-scoring-hf-migration.md) — local commit of HF/local loading, scoring package cleanup, documentation/artifacts and v2 HTTP fixtures on scoring_model; no push.
 - [2026-10-26 — Merge scoring into cookie-session](2026-10-26-merge-scoring-into-cookie-session.md) — local merge and compatibility verification; preserves cookie/CSRF, E5 local/HF/S3 and native scoring HF/local.
+
+- [2026-10-26 — Updated cookie-session backend recheck](2026-10-26-cookie-session-backend-recheck.md) — completed; stale decisions and replacement documents fixed, customer/bank screens restored without merge, 72 Java/564 Python/34 frontend tests, native HF/cookie journeys and HTTPS/browser checks passed; uncommitted.

@@ -743,6 +743,131 @@ class BackendIntegrationTest {
     }
 
     @Test
+    void replacingRejectedDocumentUnblocksResubmissionWithoutChangingHistory() throws Exception {
+        var app = ready(TestData.preliminary(), TestData.additions());
+        String id = app.path("id").asText();
+        var rejected = upload(id, "GUARANTEE_CONTRACT");
+        post(
+                "/bank/applications/"
+                        + id
+                        + "/documents/"
+                        + rejected.path("versionId").asText()
+                        + "/review",
+                bank,
+                Map.of("result", "FAIL", "reason", "Fixture needs correction"));
+        app = get("/applications/" + id, owner);
+        var original = submit(app, UUID.randomUUID().toString());
+        assertThat(process(app).path("decision").path("kind").asText()).isEqualTo("REQUEST_INFO");
+        var replacement =
+                request(
+                        multipart("/applications/" + id + "/documents")
+                                .file(
+                                        new MockMultipartFile(
+                                                "file",
+                                                "corrected.pdf",
+                                                "application/pdf",
+                                                "%PDF-1.7\ncorrected".getBytes()))
+                                .param("typeCode", "GUARANTEE_CONTRACT")
+                                .param("replacesVersionId", rejected.path("versionId").asText())
+                                .header("Authorization", "Bearer " + owner),
+                        200);
+        post(
+                "/bank/applications/"
+                        + id
+                        + "/documents/"
+                        + replacement.path("versionId").asText()
+                        + "/review",
+                bank,
+                Map.of("result", "PASS", "reason", "Corrected fixture verified"));
+        // Reviewing the superseded version must not change the current requirement status.
+        post(
+                "/bank/applications/"
+                        + id
+                        + "/documents/"
+                        + rejected.path("versionId").asText()
+                        + "/review",
+                bank,
+                Map.of("result", "FAIL", "reason", "Historical rejection remains recorded"));
+        for (var requirement : get("/applications/" + id + "/requirements", owner))
+            if (requirement.path("type_code").asText().equals("GUARANTEE_CONTRACT"))
+                assertThat(requirement.path("status").asText()).isEqualTo("VERIFIED");
+        request(
+                multipart("/applications/" + id + "/documents")
+                        .file(
+                                new MockMultipartFile(
+                                        "file",
+                                        "stale.pdf",
+                                        "application/pdf",
+                                        "%PDF-1.7\nstale".getBytes()))
+                        .param("typeCode", "GUARANTEE_CONTRACT")
+                        .param("replacesVersionId", rejected.path("versionId").asText())
+                        .header("Authorization", "Bearer " + owner),
+                409);
+        request(
+                multipart("/applications/" + id + "/documents")
+                        .file(
+                                new MockMultipartFile(
+                                        "file",
+                                        "wrong.pdf",
+                                        "application/pdf",
+                                        "%PDF-1.7\nwrong".getBytes()))
+                        .param("typeCode", "TITLE")
+                        .param("replacesVersionId", replacement.path("versionId").asText())
+                        .header("Authorization", "Bearer " + owner),
+                400);
+        var listed = get("/applications/" + id + "/documents", bank);
+        for (var file : listed) {
+            assertThat(file.has("storage_key")).isFalse();
+            if (file.path("id").equals(rejected.path("versionId")))
+                assertThat(file.path("current").asBoolean()).isFalse();
+            if (file.path("id").equals(replacement.path("versionId"))) {
+                assertThat(file.path("current").asBoolean()).isTrue();
+                assertThat(file.path("versionNo").asInt()).isEqualTo(2);
+            }
+        }
+        var other = draft(TestData.preliminary(), TestData.additions());
+        request(
+                multipart("/applications/" + other.path("id").asText() + "/documents")
+                        .file(
+                                new MockMultipartFile(
+                                        "file",
+                                        "foreign.pdf",
+                                        "application/pdf",
+                                        "%PDF-1.7\nforeign".getBytes()))
+                        .param("typeCode", "GUARANTEE_CONTRACT")
+                        .param("replacesVersionId", replacement.path("versionId").asText())
+                        .header("Authorization", "Bearer " + owner),
+                404);
+        app = get("/applications/" + id, owner);
+        var current = submit(app, UUID.randomUUID().toString());
+        assertThat(process(app).path("decision").path("kind").asText()).isEqualTo("APPROVED");
+        var firstSnapshot =
+                get(
+                                "/applications/"
+                                        + id
+                                        + "/revisions/"
+                                        + original.path("revisionId").asText(),
+                                owner)
+                        .path("snapshot");
+        var secondSnapshot =
+                get(
+                                "/applications/"
+                                        + id
+                                        + "/revisions/"
+                                        + current.path("revisionId").asText(),
+                                owner)
+                        .path("snapshot");
+        assertThat(firstSnapshot.path("documents").toString())
+                .contains(rejected.path("versionId").asText())
+                .doesNotContain(replacement.path("versionId").asText());
+        assertThat(secondSnapshot.path("documents"))
+                .hasSize(firstSnapshot.path("documents").size());
+        assertThat(secondSnapshot.path("documents").toString())
+                .contains(replacement.path("versionId").asText())
+                .doesNotContain(rejected.path("versionId").asText());
+    }
+
+    @Test
     void hardOverdueAndNoBudgetCannotBeOverriddenByBank() throws Exception {
         var add = TestData.additions();
         ((ObjectNode) add.path("financial"))
@@ -972,6 +1097,7 @@ class BackendIntegrationTest {
                                 Map.of("financial", Map.of("overdue", 0))),
                         200);
         submit(refreshed, UUID.randomUUID().toString());
+        assertThat(get("/applications/" + id + "/journey", owner).has("decision")).isFalse();
         assertThat(process(refreshed).path("application").path("status").asText())
                 .isEqualTo("APPROVED");
         assertThat(
