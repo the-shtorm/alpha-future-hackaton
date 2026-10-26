@@ -1,0 +1,393 @@
+{
+  "passed": true,
+  "authMode": "cookie-csrf-through-nginx",
+  "scope": "four-decision-journey",
+  "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
+  "cases": [
+    {
+      "decision": "APPROVED",
+      "productCode": "P07",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.006003678384059744,
+      "finalRiskScore": 0.006003678384059744,
+      "pti": 0.00690473,
+      "selectedVariant": "ORIGINAL",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "COUNTEROFFERED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 2,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.4,
+      "selectedVariant": "ALTERNATIVE",
+      "finalStatus": "DISBURSED"
+    },
+    {
+      "decision": "DECLINED",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 1,
+      "probability": 0.2525274156209339,
+      "finalRiskScore": 0.2525274156209339,
+      "pti": 0.0270809,
+      "selectedVariant": "ORIGINAL"
+    },
+    {
+      "decision": "REQUEST_INFO",
+      "productCode": "P01",
+      "rankingStatus": "READY",
+      "assessmentCount": 0
+    }
+  ],
+  "audit": {
+    "assessments": 4,
+    "linkedDecisions": 3,
+    "models": [
+      "sba-scoring-v2"
+    ]
+  },
+  "alternativeJourney": {
+    "productCode": "P01",
+    "amount": "2000000.00",
+    "termMonths": 12,
+    "businessFactsPreserved": true,
+    "draftValidationDidNotScore": true,
+    "submissionDidNotScore": true,
+    "documentsBlockedScoring": true,
+    "staleDecisionCleared": true,
+    "modelAssessmentsAfterReview": 1,
+    "status": "DECLINED",
+    "decision": "DECLINED",
+    "checks": [
+      {
+        "checkCode": "DATA_POLICY_DECISION",
+        "ruleVersion": "data-policy-3.0-sba-annuity-1",
+        "result": "FAIL",
+        "evidence": {
+          "pti": 0.28951797,
+          "mode": "SBA_DEMO",
+          "score": 75,
+          "isDemo": true,
+          "overdue": 0,
+          "warnings": [
+            "SBA_US_TO_RU_DEMO",
+            "TERM_HISTORY_UNCONFIRMED",
+            "RATE_OUT_OF_RANGE"
+          ],
+          "initialPti": 0.28951797,
+          "reasonCode": "NO_ACCEPTABLE_COUNTEROFFER",
+          "eligibility": {
+            "status": "CONDITIONAL",
+            "reasons": [
+              {
+                "code": "AMOUNT_OUT_OF_RANGE",
+                "field": "request.amount",
+                "actual": 2000000.0,
+                "result": "PASS",
+                "message": "\u0421\u0443\u043c\u043c\u0430 \u0434\u043e\u043b\u0436\u043d\u0430 \u0431\u044b\u0442\u044c \u0432 \u0434\u0438\u0430\u043f\u0430\u0437\u043e\u043d\u0435 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430",
+                "expected": {
+                  "max": 3000000.0,
+                  "min": 300000.0
+                }
+              },
+              {
+                "code": "TERM_OUT_OF_RANGE",
+                "field": "request.termMonths",
+                "actual": 12,
+                "result": "PASS",
+                "message": "\u0421\u0440\u043e\u043a \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u0432 \u0434\u0438\u0430\u043f\u0430\u0437\u043e\u043d\u0435 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430",
+                "expected": {
+                  "max": 24,
+                  "min": 6
+                }
+              },
+              {
+                "code": "PURPOSE_NOT_SUPPORTED",
+                "field": "request.purpose",
+                "actual": "DEVELOPMENT",
+                "result": "PASS",
+                "message": "\u0426\u0435\u043b\u044c \u0434\u043e\u043b\u0436\u043d\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044c\u0441\u044f \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u043e\u043c",
+                "expected": [
+                  "WORKING_CAPITAL",
+                  "DEVELOPMENT"
+                ]
+              },
+              {
+                "code": "BORROWER_KIND_NOT_SUPPORTED",
+                "field": "registration.borrowerKind",
+                "actual": "LLC",
+                "result": "PASS",
+                "message": "\u0424\u043e\u0440\u043c\u0430 \u0431\u0438\u0437\u043d\u0435\u0441\u0430 \u0434\u043e\u043b\u0436\u043d\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044c\u0441\u044f \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u043e\u043c",
+                "expected": [
+                  "IP",
+                  "LLC"
+                ]
+              },
+              {
+                "code": "USAGE_MODE_NOT_SUPPORTED",
+                "field": "request.usageMode",
+                "actual": "ONE_TIME",
+                "result": "PASS",
+                "message": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0441\u043f\u043e\u0441\u043e\u0431\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f \u0441\u0440\u0435\u0434\u0441\u0442\u0432",
+                "expected": [
+                  "ONE_TIME"
+                ]
+              },
+              {
+                "code": "SECTOR_EXCLUDED",
+                "field": "business.sector",
+                "actual": "IT",
+                "result": "PASS",
+                "message": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043e\u0442\u0440\u0430\u0441\u043b\u0435\u0432\u044b\u0445 \u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0439",
+                "expected": [
+                  "FINANCIAL_ORGANIZATION",
+                  "GAMBLING"
+                ]
+              },
+              {
+                "code": "TAX_REGIME_NOT_SUPPORTED",
+                "field": "business.taxRegime",
+                "actual": "USN",
+                "result": "PASS",
+                "message": "\u041d\u0430\u043b\u043e\u0433\u043e\u0432\u044b\u0439 \u0440\u0435\u0436\u0438\u043c \u0434\u043e\u043b\u0436\u0435\u043d \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0442\u044c\u0441\u044f \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u043e\u043c",
+                "expected": [
+                  "OSNO",
+                  "USN",
+                  "PSN",
+                  "AUSN",
+                  "COMBINED",
+                  "OTHER"
+                ]
+              },
+              {
+                "code": "BUSINESS_AGE_TOO_SHORT",
+                "field": "business.actualStartedOn",
+                "actual": 33,
+                "result": "PASS",
+                "message": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u0441\u0442\u0430\u0436\u0430",
+                "expected": 6
+              },
+              {
+                "code": "REVENUE_BELOW_MINIMUM",
+                "field": "financial.revenue",
+                "actual": 666666.6666666666,
+                "result": "PASS",
+                "message": "\u0422\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u0435 \u043a \u0441\u0440\u0435\u0434\u043d\u0435\u043c\u0435\u0441\u044f\u0447\u043d\u043e\u0439 \u0432\u044b\u0440\u0443\u0447\u043a\u0435 \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043e",
+                "expected": 500000
+              },
+              {
+                "code": "REVENUE_HISTORY_INCOMPLETE",
+                "field": "financial.periodFrom",
+                "actual": 3,
+                "result": "REVIEW",
+                "message": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043f\u043e\u043b\u043d\u043e\u0442\u044b \u0438\u0441\u0442\u043e\u0440\u0438\u0438 \u0432\u044b\u0440\u0443\u0447\u043a\u0438",
+                "expected": 12
+              },
+              {
+                "code": "GUARANTOR_REQUIRED",
+                "field": "security.guarantorReady",
+                "actual": "YES",
+                "result": "PASS",
+                "message": "\u041d\u0443\u0436\u043d\u0430 \u0433\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u044c \u043f\u0440\u0438\u0432\u043b\u0435\u0447\u044c \u043f\u043e\u0440\u0443\u0447\u0438\u0442\u0435\u043b\u044f",
+                "expected": "YES"
+              }
+            ],
+            "productCode": "P01",
+            "productVersionId": "fbf28b87-af37-5409-ac27-04b3130277f4"
+          },
+          "isSimulated": true,
+          "domainStatus": "EXTRAPOLATION",
+          "key_rate_pct": "10.00000",
+          "modelVersion": "sba-scoring-v2",
+          "periodMonths": 3,
+          "value_status": {
+            "request.amount": "KNOWN",
+            "business.sector": "KNOWN",
+            "request.purpose": "KNOWN",
+            "financial.overdue": "KNOWN",
+            "financial.revenue": "KNOWN",
+            "business.taxRegime": "KNOWN",
+            "financial.periodTo": "KNOWN",
+            "request.termMonths": "KNOWN",
+            "business.mspRegistry": "KNOWN",
+            "financial.periodFrom": "KNOWN",
+            "security.guarantorReady": "KNOWN",
+            "business.actualStartedOn": "KNOWN",
+            "security.collateralReady": "KNOWN",
+            "security.collateralValue": "KNOWN",
+            "registration.borrowerKind": "KNOWN",
+            "project.ownContributionPct": "KNOWN",
+            "financial.monthlyDebtPayment": "KNOWN"
+          },
+          "assessmentIds": [
+            "48535cfd-e9bd-4932-9e84-86ce48b9b9fa"
+          ],
+          "macroeconomic": {
+            "id": "d1ac068f-a899-473f-99a0-88298b277b6a",
+            "expiresAt": "2026-10-27T13:32:34.428257Z",
+            "validFrom": "2026-10-26T13:32:33.428257Z",
+            "keyRatePct": "10.00000",
+            "recordedAt": "2026-10-26T13:32:34.447765Z",
+            "sourceCode": "SCORING_ACCEPTANCE_FIXTURE_NOT_CBR"
+          },
+          "missingFields": [],
+          "policyVersion": "data-policy-3.0-sba-annuity-1",
+          "featureVersion": "sba-features-1",
+          "finalRiskScore": 0.2525274156209339,
+          "macroContextId": "d1ac068f-a899-473f-99a0-88298b277b6a",
+          "fxRateRubPerUsd": "90.00",
+          "selectedVariant": "ORIGINAL",
+          "paymentToRevenue": 0,
+          "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+          "operatingAgeMonths": 33,
+          "scoringAssessments": [
+            {
+              "request": {
+                "naicsCode": "541511",
+                "requestId": "8361d3e4-3c8c-4f4f-a5ce-618572f57dc7",
+                "termMonths": 12,
+                "isRevolving": false,
+                "businessType": "CORPORATION",
+                "hasCollateral": false,
+                "loanAmountUsd": "22222.22",
+                "schemaVersion": "sba-scoring-1",
+                "interestRateType": "FIXED",
+                "businessAgeCategory": "Less than 3 years old but at least 2",
+                "initialInterestRatePct": "28.00000"
+              },
+              "response": {
+                "score": 75,
+                "isDemo": true,
+                "warnings": [
+                  "SBA_US_TO_RU_DEMO",
+                  "TERM_HISTORY_UNCONFIRMED",
+                  "RATE_OUT_OF_RANGE"
+                ],
+                "requestId": "8361d3e4-3c8c-4f4f-a5ce-618572f57dc7",
+                "domainStatus": "EXTRAPOLATION",
+                "modelVersion": "sba-scoring-v2",
+                "schemaVersion": "sba-scoring-1",
+                "featureVersion": "sba-features-1",
+                "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+                "sbaDefaultProbability": 0.2525274156209339
+              }
+            }
+          ],
+          "totalMonthlyPayment": "193011.98",
+          "newLoanPaymentBudget": "266666.66",
+          "ownContributionShare": "0.0000",
+          "averageMonthlyRevenue": "666666.66666667",
+          "initialFinalRiskScore": 0.2525274156209339,
+          "sbaDefaultProbability": 0.2525274156209339,
+          "amountToMonthlyRevenue": 3,
+          "estimatedFirstMonthPayment": "193011.98",
+          "existingMonthlyDebtPayment": "0.00"
+        },
+        "createdAt": "2026-10-26T13:32:37.204+00:00"
+      }
+    ]
+  },
+  "scoringInfo": {
+    "modelVersion": "sba-scoring-v2",
+    "featureVersion": "sba-features-1",
+    "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+    "isDemo": true,
+    "positiveClass": 1,
+    "outcome": "CHGOFF",
+    "naicsMode": "full",
+    "operatingThreshold": 0.167204479067272,
+    "runtime": {
+      "inferenceThreads": 1,
+      "maxInflightRequests": 4,
+      "inflightRequests": 0,
+      "completedRequests": 225,
+      "failedRequests": 0,
+      "busyRequests": 0
+    }
+  },
+  "containerStats": {
+    "frontend": {
+      "currentBytes": 18255872,
+      "peakBytes": 18567168,
+      "limitBytes": 134217728
+    },
+    "backend": {
+      "currentBytes": 304381952,
+      "peakBytes": 312942592,
+      "limitBytes": 805306368
+    },
+    "fastapi": {
+      "currentBytes": 813084672,
+      "peakBytes": 849510400,
+      "limitBytes": 2147483648
+    },
+    "postgres": {
+      "currentBytes": 132599808,
+      "peakBytes": 135516160,
+      "limitBytes": 536870912
+    }
+  },
+  "memoryBudget": {
+    "budgetBytes": 6442450944,
+    "osReserveBytes": 2147483648,
+    "sumContainerLimitsBytes": 3623878656,
+    "sumObservedPeaksBytes": 1316536320,
+    "osReserveIsMeasured": false
+  },
+  "httpBenchmark": {
+    "scoring": {
+      "modelVersion": "sba-scoring-v2",
+      "featureVersion": "sba-features-1",
+      "calibrationVersion": "sba-scoring-v2-sigmoid-fy2012",
+      "isDemo": true,
+      "positiveClass": 1,
+      "outcome": "CHGOFF",
+      "naicsMode": "full",
+      "operatingThreshold": 0.167204479067272,
+      "runtime": {
+        "inferenceThreads": 1,
+        "maxInflightRequests": 4,
+        "inflightRequests": 0,
+        "completedRequests": 5,
+        "failedRequests": 0,
+        "busyRequests": 0
+      }
+    },
+    "single": {
+      "requests": 50,
+      "p50Ms": 12.00599200092256,
+      "p95Ms": 12.681184602843132,
+      "p99Ms": 13.21206156077096,
+      "maxMs": 13.58159800292924
+    },
+    "concurrent": {
+      "requests": 100,
+      "p50Ms": 47.46533400611952,
+      "p95Ms": 57.21644939185353,
+      "p99Ms": 67.79663043271285,
+      "maxMs": 69.07931802561507
+    },
+    "withE5": {
+      "requests": 60,
+      "p50Ms": 42.77731050387956,
+      "p95Ms": 62.22318748914404,
+      "p99Ms": 63.571833793830585,
+      "maxMs": 64.46511799003929
+    },
+    "scoringConcurrency": 4,
+    "mixedConcurrency": "four scoring requests plus one E5 request",
+    "rankingUnchanged": true,
+    "rankingMetadata": {
+      "model": "local/e5-credit-finetune-v1",
+      "modelVersion": "116acca8c00237091e511ea6e96a2959ad1345d9439b8c5a9c7fc2c29b9012e8",
+      "queryTemplateVersion": "query-v2",
+      "passageTemplateVersion": "passage-v2"
+    },
+    "isDemo": true
+  },
+  "isDemo": true
+}

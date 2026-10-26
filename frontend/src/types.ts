@@ -70,6 +70,11 @@ export type Candidate = {
   similarityScore?: number;
   isRecommended?: boolean;
 };
+export type SelectionAlternative = Candidate & {
+  answersPatch: Answers;
+  proposedRequest: Answers[string];
+  changes: { field: string; from: JsonValue; to: JsonValue; message: string }[];
+};
 export type Selection = {
   profileId: string;
   runId: string;
@@ -83,6 +88,7 @@ export type Selection = {
     | 'INVALID_RESPONSE'
     | 'NOT_REQUESTED';
   results: Candidate[];
+  alternatives?: SelectionAlternative[];
   excluded: { productCode: string; reasons: Reason[] }[];
   asOf: string;
 };

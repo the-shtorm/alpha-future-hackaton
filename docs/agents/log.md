@@ -56,3 +56,5 @@ or overwritten. Historical backend reports remain available in their original lo
 - [2026-10-26 — Merge scoring into cookie-session](2026-10-26-merge-scoring-into-cookie-session.md) — local merge and compatibility verification; preserves cookie/CSRF, E5 local/HF/S3 and native scoring HF/local.
 
 - [2026-10-26 — Updated cookie-session backend recheck](2026-10-26-cookie-session-backend-recheck.md) — completed; stale decisions and replacement documents fixed, customer/bank screens restored without merge, 72 Java/564 Python/34 frontend tests, native HF/cookie journeys and HTTPS/browser checks passed; uncommitted.
+- [2026-10-26 — Manual MVP test guidance](2026-10-26-manual-test-guidance.md) — synthetic inputs and expected outcomes provided in chat; source inspection only, no uploads, seeding or application changes.
+- [2026-10-26 — Alternatives and full credit pipeline](2026-10-26-selection-alternatives.md) — completed; explicit alternatives, deferred scoring/document gates, 82 Java and 34 frontend tests, real E5/v2 four outcomes plus screenshot journey; local UI/API updated, scoring startup from an empty HF cache remains unverified.

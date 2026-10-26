@@ -1,5 +1,7 @@
-import type { Candidate, Product, SavedSelection, Selection } from '../types';
-import { date, money, purposeNames } from '../presentation';
+import type {
+  Candidate, Product, SavedSelection, Selection, SelectionAlternative, JsonValue,
+} from '../types';
+import { date, money, months, purposeNames, dictionaries } from '../presentation';
 import { ProductCard } from './Catalog';
 import { Banner, Button, Empty, Icon } from './UI';
 
@@ -7,6 +9,7 @@ export function SelectionResults({
   selection,
   onDetails,
   onChoose,
+  onAlternative,
   onRetry,
   onEdit,
   busy,
@@ -14,10 +17,19 @@ export function SelectionResults({
   selection: Selection;
   onDetails: (p: Product) => void;
   onChoose: (c: Candidate) => void;
+  onAlternative: (c: SelectionAlternative) => void;
   onRetry: () => void;
   onEdit: () => void;
   busy: boolean;
 }) {
+  const alternatives = selection.alternatives ?? [];
+  const changeValue = (field: string, value: JsonValue) => {
+    if (field === 'request.amount') return money(String(value));
+    if (field === 'request.termMonths') return months(Number(value));
+    if (field === 'request.purpose') return purposeNames[String(value)] ?? String(value);
+    if (field === 'request.usageMode') return dictionaries.usageModes[String(value)] ?? String(value);
+    return String(value);
+  };
   const allFail = (code: string) =>
     selection.excluded.length > 0 &&
     selection.excluded.every((item) =>
@@ -41,7 +53,9 @@ export function SelectionResults({
           <h1>
             {selection.results.length
               ? 'Предложения под\nвашу задачу.'
-              : 'Изменим условия\nи попробуем снова.'}
+              : alternatives.length
+                ? 'Нашли другие\nварианты финансирования.'
+                : 'Результат проверки\nвашего запроса.'}
           </h1>
           <p>Проверка от {date(selection.asOf)}. Перед оформлением можно изучить все условия.</p>
         </div>
@@ -116,6 +130,58 @@ export function SelectionResults({
             </ProductCard>
           ))}
         </div>
+      ) : alternatives.length ? (
+        <>
+          <Banner>
+            Точных совпадений с запросом нет. Подобрали варианты с другими условиями — выберите
+            подходящий, и мы перенесём его в черновик заявки. До выбора ваши ответы не меняются.
+          </Banner>
+          <div className="product-grid">
+            {alternatives.map((alternative) => (
+              <ProductCard
+                key={alternative.productVersion}
+                product={alternative.product}
+                onDetails={onDetails}
+                onStart={() => onAlternative(alternative)}
+                disabled={busy || !selection.current}
+                actionLabel="Выбрать эти условия"
+              >
+                <div className="pending-conditions">
+                  <strong>Предлагаемые условия</strong>
+                  <p>
+                    {money(String(alternative.proposedRequest.amount))} ·{' '}
+                    {months(Number(alternative.proposedRequest.termMonths))}
+                    <br />
+                    {purposeNames[String(alternative.proposedRequest.purpose)]}
+                    <br />
+                    {dictionaries.usageModes[String(alternative.proposedRequest.usageMode)]}
+                  </p>
+                  <ul>
+                    {alternative.changes.map((change) => (
+                      <li key={change.field}>
+                        <strong>
+                          {changeValue(change.field, change.from)} → {changeValue(change.field, change.to)}
+                        </strong>
+                        <br />
+                        {change.message}
+                      </li>
+                    ))}
+                  </ul>
+                  {alternative.pendingConditions.length > 0 && (
+                    <>
+                      <strong>Что ещё потребуется уточнить</strong>
+                      <ul>
+                        {alternative.pendingConditions.map((condition, i) => (
+                          <li key={`${condition.code}-${i}`}>{condition.message}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </ProductCard>
+            ))}
+          </div>
+        </>
       ) : (
         <Empty
           title="Сейчас подходящих продуктов нет"
@@ -125,8 +191,10 @@ export function SelectionResults({
             </Button>
           }
         >
-          {emptyReasons || 'Попробуйте скорректировать сумму, срок или цель.'} Причины проверки
-          каждого продукта можно посмотреть ниже.
+          {emptyReasons ||
+            'Проверили также варианты с другой суммой, сроком и способом финансирования. Доступных вариантов с указанными сведениями о бизнесе пока нет.'}{' '}
+          Причины проверки каждого продукта можно посмотреть ниже. Если данные указаны верно,
+          изменение суммы само по себе может не помочь.
         </Empty>
       )}
       {selection.excluded.length > 0 && (

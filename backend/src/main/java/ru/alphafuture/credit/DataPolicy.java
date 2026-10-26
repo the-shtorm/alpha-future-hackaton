@@ -78,10 +78,16 @@ class DataPolicy {
                             "POLICY_VERSION_UNSUPPORTED",
                             "missingFields",
                             List.of("policyVersion")));
-        return reviewNew(answers, product, asOf);
+        return reviewNew(answers, product, asOf, true);
     }
 
-    private Review reviewNew(JsonNode answers, Catalog.Product product, Instant asOf) {
+    Review preflight(JsonNode answers, Catalog.Product product, Instant asOf, String version) {
+        if (!VERSION.equals(version)) return review(answers, product, asOf, version);
+        return reviewNew(answers, product, asOf, false);
+    }
+
+    private Review reviewNew(
+            JsonNode answers, Catalog.Product product, Instant asOf, boolean allowScoring) {
         var conditions = new LinkedHashMap<String, Object>();
         conditions.put("isSimulated", product.synthetic());
         try {
@@ -256,6 +262,14 @@ class DataPolicy {
                     "Нужно подтверждённое обеспечение",
                     conditions,
                     List.of("security.collateralReady"),
+                    null);
+        if (!allowScoring)
+            return result(
+                    Kind.REQUEST_INFO,
+                    "SCORING_PENDING",
+                    "Скоринг выполняется банком после отправки заявки и проверки документов",
+                    conditions,
+                    List.of("scoring"),
                     null);
         var assessments = new ArrayList<ScoringExchange.Assessment>();
         conditions.put("scoringAssessments", assessments);

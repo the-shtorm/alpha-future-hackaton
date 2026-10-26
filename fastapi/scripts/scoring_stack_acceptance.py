@@ -25,6 +25,11 @@ def main():
         "--cookie-auth", action="store_true", help="Run Java requests through nginx using cookie/CSRF"
     )
     parser.add_argument(
+        "--selection-alternatives",
+        action="store_true",
+        help="Also verify the equipment alternative and the document gate before scoring",
+    )
+    parser.add_argument(
         "--source-smoke",
         action="store_true",
         help="Check HF/source integration with decline and missing-data journeys, without v1 approval fixtures",
@@ -135,6 +140,8 @@ def main():
                 time.sleep(0.5)
         assert b"<html" in call(frontend + "/", raw=True).lower()
         call(frontend + "/api/health")
+        # Recommendation readiness alone does not establish scoring readiness.
+        call(ml + "/api/v1/scoring/ready", token=env["ML_TEST_API_KEY"])
         owner, bank = login("demo-owner"), login("demo-bank")
         stable = next(
             row for row in call(java + "/demo/scenarios", token=owner)["items"] if row["code"] == "STABLE"
@@ -243,7 +250,7 @@ def main():
                 {"Idempotency-Key": uuid4().hex},
             )
             journey = call(java + "/bank/applications/" + app["id"] + "/process", "POST", {}, bank)
-            assert journey["decision"]["kind"] == scenario, (scenario, journey["decision"]["kind"])
+            assert journey["decision"]["kind"] == scenario, (scenario, journey["decision"])
             conditions = journey["decision"]["conditions"]
             entry = {
                 "decision": scenario,
@@ -306,11 +313,142 @@ def main():
         )
         expected_assessments, expected_links = (1, 1) if args.source_smoke else (4, 3)
         assert audit["assessments"] == expected_assessments and audit["linkedDecisions"] == expected_links
-        benchmark_path = (
-            args.output.with_name(args.output.stem + "-http.json")
-            if args.source_smoke
-            else ROOT / "fastapi/experiments/sba-scoring-http-acceptance-v2.json"
-        )
+        alternative_journey = None
+        if args.selection_alternatives:
+            answers = copy.deepcopy(stable["preliminaryAnswers"])
+            answers["request"].update(
+                purpose="EQUIPMENT",
+                amount="2000000.00",
+                termMonths=12,
+                description="Хочу купить компьютеры для сервера",
+            )
+            answers["business"].update(actualStartedOn="2024-01-01", sector="IT", mspRegistry=True)
+            answers["financial"].update(
+                revenue="2000000.00",
+                periodFrom="2026-04-01",
+                periodTo="2026-06-30",
+            )
+            profile = call(
+                java + "/selection-profiles",
+                "POST",
+                {"partyId": stable["partyId"], "answers": answers},
+                owner,
+            )
+            prefix = java + "/selection-profiles/" + profile["id"]
+            selection = call(prefix + "/automatic-selection", "POST", {}, owner)
+            assert not selection["results"] and len(selection["alternatives"]) == 1
+            alternative = selection["alternatives"][0]
+            assert alternative["product"]["code"] == "P01"
+            assert call(prefix, token=owner)["answers"] == answers
+            accepted = call(
+                prefix
+                + "/recommendations/"
+                + selection["runId"]
+                + "/alternatives/"
+                + alternative["productVersion"]
+                + "/accept",
+                "POST",
+                {"expectedVersion": profile["rowVersion"]},
+                owner,
+            )["profile"]
+            assert accepted["answers"]["request"]["purpose"] == "DEVELOPMENT"
+            for section in ("business", "financial", "security", "registration"):
+                assert accepted["answers"][section] == answers[section]
+            app = call(
+                java + "/applications",
+                "POST",
+                {
+                    "profileId": profile["id"],
+                    "expectedProfileVersion": accepted["rowVersion"],
+                    "answers": stable["applicationAdditionalAnswers"],
+                },
+                owner,
+            )
+            path = java + "/applications/" + app["id"]
+
+            def assessments():
+                return int(
+                    compose(
+                        "exec",
+                        "-T",
+                        "postgres",
+                        "psql",
+                        "-U",
+                        "postgres",
+                        "-d",
+                        "recsys_acceptance",
+                        "-tAc",
+                        "SELECT count(*) FROM credit.assessment_run",
+                    )
+                )
+
+            before = assessments()
+            validation = call(path + "/validate", "POST", {}, owner)
+            assert validation["review"]["conditions"]["reasonCode"] == "SCORING_PENDING"
+            assert assessments() == before
+            call(
+                path + "/submit",
+                "POST",
+                {"expectedVersion": app["rowVersion"], "confirmed": True},
+                owner,
+                {"Idempotency-Key": uuid4().hex},
+            )
+            assert assessments() == before
+            blocked = call(java + "/bank/applications/" + app["id"] + "/process", "POST", {}, bank)
+            assert blocked["decision"]["conditions"]["reasonCode"] == "DOCUMENT_CHECK_REQUIRED"
+            assert assessments() == before
+            assert not any(row["toStatus"] == "SCORING" for row in blocked["history"])
+            for requirement in call(path + "/requirements", token=owner):
+                boundary = "alternative-" + uuid4().hex
+                content = (
+                    f'--{boundary}\r\nContent-Disposition: form-data; name="typeCode"\r\n\r\n{requirement["type_code"]}\r\n'
+                    f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="fixture.pdf"\r\nContent-Type: application/pdf\r\n\r\n%PDF-1.7\nalternative fixture\r\n--{boundary}--\r\n'
+                ).encode()
+                document = call(
+                    path + "/documents",
+                    "POST",
+                    content,
+                    owner,
+                    {"Content-Type": "multipart/form-data; boundary=" + boundary},
+                )
+                call(
+                    java
+                    + "/bank/applications/"
+                    + app["id"]
+                    + "/documents/"
+                    + document["versionId"]
+                    + "/review",
+                    "POST",
+                    {"result": "PASS", "reason": "Synthetic pipeline verification"},
+                    bank,
+                )
+            app = call(path, token=owner)
+            call(
+                path + "/submit",
+                "POST",
+                {"expectedVersion": app["rowVersion"], "confirmed": True},
+                owner,
+                {"Idempotency-Key": uuid4().hex},
+            )
+            assert assessments() == before
+            assert "decision" not in call(path + "/journey", token=owner)
+            journey = call(java + "/bank/applications/" + app["id"] + "/process", "POST", {}, bank)
+            assert assessments() > before
+            alternative_journey = {
+                "productCode": "P01",
+                "amount": "2000000.00",
+                "termMonths": 12,
+                "businessFactsPreserved": True,
+                "draftValidationDidNotScore": True,
+                "submissionDidNotScore": True,
+                "documentsBlockedScoring": True,
+                "staleDecisionCleared": True,
+                "modelAssessmentsAfterReview": assessments() - before,
+                "status": journey["application"]["status"],
+                "decision": journey.get("decision", {}).get("kind"),
+                "checks": journey.get("checks", []),
+            }
+        benchmark_path = args.output.with_name(args.output.stem + "-http.json")
         subprocess.run(
             [
                 sys.executable,
@@ -360,6 +498,7 @@ def main():
             "transport": "real nginx HTTP -> Java 21 -> FastAPI CPU E5/SBA -> PostgreSQL 17",
             "cases": outcomes,
             "audit": audit,
+            "alternativeJourney": alternative_journey,
             "scoringInfo": call(ml + "/api/v1/scoring/model-info", token=env["ML_TEST_API_KEY"]),
             "containerStats": stats,
             "memoryBudget": memory_budget,

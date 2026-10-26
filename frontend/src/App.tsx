@@ -20,6 +20,7 @@ import type {
   Profile,
   SavedSelection,
   Selection,
+  SelectionAlternative,
 } from './types';
 
 type Intent = 'submit' | 'saved' | 'applications' | null;
@@ -599,6 +600,28 @@ export function App() {
       setPage('applications');
     });
 
+  const chooseAlternative = (alternative: SelectionAlternative) =>
+    void run(async () => {
+      if (!profile || !selection?.current) throw new Error('Обновите подбор перед выбором условий.');
+      const accepted = await api<{ profile: Profile; selection: Selection }>(
+        `/selection-profiles/${profile.id}/recommendations/${selection.runId}/alternatives/${alternative.productVersion}/accept`,
+        { expectedVersion: profile.rowVersion },
+      );
+      profileRef.current = accepted.profile;
+      saveConflict.current = false;
+      setProfile(accepted.profile);
+      setAnswers(normalizeAnswers(accepted.profile.answers));
+      setSelection(accepted.selection);
+      const draft = await api<{ id: string }>('/applications', {
+        profileId: accepted.profile.id,
+        expectedProfileVersion: accepted.profile.rowVersion,
+        answers: {},
+      });
+      setApplicationId(draft.id);
+      setApplicationRefresh((n) => n + 1);
+      setPage('applications');
+    });
+
   return (
     <div className="customer-app">
       <a className="skip-link" href="#content">
@@ -733,6 +756,7 @@ export function App() {
             onDetails={setDetails}
             busy={busy}
             onChoose={choose}
+            onAlternative={chooseAlternative}
             onRetry={() =>
               void run(async () => {
                 setSelection(

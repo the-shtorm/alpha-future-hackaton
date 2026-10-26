@@ -59,11 +59,14 @@ expectedVersion; запросы сериализуются. До входа хр
 | POST | `/selection-profiles` | partyId, answers | 15 полей, частичная форма; rowVersion, fieldSources, value_status | OWNER/EDITOR |
 | GET | `/selection-profiles/{id}` | Нет | Форма подбора; изменение сбрасывает выбор продукта | Участник компании |
 | PATCH | `/selection-profiles/{id}` | expectedVersion, answers | Форма подбора; изменение сбрасывает выбор продукта | OWNER/EDITOR |
+| POST | `/selection-profiles/{id}/automatic-selection` | `{}` | Проверка, ранжирование доступных продуктов и до трёх alternatives при отсутствии совпадений | OWNER/EDITOR |
+| GET | `/selection-profiles/{id}/recommendations/{runId}/view` | Нет | results, excluded, alternatives, rankingStatus, current | Участник компании |
+| POST | `/selection-profiles/{id}/recommendations/{runId}/alternatives/{productVersionId}/accept` | expectedVersion | profile и selection с принятыми условиями и выбранным продуктом | OWNER/EDITOR |
 | POST | `/applications` | profileId, expectedProfileVersion, answers (дополнения по схеме 17 полей) | DRAFT из выбранного профиля, отдельно preliminaryContext | OWNER/EDITOR |
 | GET | `/applications` | page, size | Заявки доступных компаний | Участник компании |
 | GET | `/applications/{id}` | Нет | Текущий черновик/статус/версия | Участник или банк |
 | PATCH | `/applications/{id}` | expectedVersion, answers | Слияние ответов, версия +1 | OWNER/EDITOR; DRAFT/NEEDS_INFO |
-| POST | `/applications/{id}/validate` | Нет | value_status, review: kind/reason/conditions | Участник или банк |
+| POST | `/applications/{id}/validate` | Нет | Проверка данных без ML; value_status, review: kind/reason/conditions | Участник или банк |
 | POST | `/applications/{id}/submit` | expectedVersion, confirmed=true; Idempotency-Key | revisionId, sha256, replayed | OWNER |
 | GET | `/applications/{id}/journey` | Нет | application, history, checks с причинами, decision, offer/counteroffer, договор/выдача | Участник или банк |
 | GET | `/applications/{id}/status` | Нет | application, history, checks с причинами, decision, offer/counteroffer, договор/выдача | Участник или банк |
@@ -94,6 +97,42 @@ expectedVersion; запросы сериализуются. До входа хр
 | GET | `/demo/scenarios` | Нет | 8 синтетических сценариев; только профиль demo и доступные компании | Участник или банк |
 
 ## Переход от формы к заявке
+
+Если для исходной формы нет ни одного ELIGIBLE/CONDITIONAL продукта, автоматический
+подбор возвращает `alternatives` (до трёх). Это предложения изменить параметры запроса,
+а не кредитный контр-оффер и не результат скоринга. Каждое содержит продукт,
+`proposedRequest`, серверный `answersPatch`, изменения `changes` (field/from/to/message),
+статус применимости и `pendingConditions`. `results` при этом остаётся пустым,
+`rankingStatus=EMPTY` относится к ранжированию исходного запроса.
+
+Допускаются уменьшение суммы до максимума продукта (без увеличения запрошенной суммы),
+ближайший допустимый срок и другой способ выдачи. Покупку оборудования, транспорта или
+недвижимости можно отдельно предложить как «Развитие бизнеса», если продукт поддерживает
+эту общую цель; другие цели не подменяются. Выручка, её период, отрасль, стаж, налоги,
+МСП, форма бизнеса и готовность предоставить обеспечение/поручительство не изменяются.
+Каждый вариант заново проходит все проверки применимости. Короткая история выручки
+остаётся условием для проверки, а известная низкая выручка не превращается в неизвестную.
+
+Просмотр вариантов ничего не меняет. Явный POST `.../alternatives/{productVersionId}/accept`
+с `expectedVersion` атомарно применяет сохранённый серверный patch, создаёт новый запуск
+проверки по действующему каталогу и выбирает продукт. Ответ `{profile, selection}` пригоден
+для последующего обычного POST `/applications` с новой `profile.rowVersion`.
+Устаревшая форма/повторное принятие даёт 409, чужой/несуществующий вариант — 404;
+изменение доступности продукта отменяет всю транзакцию. Клиент не передаёт свои условия
+в endpoint принятия. Старые снимки без `alternatives` сохраняются; для получения новых
+вариантов нужно заново запустить подбор. Схема БД и Java–FastAPI контракт не меняются.
+
+Предварительный подбор использует только применимость продуктов и семантическое
+ранжирование E5. Создание/редактирование черновика, `/validate` и `/submit` не вызывают
+ML-скоринг. `/validate` возвращает `SCORING_PENDING`, если данные прошли проверки и
+осталась банковская оценка. После явной отправки банк проверяет документы и, при наличии,
+финансовые операции, затем вызывает `/bank/applications/{id}/process`. Неподтверждённые
+документы/операции возвращают запрос сведений до обращения к модели. Отсутствующие
+данные и обязательные ограничения также проверяются до ML. Скоринг через FastAPI
+создаёт оценку первоначальных условий и при необходимости отдельную оценку контр-оффера.
+Далее возможны запрос сведений, отказ, ручное рассмотрение, предложение или контр-оффер.
+Для положительных исходов клиент явно принимает условия, подписывает демо-договор,
+а сотрудник выполняет демо-выдачу. Договор и выдача остаются демонстрационными.
 
 При известной выручке перед подбором нужны обе даты полного периода (первое и
 последнее число месяца); иначе 400 INVALID_INPUT. Запуски до eligibility-3.1

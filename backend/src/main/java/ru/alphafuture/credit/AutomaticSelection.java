@@ -1,9 +1,11 @@
 package ru.alphafuture.credit;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import java.util.*;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -156,6 +158,33 @@ class AutomaticSelection {
                                 .query(String.class)
                                 .optional()
                                 .orElse(results.isEmpty() ? "EMPTY" : "NOT_REQUESTED");
+        var alternatives = new ArrayList<Map<String, Object>>();
+        for (var item : snapshot.path("alternatives")) {
+            var product = products.get(item.path("productVersionId").asText());
+            if (product == null) continue;
+            var pending = json.mapper.createArrayNode();
+            for (var reason : item.path("eligibility").path("reasons"))
+                if (!reason.path("result").asText().equals("PASS")) pending.add(reason);
+            alternatives.add(
+                    Map.of(
+                            "productId",
+                            product.id(),
+                            "productVersion",
+                            product.versionId(),
+                            "product",
+                            product,
+                            "eligibilityStatus",
+                            item.path("eligibility").path("status"),
+                            "pendingConditions",
+                            pending,
+                            "answersPatch",
+                            item.path("answersPatch"),
+                            "changes",
+                            item.path("changes"),
+                            "proposedRequest",
+                            json.merge(snapshot.path("answers"), item.path("answersPatch"))
+                                    .path("request")));
+        }
         return Map.of(
                 "profileId",
                 id,
@@ -171,8 +200,24 @@ class AutomaticSelection {
                 results,
                 "excluded",
                 excluded,
+                "alternatives",
+                alternatives,
                 "asOf",
                 snapshot.path("asOf"));
+    }
+
+    @PostMapping(
+            "/selection-profiles/{id}/recommendations/{runId}/alternatives/{productVersionId}/accept")
+    @Transactional
+    Map<String, Object> acceptAlternative(
+            @PathVariable UUID id,
+            @PathVariable UUID runId,
+            @PathVariable UUID productVersionId,
+            @Valid @RequestBody SelectionProfiles.AcceptAlternative body) {
+        var profile =
+                profiles.acceptAlternative(id, runId, productVersionId, body.expectedVersion());
+        return Map.of(
+                "profile", profile, "selection", view(id, (UUID) profile.get("selectedRunId")));
     }
 
     @GetMapping("/selections")

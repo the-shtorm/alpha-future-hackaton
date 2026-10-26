@@ -343,7 +343,9 @@ class ApplicationService {
                         app.answers(),
                         app.preliminaryContext(),
                         catalog.get(app.productVersionId(), false),
-                        Instant.now());
+                        Instant.now(),
+                        DataPolicy.VERSION,
+                        false);
         return Map.of("value_status", form.statuses(app.answers()), "review", result);
     }
 
@@ -509,14 +511,22 @@ class ApplicationService {
                 revision.get("submitted_at") instanceof Timestamp time
                         ? time.toInstant()
                         : ((java.time.OffsetDateTime) revision.get("submitted_at")).toInstant();
+        var missing = documents.missing(id, app.activeRevisionId());
+        var checked =
+                snapshot.hasNonNull("financialEvidenceId")
+                        ? financialEvidence.check(
+                                id,
+                                UUID.fromString(snapshot.path("financialEvidenceId").asText()),
+                                answers)
+                        : Map.<String, Object>of();
         var result =
                 review(
                         answers,
                         snapshot.path("preliminaryContext"),
                         product,
                         asOf,
-                        snapshot.path("policyVersion").asText(LegacyDataPolicy.VERSION));
-        var missing = documents.missing(id, app.activeRevisionId());
+                        snapshot.path("policyVersion").asText(LegacyDataPolicy.VERSION),
+                        missing.isEmpty() && !checked.containsKey("missingFields"));
         if (!missing.isEmpty() && result.kind() != DataPolicy.Kind.DECLINED) {
             var conditions = new LinkedHashMap<>(result.conditions());
             var all = new LinkedHashSet<String>();
@@ -532,19 +542,13 @@ class ApplicationService {
                             "Требуются данные или проверка документов",
                             conditions);
         }
-        if (result.kind() != DataPolicy.Kind.DECLINED
-                && snapshot.hasNonNull("financialEvidenceId")) {
-            var checked =
-                    financialEvidence.check(
-                            id,
-                            UUID.fromString(snapshot.path("financialEvidenceId").asText()),
-                            answers);
+        if (result.kind() != DataPolicy.Kind.DECLINED && !checked.isEmpty()) {
             var conditions = new LinkedHashMap<>(result.conditions());
             conditions.put("financialEvidence", checked);
             if (checked.containsKey("missingFields")) {
                 var fields = new LinkedHashSet<String>();
                 for (var field : (List<?>) conditions.get("missingFields"))
-                    fields.add(field.toString());
+                    if (!field.equals("scoring")) fields.add(field.toString());
                 for (var field : (List<?>) checked.get("missingFields"))
                     fields.add(field.toString());
                 conditions.put("missingFields", List.copyOf(fields));
@@ -606,7 +610,10 @@ class ApplicationService {
         if (app.status().equals("SUBMITTED")) {
             transition(id, "VALIDATING", "Проверка поданной ревизии");
             transition(id, "ENRICHING", "Сопоставление заявки и контекста подбора");
-            transition(id, "SCORING", "Оценка сделки: режим указан в условиях решения");
+            if (result.kind() != DataPolicy.Kind.REQUEST_INFO
+                    || Boolean.TRUE.equals(result.conditions().get("requiresManualReview"))
+                    || result.conditions().containsKey("scoringAssessments"))
+                transition(id, "SCORING", "Оценка сделки: режим указан в условиях решения");
         }
         boolean positive =
                 result.kind() == DataPolicy.Kind.APPROVED
@@ -718,6 +725,16 @@ class ApplicationService {
             Catalog.Product product,
             Instant asOf,
             String version) {
+        return review(answers, context, product, asOf, version, true);
+    }
+
+    private DataPolicy.Review review(
+            JsonNode answers,
+            JsonNode context,
+            Catalog.Product product,
+            Instant asOf,
+            String version,
+            boolean allowScoring) {
         if (!context.has("answers"))
             return new DataPolicy.Review(
                     DataPolicy.Kind.REQUEST_INFO,
@@ -766,7 +783,10 @@ class ApplicationService {
             return new DataPolicy.Review(
                     DataPolicy.Kind.REQUEST_INFO, "Нужно дополнить предварительную форму", initial);
         }
-        var result = policy.review(answers, product, asOf, version);
+        var result =
+                allowScoring
+                        ? policy.review(answers, product, asOf, version)
+                        : policy.preflight(answers, product, asOf, version);
         var conditions = new LinkedHashMap<>(result.conditions());
         conditions.put("eligibility", applicable);
         if (result.kind() != DataPolicy.Kind.REQUEST_INFO

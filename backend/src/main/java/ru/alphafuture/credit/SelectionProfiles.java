@@ -24,6 +24,8 @@ class SelectionProfiles {
             @NotNull UUID runId,
             @NotNull UUID productVersionId) {}
 
+    record AcceptAlternative(@NotNull @PositiveOrZero Long expectedVersion) {}
+
     record Transfer(
             UUID id,
             UUID partyId,
@@ -39,6 +41,7 @@ class SelectionProfiles {
     private final FormPolicy form;
     private final Catalog catalog;
     private final Eligibility eligibility;
+    private final SelectionAlternatives alternatives;
 
     SelectionProfiles(
             JdbcClient db,
@@ -46,13 +49,15 @@ class SelectionProfiles {
             Json json,
             FormPolicy form,
             Catalog catalog,
-            Eligibility eligibility) {
+            Eligibility eligibility,
+            SelectionAlternatives alternatives) {
         this.db = db;
         this.access = access;
         this.json = json;
         this.form = form;
         this.catalog = catalog;
         this.eligibility = eligibility;
+        this.alternatives = alternatives;
     }
 
     @PostMapping("/selection-profiles")
@@ -147,7 +152,9 @@ class SelectionProfiles {
                         "semanticProducts",
                         products.stream().map(ProductSemantics::describe).toList(),
                         "rankingTopK",
-                        RankingExchange.TOP_K);
+                        RankingExchange.TOP_K,
+                        "alternatives",
+                        alternatives.suggest(products, answers, asOf));
         db.sql(
                         "INSERT INTO credit.recommendation_run(id,profile_id,profile_snapshot,model_version,policy_version) VALUES (:id,:profile,CAST(:snapshot AS jsonb),'NOT_USED',:policy)")
                 .param("id", run)
@@ -243,6 +250,41 @@ class SelectionProfiles {
                 .param("id", id)
                 .update();
         return get(id);
+    }
+
+    /** Применяет только сохранённый серверный вариант после явного выбора клиента. */
+    @Transactional
+    Map<String, Object> acceptAlternative(
+            UUID id, UUID runId, UUID productVersionId, long expected) {
+        var row = load(id, true, true);
+        requireCurrentSchema(row);
+        requireCurrentRun(id, runId);
+        var snapshot =
+                json.read(
+                        db.sql(
+                                        "SELECT profile_snapshot FROM credit.recommendation_run WHERE id=:run AND profile_id=:id")
+                                .param("run", runId)
+                                .param("id", id)
+                                .query(String.class)
+                                .single());
+        if (((Number) row.get("row_version")).longValue() != expected
+                || snapshot.path("profileVersion").asLong() != expected
+                || !snapshot.path("answers").equals(json.read(row.get("answers").toString())))
+            throw new ApiFailure(409, "SELECTION_STALE", "Повторите подбор для текущей формы");
+        JsonNode alternative = null;
+        for (var candidate : snapshot.path("alternatives"))
+            if (candidate.path("productVersionId").asText().equals(productVersionId.toString()))
+                alternative = candidate;
+        if (alternative == null) throw ApiFailure.missing();
+        var updated = patch(id, new Patch(expected, alternative.path("answersPatch")));
+        var run = evaluate(id);
+        // choose rechecks eligibility against a new snapshot of the active catalog.
+        return choose(
+                id,
+                new Choose(
+                        ((Number) updated.get("rowVersion")).longValue(),
+                        (UUID) run.get("runId"),
+                        productVersionId));
     }
 
     Transfer transfer(UUID id, long expected) {

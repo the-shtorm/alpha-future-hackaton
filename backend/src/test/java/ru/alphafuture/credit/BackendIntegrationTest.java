@@ -899,6 +899,9 @@ class BackendIntegrationTest {
         app = get("/applications/" + id, owner);
         submit(app, UUID.randomUUID().toString());
         var r = process(app);
+        assertThat(SCORING.calls.get()).isZero();
+        assertThat(r.path("history"))
+                .noneMatch(event -> event.path("toStatus").asText().equals("SCORING"));
         assertThat(r.path("decision").path("kind").asText()).isEqualTo("REQUEST_INFO");
         assertThat(r.path("decision").path("conditions").path("missingFields").toString())
                 .contains("documents.");
@@ -1675,6 +1678,161 @@ class BackendIntegrationTest {
         assertThat(retried.path("results")).isEqualTo(selection.path("results"));
     }
 
+    ObjectNode screenshotEquipmentAnswers() {
+        var a = TestData.preliminary();
+        ((ObjectNode) a.path("business"))
+                .put("actualStartedOn", "2024-01-01")
+                .put("sector", "IT")
+                .put("mspRegistry", true);
+        ((ObjectNode) a.path("request"))
+                .put("purpose", "EQUIPMENT")
+                .put("amount", "2000000.00")
+                .put("description", "Хочу купить компьютеры для сервера");
+        ((ObjectNode) a.path("financial"))
+                .put("revenue", "2000000.00")
+                .put("periodFrom", "2026-04-01")
+                .put("periodTo", "2026-06-30");
+        return a;
+    }
+
+    @Test
+    void emptyEquipmentSelectionOffersUsableAlternativeWithoutSilentlyChangingAnswers()
+            throws Exception {
+        var answers = screenshotEquipmentAnswers();
+        var p = profile(answers);
+        String base = "/selection-profiles/" + p.path("id").asText();
+        var result = post(base + "/automatic-selection", owner, Map.of());
+        assertThat(result.path("rankingStatus").asText()).isEqualTo("EMPTY");
+        assertThat(result.path("results")).isEmpty();
+        assertThat(result.path("alternatives")).hasSize(1);
+        var alternative = result.path("alternatives").get(0);
+        assertThat(alternative.path("product").path("code").asText()).isEqualTo("P01");
+        assertThat(alternative.path("eligibilityStatus").asText()).isEqualTo("CONDITIONAL");
+        assertThat(alternative.path("changes")).hasSize(1);
+        assertThat(alternative.path("changes").get(0).path("field").asText())
+                .isEqualTo("request.purpose");
+        assertThat(alternative.path("proposedRequest").path("amount").asText())
+                .isEqualTo("2000000.00");
+        assertThat(alternative.path("proposedRequest").path("termMonths").asInt()).isEqualTo(12);
+        assertThat(get(base, owner).path("answers")).isEqualTo(answers);
+        String route = base + "/recommendations/" + result.path("runId").asText();
+        assertThat(get(route + "/view", owner).path("alternatives"))
+                .isEqualTo(result.path("alternatives"));
+        var accepted =
+                post(
+                        route + "/alternatives/" + product + "/accept",
+                        owner,
+                        Map.of("expectedVersion", p.path("rowVersion").asLong()));
+        var selected = accepted.path("profile");
+        assertThat(selected.path("answers").path("request").path("purpose").asText())
+                .isEqualTo("DEVELOPMENT");
+        for (String section : List.of("business", "financial", "security", "registration"))
+            assertThat(selected.path("answers").path(section)).isEqualTo(answers.path(section));
+        assertThat(selected.path("answers").path("request").path("description"))
+                .isEqualTo(answers.path("request").path("description"));
+        assertThat(selected.path("selectedProductVersionId").asText())
+                .isEqualTo(product.toString());
+        assertThat(accepted.path("selection").path("current").asBoolean()).isTrue();
+        assertThat(get(route + "/view", owner).path("current").asBoolean()).isFalse();
+        var app =
+                post(
+                        "/applications",
+                        owner,
+                        Map.of(
+                                "profileId",
+                                selected.path("id").asText(),
+                                "expectedProfileVersion",
+                                selected.path("rowVersion").asLong(),
+                                "answers",
+                                TestData.additions()));
+        assertThat(app.path("status").asText()).isEqualTo("DRAFT");
+        assertThat(app.path("answers").path("request").path("amount").asText())
+                .isEqualTo("2000000.00");
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        route + "/alternatives/" + product + "/accept"),
+                owner,
+                Map.of("expectedVersion", p.path("rowVersion").asLong()),
+                409);
+    }
+
+    @Test
+    void alternativeAcceptanceRejectsForeignMissingAndStaleChoices() throws Exception {
+        var p = profile(screenshotEquipmentAnswers());
+        String base = "/selection-profiles/" + p.path("id").asText();
+        var result = post(base + "/automatic-selection", owner, Map.of());
+        String route =
+                base + "/recommendations/" + result.path("runId").asText() + "/alternatives/";
+        var body = Map.of("expectedVersion", p.path("rowVersion").asLong());
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        route + product + "/accept"),
+                bank,
+                body,
+                404);
+        send(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        route + UUID.randomUUID() + "/accept"),
+                owner,
+                body,
+                404);
+        send(
+                patch(base),
+                owner,
+                Map.of(
+                        "expectedVersion",
+                        p.path("rowVersion").asLong(),
+                        "answers",
+                        Map.of("request", Map.of("termMonths", 18))),
+                200);
+        var failed =
+                send(
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                route + product + "/accept"),
+                        owner,
+                        body,
+                        409);
+        assertThat(failed.path("code").asText()).isEqualTo("SELECTION_STALE");
+    }
+
+    @Test
+    void withdrawnAlternativeRollsBackAcceptedTermsAndVersion() throws Exception {
+        var p = profile(screenshotEquipmentAnswers());
+        String base = "/selection-profiles/" + p.path("id").asText();
+        var result = post(base + "/automatic-selection", owner, Map.of());
+        UUID productId =
+                UUID.fromString(result.path("alternatives").get(0).path("productId").asText());
+        var catalogAdmin =
+                JdbcClient.create(
+                        new org.springframework.jdbc.datasource.DriverManagerDataSource(
+                                POSTGRES.getJdbcUrl(),
+                                POSTGRES.getUsername(),
+                                POSTGRES.getPassword()));
+        try {
+            catalogAdmin
+                    .sql("UPDATE credit.credit_product SET active=false WHERE id=:id")
+                    .param("id", productId)
+                    .update();
+            send(
+                    org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                            base
+                                    + "/recommendations/"
+                                    + result.path("runId").asText()
+                                    + "/alternatives/"
+                                    + product
+                                    + "/accept"),
+                    owner,
+                    Map.of("expectedVersion", p.path("rowVersion").asLong()),
+                    404);
+            assertThat(get(base, owner)).isEqualTo(p);
+        } finally {
+            catalogAdmin
+                    .sql("UPDATE credit.credit_product SET active=true WHERE id=:id")
+                    .param("id", productId)
+                    .update();
+        }
+    }
+
     @Test
     void lowRevenueAndAbsurdAmountsNeverReturnCandidatesIncludingDirectApiCalls() throws Exception {
         for (String amount : List.of("1000000.00", "12121212121200000.00")) {
@@ -1685,6 +1843,7 @@ class BackendIntegrationTest {
             String base = "/selection-profiles/" + p.path("id").asText();
             var result = post(base + "/automatic-selection", owner, Map.of());
             assertThat(result.path("results")).isEmpty();
+            assertThat(result.path("alternatives")).isEmpty();
             assertThat(result.path("rankingStatus").asText()).isEqualTo("EMPTY");
             assertThat(result.path("excluded")).hasSize(15);
             for (var excluded : result.path("excluded"))
@@ -1845,6 +2004,21 @@ class BackendIntegrationTest {
     }
 
     @Test
+    void scoringStartsOnlyOnBankProcessAfterSubmissionAndNotOnDraftValidation() throws Exception {
+        var app = ready(TestData.preliminary(), TestData.additions());
+        assertThat(SCORING.calls.get()).isZero();
+        var validation =
+                post("/applications/" + app.path("id").asText() + "/validate", owner, Map.of());
+        assertThat(validation.path("review").path("conditions").path("reasonCode").asText())
+                .isEqualTo("SCORING_PENDING");
+        assertThat(SCORING.calls.get()).isZero();
+        submit(app, UUID.randomUUID().toString());
+        assertThat(SCORING.calls.get()).isZero();
+        assertThat(process(app).path("decision").path("kind").asText()).isEqualTo("APPROVED");
+        assertThat(SCORING.calls.get()).isEqualTo(1);
+    }
+
+    @Test
     void historicalPolicyRevisionKeepsItsCheckVersionThroughDisbursement() throws Exception {
         var source = ready(TestData.preliminary(), TestData.additions());
         var sourceRevision = submit(source, UUID.randomUUID().toString());
@@ -1946,15 +2120,31 @@ class BackendIntegrationTest {
                 .when(scoringGateway)
                 .evaluate(org.mockito.ArgumentMatchers.any());
         var outcomes = new ArrayList<Map<String, Object>>();
+        UUID expressProduct = product;
         try {
             for (String scenario :
                     List.of("APPROVED", "COUNTEROFFERED", "DECLINED", "REQUEST_INFO")) {
                 var pre = TestData.preliminary();
                 var additions = TestData.additions();
+                product = expressProduct;
                 ((ObjectNode) pre.path("request"))
                         .put(
                                 "amount",
                                 scenario.equals("COUNTEROFFERED") ? "1000000.00" : "300000.00");
+                if (scenario.equals("APPROVED")) {
+                    product =
+                            db.sql(
+                                            "SELECT v.id FROM credit.credit_product_version v JOIN credit.credit_product p ON p.id=v.product_id WHERE p.code='P07'")
+                                    .query(UUID.class)
+                                    .single();
+                    ((ObjectNode) pre.path("request"))
+                            .put("amount", "500000.00")
+                            .put("termMonths", 60)
+                            .put("purpose", "EQUIPMENT");
+                    ((ObjectNode) pre.path("security")).put("collateralReady", "YES");
+                    ((ObjectNode) additions.path("security")).put("collateralValue", "1000000.00");
+                    ((ObjectNode) additions.path("project")).put("ownContributionPct", "20.00");
+                }
                 if (scenario.equals("DECLINED"))
                     ((ObjectNode) pre.path("request")).put("termMonths", 6);
                 if (scenario.equals("COUNTEROFFERED")) {
@@ -1972,7 +2162,7 @@ class BackendIntegrationTest {
                 var conditions = result.path("decision").path("conditions");
                 if (!scenario.equals("REQUEST_INFO")) {
                     assertThat(conditions.path("modelVersion").asText())
-                            .isEqualTo("sba-scoring-v1");
+                            .isEqualTo("sba-scoring-v2");
                     assertThat(conditions.path("warnings").toString())
                             .contains("RATE_OUT_OF_RANGE", "TERM_HISTORY_UNCONFIRMED");
                 }
@@ -2033,10 +2223,11 @@ class BackendIntegrationTest {
                             .writeValueAsString(
                                     Map.of(
                                             "modelVersion",
-                                            "sba-scoring-v1",
+                                            "sba-scoring-v2",
                                             "outcomes",
                                             outcomes)));
         } finally {
+            product = expressProduct;
             org.mockito.Mockito.reset(scoringGateway);
         }
     }
