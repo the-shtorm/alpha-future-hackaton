@@ -7,6 +7,7 @@
 1. [Запуск и полная демонстрация](hackathon-start.md).
 2. [Обзор проекта](../README.md).
 3. [Конфигурация Docker](configuration.md).
+4. [Инструкция для презентации на 6 слайдов](presentation-guide.md).
 
 ## Приложение и контракты
 
@@ -24,6 +25,7 @@
 | Автоматический и ручной обмен рекомендациями | [Рекомендации](ranking-exchange.md) |
 | Формирование query/passage | [Query и passage](query_passage_mvp.md) |
 | Модель кредитного риска, правила и аудит | [Скоринг SBA v2](credit-scoring.md) |
+| Kubernetes и облачная инфраструктура | [Шаблоны и подготовка окружения](cloud-deployment.md) |
 | Проверки и приёмка | [Проверка проекта](validation.md) |
 | Повторение процесса через API | [API/Postman](postman-testing.md) |
 | Форматирование исходников | [Кодстайл](code-style.md) |
