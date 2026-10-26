@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { api, upload, ApiError } from '../api';
 import { sameAnswers } from '../form';
 import { DraftWriter } from '../drafts';
+import { startLiveRefresh } from '../liveRefresh';
+import { canApplyJourney, shouldRefreshApplication } from '../journeyRefresh';
 import { date, dictionaries, money, purposeNames, statusNames } from '../presentation';
 import type { Answers, Application, Journey, Product } from '../types';
 import { Banner, Button, Empty, Field, Icon, Select } from './UI';
@@ -51,6 +53,10 @@ export function ApplicationsPage({
   const [requirements, setRequirements] = useState<Requirement[]>([]),
     [answers, setAnswers] = useState<Answers>({});
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [refreshError, setRefreshError] = useState('');
+  const snapshot = useRef<Journey | null>(null);
+  snapshot.current = journey;
+  const actionVersion = useRef(0);
   const [replacements, setReplacements] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
@@ -68,6 +74,7 @@ export function ApplicationsPage({
   const [confirmed, setConfirmed] = useState(false),
     [attempt, setAttempt] = useState(0);
   useEffect(() => {
+    actionVersion.current++;
     let active = true;
     let loadedWriter: DraftWriter<Journey['application']> | null = null;
     writer.current?.dispose();
@@ -78,6 +85,7 @@ export function ApplicationsPage({
     setSubmissionUncertain(false);
     setLoading(true);
     setError('');
+    setRefreshError('');
     setNotice('');
     setJourney(null);
     setDocuments([]);
@@ -154,6 +162,77 @@ export function ApplicationsPage({
   );
   const editable = journey && ['DRAFT', 'NEEDS_INFO'].includes(journey.application.status);
   const dirty = !!editable && !sameAnswers(journey.application.answers, answers);
+  useEffect(() => {
+    if (
+      loading ||
+      busy ||
+      externalBusy ||
+      submissionUncertain ||
+      (applicationId && (!journey || !shouldRefreshApplication(journey.application.status)))
+    )
+      return;
+    let active = true;
+    const stop = startLiveRefresh(async () => {
+      if (acting.current) return;
+      const version = actionVersion.current;
+      try {
+        if (!applicationId) {
+          const result = await api<{ content: Application[] }>('/applications?page=0&size=50');
+          if (active && !acting.current && version === actionVersion.current) {
+            setItems(result.content);
+            setRefreshError('');
+          }
+          return;
+        }
+        const [next, docs, files] = await Promise.all([
+          api<Journey>(`/applications/${applicationId}/journey`),
+          api<Requirement[]>(`/applications/${applicationId}/requirements`),
+          api<UploadedDocument[]>(`/applications/${applicationId}/documents`),
+        ]);
+        if (
+          !active ||
+          acting.current ||
+          version !== actionVersion.current ||
+          !canApplyJourney(snapshot.current, next, applicationId)
+        )
+          return;
+        const previous = snapshot.current!;
+        if (next.application.status !== previous.application.status) {
+          setCounterConfirmed(false);
+          setOfferConfirmed(false);
+          setSignConfirmed(false);
+        } else {
+          if (next.offer?.id !== previous.offer?.id) setOfferConfirmed(false);
+          if (next.counteroffer?.id !== previous.counteroffer?.id) setCounterConfirmed(false);
+        }
+        if (writer.current) writer.current.current = next.application;
+        snapshot.current = next;
+        setJourney(next);
+        setAnswers(next.application.answers);
+        setRequirements(docs);
+        setDocuments(files);
+        setRefreshError('');
+      } catch {
+        if (active && !acting.current && version === actionVersion.current)
+          setRefreshError(
+            'Не удалось обновить статус. Повторяем автоматически; можно обновить вручную.',
+          );
+      }
+    });
+    return () => {
+      active = false;
+      stop();
+    };
+  }, [
+    applicationId,
+    refresh,
+    attempt,
+    loading,
+    busy,
+    externalBusy,
+    submissionUncertain,
+    journey?.application.status,
+  ]);
   const save = async () => {
     const current = writer.current;
     if (!current || !applicationId) throw new Error('Заявка не загружена');
@@ -213,6 +292,7 @@ export function ApplicationsPage({
 
   const perform = async (action: () => Promise<void>) => {
     if (acting.current) return;
+    actionVersion.current++;
     acting.current = true;
     setBusy(true);
     setError('');
@@ -314,6 +394,7 @@ export function ApplicationsPage({
           </Button>
         )}
       </div>
+      {refreshError && <Banner>{refreshError}</Banner>}
       {error && (
         <Banner tone="error">
           {error}{' '}
@@ -758,7 +839,7 @@ export function ApplicationsPage({
               <div className="summary-card">
                 <span className="summary-label">СТАТУС РАССМОТРЕНИЯ</span>
                 <h3>{statusNames[journey.application.status] ?? 'На рассмотрении'}</h3>
-                <p>Возвращайтесь в кабинет, чтобы проверить результат.</p>
+                <p>Статус обновляется автоматически, пока вкладка открыта.</p>
                 <button
                   className="text-action"
                   disabled={busy}

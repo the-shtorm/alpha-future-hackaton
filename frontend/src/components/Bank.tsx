@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '../api';
+import { startLiveRefresh } from '../liveRefresh';
+import { canApplyJourney } from '../journeyRefresh';
 import { date, money, statusNames } from '../presentation';
 import type { Application, Journey, Product } from '../types';
 import { Banner, Button, Field, Select } from './UI';
@@ -32,11 +34,17 @@ export function BankPage({ products }: { products: Product[] }) {
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [refreshError, setRefreshError] = useState('');
+  const snapshot = useRef<Journey | null>(null);
+  snapshot.current = journey;
+  const actionVersion = useRef(0);
   const acting = useRef(false);
   useEffect(() => {
+    actionVersion.current++;
     let active = true;
     setLoading(true);
     setError('');
+    setRefreshError('');
     setJourney(null);
     setDocuments([]);
     setConfirmed(false);
@@ -70,8 +78,52 @@ export function BankPage({ products }: { products: Product[] }) {
       active = false;
     };
   }, [id, page, tick]);
+  useEffect(() => {
+    if (busy || loading) return;
+    let active = true;
+    const stop = startLiveRefresh(async () => {
+      if (acting.current) return;
+      const version = actionVersion.current;
+      try {
+        const [queue, current, docs] = await Promise.all([
+          api<{ content: Application[]; totalElements: number }>(
+            `/bank/applications?page=${page}&size=20`,
+          ),
+          id ? api<Journey>(`/applications/${id}/journey`) : Promise.resolve(null),
+          id ? api<Document[]>(`/applications/${id}/documents`) : Promise.resolve([]),
+        ]);
+        if (
+          !active ||
+          acting.current ||
+          version !== actionVersion.current ||
+          (current && !canApplyJourney(snapshot.current, current, id))
+        )
+          return;
+        if (current?.application.status !== snapshot.current?.application.status) {
+          setConfirmed(false);
+          setReason('');
+        }
+        snapshot.current = current;
+        setItems(queue.content);
+        setTotal(queue.totalElements);
+        setJourney(current);
+        setDocuments(docs.filter((doc) => doc.current));
+        setRefreshError('');
+      } catch {
+        if (active && !acting.current && version === actionVersion.current)
+          setRefreshError(
+            'Не удалось обновить очередь. Повторяем автоматически; можно обновить вручную.',
+          );
+      }
+    });
+    return () => {
+      active = false;
+      stop();
+    };
+  }, [id, page, tick, busy, loading]);
   const perform = async (action: () => Promise<unknown>) => {
     if (acting.current) return;
+    actionVersion.current++;
     acting.current = true;
     setBusy(true);
     setError('');
@@ -101,6 +153,7 @@ export function BankPage({ products }: { products: Product[] }) {
         </Button>
       </div>
       {error && <Banner tone="error">{error}</Banner>}
+      {refreshError && <Banner>{refreshError}</Banner>}
       <details className="application-overview">
         <summary>Макроэкономический контекст</summary>
         {macro ? (

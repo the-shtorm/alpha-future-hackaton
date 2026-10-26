@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "branch": "main",
+  "backend": "mocked contract-consistent API responses",
+  "browser": "headless Microsoft Edge",
+  "cases": [
+    "original HEAD reproduces stale submitted after external approval",
+    "external approval appears; consent survives poll; accept/sign work; external disbursement appears",
+    "remote NEEDS_INFO resumes editing using new version; autosave survives without readonly polling",
+    "late pre-accept poll cannot regress offer accepted",
+    "bank sees external owner signature without manual refresh"
+  ],
+  "pageErrors": []
+}
