@@ -1,5 +1,7 @@
 # Task reports
 
+- [2026-10-26 — THIRD_PARTY_NOTICES inventory](2026-10-26-third-party-notices.md) — completed; added root THIRD_PARTY_NOTICES.md listing third-party components, models, datasets, services and simulated integrations from actual manifests and lock files; docs only, no tests or push.
+
 - [2026-10-26 — Merge db-init and pre-docs into main](2026-10-26-merge-db-init-cookie-session-and-pre-docs-main.md) — completed; db-init merged into cookie-session, main created and pre-docs merged; conflicts resolved, tests explicitly deferred, local only.
 
 - [2026-10-26 — Documentation unification and hackathon launch](2026-10-26-documentation-unification-and-hackathon-launch.md) — completed; merged f5c2a33 into pre-docs first, unified current docs, added setup/start and judges guide; stock Compose, real E5/SBA four outcomes, PDF replacement and restart/session persistence passed; isolated test stack cleaned up.
